@@ -1,0 +1,162 @@
+
+## --- ---------------------------------------------------
+##
+## ----- IMPLEMENTATION; ips + fips IPS for uggm
+##
+## --- ---------------------------------------------------
+
+## #' @rdname fit-ggm
+## #' @export
+## edges can be either list or 2 x p matrix
+.r_fips_ggm_ <- function (S, Elist, Emat, nobs, K, iter=1000L, eps=1e-6, convcrit=1, aux=list(), print=FALSE){
+
+    solve_fun <- solve_qr
+    t0 <- .get.time()
+    inner <- get_inner_function(Elist)
+
+    parm  <- get_init_parm(S, K)  
+    nparm <- ncol(S) + ncol(Emat)
+    
+    Scc_inv_list <- lapply(Elist, function(cc) {
+        .sol(S[cc, cc, drop=FALSE])} )
+
+    logLp <- ips_logL_(S, K=parm$K, nobs=nobs)
+    ## sprintf("logL (init): %f\n", logLp) %>% cat()
+    
+    it <- 0L
+    repeat {
+        it <- it + 1L        
+        parm <- inner(Elist, S, parm, eps=eps, Scc_inv_list)
+
+        switch(convcrit,
+               "1" = {
+                   conv_check = mean_abs_diff_on_Emat_(S, parm$Sigma, Emat, 1)
+               },
+               "2" = {
+                   logL = ips_logL_(S, K=parm$K, nobs=nobs)
+                   conv_check <- abs((logL - logLp) / nparm)
+                   logLp <- logL                   
+               })        
+        if (conv_check < eps || it == iter) break
+    }
+
+    if (convcrit==1)
+        logL  = ips_logL_(S, K=parm$K, nobs=nobs)
+
+    parm <- c(parm,
+              list(Sigma = solve_fun(parm$K),
+                   iter  = it,
+                   conv_check = conv_check,
+                   time  = .get.diff.time(t0, units="millisecs"),
+                   logL  = logL
+                   ))        
+    parm
+}
+
+
+get_inner_function <- function(edges){
+    innerLoop_pair <- function(edges, S, parm, eps, Scc_inv_list){    
+        for (j in 1:ncol(edges)){
+            cc <- edges[, j]
+            parm <- .fips_ggm_update_cc_parm(S, cc, parm, Scc_inv_list)
+        }
+        parm
+    }
+    
+    innerLoop_gen <- function(edges, S, parm, eps, Scc_inv_list){    
+        for (j in seq_along(edges)){
+            cc <- edges[[j]]
+            parm <- .fips_ggm_update_cc_parm(S, cc, parm, Scc_inv_list, j)
+        }
+        parm
+    }
+
+    if (is.matrix(edges))
+        inner <- innerLoop_pair
+    else if (is.list(edges))
+        inner <- innerLoop_gen
+    else stop("Can not find inner loop function")
+    inner    
+}
+
+
+## edges is a list
+.r_ips_ggm_ <- function (S, Elist, Emat, nobs, K, iter=1000, eps=1e-6, convcrit=1, aux=list(), print=FALSE) 
+{
+    my.complement <- function(cc, p){
+        return(setdiff(1:p, cc))
+    }
+
+    nparm = ncol(S) + ncol(Emat)
+    solve_fun <- solve_qr
+    
+    ## t0 <- proc.time()
+    t0 <- .get.time()
+    if (!inherits(Elist, "list")) stop("'Elist' must be a list\n")
+
+    if (length(Elist) == 1 && length(Elist[[1]]) == ncol(S)) ## Saturated model
+    {
+        out <- list(K    = solve_fun(S),
+                    Sigma= S,
+                    iter = 1,  ## Should be zero?
+                    time = .get.diff.time(t0, units="millisecs"))
+    }
+    else if (length(Elist) == 0) ## Independence model
+    {
+        out <- list(K      = diag(1/diag(S)),
+                    Sigma  = S,
+                    iter   = 1, ## Should be zero?
+                    time   =.get.diff.time(t0, units="millisecs"))
+    }
+    else
+    {
+        p  <- dim(S)[1]
+        logLp = ips_logL_(S, K=K, nobs=nobs)
+
+        Scc_inv_list <-
+            lapply(Elist, function(cc) {
+                .sol(S[cc, cc, drop=FALSE])
+            })
+        
+        Elist.complements <-
+            lapply(Elist, my.complement, p)        
+
+        it <- 0
+        repeat {
+            it <- it + 1
+            for (j in 1:length(Elist)) {
+                cc <- Elist[[j]]
+                aa <- Elist.complements[[j]]
+                D2 <- Scc_inv_list[[j]] +   ## solve(S[cc, cc, drop=FALSE]) +
+                    K[cc, aa, drop=FALSE] %*%
+                    solve_fun(K[aa, aa, drop=FALSE], K[aa, cc, drop=FALSE])                                
+                K[cc, cc] <- D2
+            }
+            
+            switch(convcrit,
+                   "1" = {
+                       conv_check = mean_abs_diff_on_Emat_(S, solve_fun(K), Emat, 1)
+                   },
+                   "2" = {
+                       logL = ips_logL_(S, K=K, nobs=nobs)
+                       conv_check <- abs((logL - logLp) / nparm)
+                       logLp <- logL                   
+                   })
+            
+            if (conv_check < eps || it == iter) break
+        }
+        dimnames(K) <- dimnames(S)
+        out <- list(K     = K,
+                    Sigma = solve_fun(K),
+                    conv_check = conv_check,
+                    time  = .get.diff.time(t0, units="millisecs"),
+                    iter  = it)
+    }
+
+    if (convcrit == 1)
+        logL  = ips_logL_(S, K=out$K, nobs=nobs)
+   
+    out$logL  = logL
+    out
+}
+

@@ -1,0 +1,31 @@
+Package: gRips
+Type: Package
+Title: Restricted Iterative Proportional Scaling Algorithms for Graphical Models
+Version: 0.1.1
+Author: Søren Højsgaard <sorenh@math.aau.dk>, Steffen Lauritzen <lauritzen@math.ku.dk>
+Maintainer: Søren Højsgaard <sorenh@math.aau.dk>
+Description: Restricted iterative proportional scaling algorithms for Gaussian graphical models.
+LazyData: true
+License: GPL
+Depends:
+    R (>= 3.6.0),
+    methods
+Imports:
+    glasso,
+    gRbase,
+    igraph,
+    MASS,
+    Matrix,
+    magrittr,    
+    Rcpp (>= 0.12.0),
+    Rgraphviz,
+    stats4
+Suggests:
+    testthat (>= 2.1.0),
+    knitr,
+    devtools
+LinkingTo: Rcpp, RcppArmadillo
+Encoding: UTF-8
+VignetteBuilder: knitr
+RoxygenNote: 7.2.3
+ByteCompile: yes
