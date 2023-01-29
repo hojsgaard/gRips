@@ -15,7 +15,7 @@ fit_ggm(
   convcrit = 1,
   aux = list(),
   engine = "cpp",
-  method = "fips",
+  method = "covips",
   print = 0
 )
 }
@@ -55,7 +55,7 @@ Convergence criterion:
 model (number of edges + number of nodes) between successive
 iterations.
 
-R-based / c++-based in combination with ips / fips.
+R-based / c++-based in combination with con / cov.
 }
 \examples{
 options("digits"=3)
@@ -68,10 +68,10 @@ em <- matrix(c(1,2, 2,3, 1,3, 3,4, 3,5, 4,5), nrow=2)
 
 EPS = 1e-2
 
-cg = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="cpp", method="fips")
-ci = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="cpp", method="ips")
-rg = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="R",   method="fips")
-ri = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="R",   method="ips")
+cg = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="cpp", method="cov")
+ci = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="cpp", method="con")
+rg = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="R",   method="cov")
+ri = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="R",   method="con")
 
 K <- solve(S)
 (ci$K - K)  \%>\% abs \%>\% max
@@ -79,10 +79,10 @@ K <- solve(S)
 (ri$K - K)  \%>\% abs \%>\% max
 (rg$K - K)  \%>\% abs \%>\% max
 
-cg = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="cpp", method="fips")
-ci = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="cpp", method="ips")
-rg = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="R",   method="fips")
-ri = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="R",   method="ips")
+cg = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="cpp", method="cov")
+ci = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="cpp", method="con")
+rg = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="R",   method="cov")
+ri = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="R",   method="con")
 
 K <- solve(S)
 (ci$K - K)  \%>\% abs \%>\% max

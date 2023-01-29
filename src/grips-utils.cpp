@@ -57,7 +57,7 @@ int method2int_(CharacterVector method){
 
 
 // [[Rcpp::export]]
-double ips_logL_(mat& S, mat& K, int nobs)
+double ggm_logL_(mat& S, mat& K, int nobs)
 {
   double trKS = accu(K % S);
   // Rf_PrintValue(wrap(trKS));

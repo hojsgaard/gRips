@@ -57,7 +57,7 @@ List Scc_list_(const mat& S, const List& edges0){
   return out;
 }
 
-inline void ips_ggm_update_cc_parm_(mat& S, uvec& cc0, mat& K, uvec& aa0, mat& Scc_inv)
+inline void conips_ggm_update_cc_parm_(mat& S, uvec& cc0, mat& K, uvec& aa0, mat& Scc_inv)
 {
   // mat Scc=S.submat(cc0, cc0);
   mat Kaa=K.submat(aa0, aa0);
@@ -67,25 +67,25 @@ inline void ips_ggm_update_cc_parm_(mat& S, uvec& cc0, mat& K, uvec& aa0, mat& S
   K.submat(cc0, cc0) = Scc_inv + Kca * inv(Kaa) * Kac;
 }
 
-void ips_inner_(arma::mat& S, List& edges0,
+void conips_inner_(arma::mat& S, List& edges0,
 		arma::mat& K,
 		List& clist0){  // NOTE: edges0, clist0 are 0-based
 
   List Scc_inv_list = Scc_inv_list_(S, edges0);
 
-  // Rcout << "ips_inner started" << std::endl;
+  // Rcout << "conips_inner started" << std::endl;
   for (int i=0; i < edges0.length(); i++)
     {    
       uvec cc0 = (edges0[i]), aa0 = (clist0[i]);
       mat Scc_inv = Scc_inv_list[i];
-      ips_ggm_update_cc_parm_(S, cc0, K, aa0, Scc_inv);
+      conips_ggm_update_cc_parm_(S, cc0, K, aa0, Scc_inv);
     } 
-  // Rcout << "ips_inner done" << std::endl;
+  // Rcout << "conips_inner done" << std::endl;
 }
 
 
-//[[Rcpp::export(.c_ips_ggm_)]]
-List ips_ggm_(arma::mat& S, List& Elist, umat& Emat, int& nobs,
+//[[Rcpp::export(.c_conips_ggm_)]]
+List conips_ggm_(arma::mat& S, List& Elist, umat& Emat, int& nobs,
 	      arma::mat K,
 	      int& iter, double& eps, int& convcrit, int& print, List& aux){
 
@@ -95,7 +95,7 @@ List ips_ggm_(arma::mat& S, List& Elist, umat& Emat, int& nobs,
   double nparm = S.n_cols + Emat.n_cols;  
   umat Emat0   = Emat - 1;
 
-  // Variables for ips
+  // Variables for conips
   mat Sigma = inv(K);
   List Elist0 = clone(Elist);
   List clist0 = make_clist_(S, Elist);
@@ -109,13 +109,13 @@ List ips_ggm_(arma::mat& S, List& Elist, umat& Emat, int& nobs,
   INIT_CONVERGENCE_CHECK;
     
   for (; itcount < iter; ){  
-    ips_inner_(S, Elist0, K, clist0);
+    conips_inner_(S, Elist0, K, clist0);
     ++itcount;          
 
     if (true){ 
       switch(convcrit){
       case 1: 
-	Sigma = inv(K); // Needed for ips only
+	Sigma = inv(K); // Needed for conips only
 	mad   = mean_abs_diff_on_Emat_(S, Sigma, Emat0, 0);
 	conv_check = mad;
 	PRINT_CONV_CHECK1;
@@ -132,7 +132,7 @@ List ips_ggm_(arma::mat& S, List& Elist, umat& Emat, int& nobs,
     }
   }
 
-  logL  = ips_logL_(S, K, nobs);
+  logL  = ggm_logL_(S, K, nobs);
   Sigma = inv(K);
   RETURN_VALUE;
 }
@@ -140,11 +140,11 @@ List ips_ggm_(arma::mat& S, List& Elist, umat& Emat, int& nobs,
   
 
 // ------------------------------------------------------------------
-// ------ FIPS - Fast iterative proportional scaling          -------
+// ------ COVIPS - Fast iterative proportional scaling          -------
 // ------------------------------------------------------------------
 
 
-void fips_ggm_update_cc_parm0_(const mat& Scc, const uvec& cc0, mat& K, mat& Sigma,
+void covips_ggm_update_cc_parm0_(const mat& Scc, const uvec& cc0, mat& K, mat& Sigma,
 				      const mat& Scc_inv)
 {
   
@@ -163,7 +163,7 @@ void fips_ggm_update_cc_parm0_(const mat& Scc, const uvec& cc0, mat& K, mat& Sig
 }
 
 
-void fips_ggm_update_cc_parm_(const mat& Scc, const uvec& cc0, mat& K, mat& Sigma,
+void covips_ggm_update_cc_parm_(const mat& Scc, const uvec& cc0, mat& K, mat& Sigma,
 				      const mat& Scc_inv)
 {
   
@@ -182,17 +182,17 @@ void fips_ggm_update_cc_parm_(const mat& Scc, const uvec& cc0, mat& K, mat& Sigm
 }
 
 
-void fips_inner_(const mat& S, const List& Elist0,
+void covips_inner_(const mat& S, const List& Elist0,
 		  mat& K, mat& Sigma, List& Scc_list, List& Scc_inv_list)
 {
   for (int i=0; i < Elist0.length(); ++i){
     uvec cc0 = Elist0[i];
-    fips_ggm_update_cc_parm_(Scc_list[i], cc0, K, Sigma, Scc_inv_list[i]);
+    covips_ggm_update_cc_parm_(Scc_list[i], cc0, K, Sigma, Scc_inv_list[i]);
   }
 }
 
-//[[Rcpp::export(.c_fips_ggm_)]] 
-List fips_ggm_(mat& S, List& Elist, umat& Emat, int& nobs,
+//[[Rcpp::export(.c_covips_ggm_)]] 
+List covips_ggm_(mat& S, List& Elist, umat& Emat, int& nobs,
 	       mat K,       
 	       int& iter, double& eps, int& convcrit, int& print, List& aux){
 
@@ -202,7 +202,7 @@ List fips_ggm_(mat& S, List& Elist, umat& Emat, int& nobs,
   double nparm = S.n_cols + Emat.n_cols;
   umat Emat0   = Emat - 1;
  
-  // Variables for fips
+  // Variables for covips
   mat Sigma    = initSigma_(S);  
   // END
   
@@ -218,7 +218,7 @@ List fips_ggm_(mat& S, List& Elist, umat& Emat, int& nobs,
   List Scc_list     = Scc_list_(S, Elist0);
 
   for (; itcount < iter; ){  
-    fips_inner_(S, Elist0, K, Sigma, Scc_list, Scc_inv_list);
+    covips_inner_(S, Elist0, K, Sigma, Scc_list, Scc_inv_list);
     ++itcount;      
     
     if (true){ 
@@ -240,7 +240,7 @@ List fips_ggm_(mat& S, List& Elist, umat& Emat, int& nobs,
     }      
   }
   
-  logL = ips_logL_(S, K, nobs);  
+  logL = ggm_logL_(S, K, nobs);  
   RETURN_VALUE;
 }
 

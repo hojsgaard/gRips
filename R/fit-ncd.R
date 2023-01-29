@@ -34,8 +34,6 @@ certificate_ncd <- function(S, K, em, emc){
 ## WITHOUT S
 update_row_Sigma2 <- function(u, parm, amat, print=FALSE){
 
-    solve_fun <- solveM
-
     ne_u2 <- amat[u, ] == 1 ## closure: u and its nbrs
     s_ru2 <- parm$Sigma[, u, drop = FALSE]    
     ## parm$Sigma ovenfor isf S
@@ -68,7 +66,7 @@ update_row_Sigma2 <- function(u, parm, amat, print=FALSE){
 
 ## Without S
 update_row_K2 <- function(u, parm, update_K=TRUE, print=FALSE){
-    solve_fun <- solveM
+
     if (update_K){
         ## cat("smart update of K\n"); print(parm$K)
         BB <- parm$K[-u, u, drop=FALSE]
@@ -121,7 +119,7 @@ outerloop1 <- function(parm, Emat, Emat_c, amat, eps, maxit=1000){
     it1 <- 0
 
     if (!is.null(parm$K)){
-        logLp <- ips_logL_(parm$Sigma, parm$K, nobs=nobs)
+        logLp <- ggm_logL_(parm$Sigma, parm$K, nobs=nobs)
     } else {
         logLp <- -99999
     }
@@ -145,7 +143,6 @@ outerloop1 <- function(parm, Emat, Emat_c, amat, eps, maxit=1000){
 
 outerloop2 <- function(parm, Emat, Emat_c, amat, eps, maxit=1000){
 
-    solve_fun <- solveM
     update_K <- TRUE
     
     is_invertible <- function(S){det(S) > 0}
@@ -181,7 +178,7 @@ outerloop2_s <- function(parm, Emat, Emat_c, amat, eps, maxit=1000){
     is_invertible <- function(S){det(S) > 0}
     
     if (is_invertible(parm$Sigma)){
-        parm$K <- solve_qr(parm$Sigma)        
+        parm$K <- solve_fun(parm$Sigma)        
     } else {
         stop("NCD algorithm failed")
     }
@@ -213,7 +210,7 @@ outerloop2_s <- function(parm, Emat, Emat_c, amat, eps, maxit=1000){
     res2 <- outerloop2(parm, Emat, Emat_c, amat, eps, iter)
     ## cat("Sigma and K after outerloop2 :\n"); print(parm$Sigma); print(parm$K)
     
-    logL = ips_logL_(parm$Sigma, K=parm$K, nobs=nobs)
+    logL = ggm_logL_(parm$Sigma, K=parm$K, nobs=nobs)
     cert = certificate_ncd(parm$Sigma, parm$K, Emat, Emat_c)
     ## cat(sprintf("cert: %f\n", cert))
 

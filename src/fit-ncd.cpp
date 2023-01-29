@@ -260,7 +260,7 @@ List outerloop1_(mat& Sigma, mat& K, umat& Emat, umat& Emat_c, mat& amat, int& n
   bool converged = false;
     
   double mad, conv_crit;
-  // double logLp = ips_logL_(Sigma, K, nobs);
+  // double logLp = ggm_logL_(Sigma, K, nobs);
   
   mat Sigma_prev = diagmat(Sigma.diag());
   // Rprintf("Sigma_prev:\n"); Sigma_prev.print();
@@ -285,11 +285,12 @@ List outerloop1_(mat& Sigma, mat& K, umat& Emat, umat& Emat_c, mat& amat, int& n
 List outerloop2_(mat& Sigma, mat& K, umat& Emat, umat& Emat_c, mat& amat, double& eps, int& maxit){
 
   bool update_K = true;
-
-  // double d = det(Sigma),
+  
   double dif2, conv_crit;
+  
+  // double d = 1.234;
+  double d = det(Sigma);
 
-  double d = 1.234;
   if (d > 0){
     K = inv_qr_(Sigma);
     // K = eye(Sigma.n_rows, Sigma.n_cols);
@@ -343,114 +344,10 @@ List ncd_ggm_(mat& S, List& Elist, umat& Emat, int& nobs,
 
   int itcount = (int) res2["iter"] + (int) res1["iter"];
   double conv_check = res2["conv_crit"];
-  double logL = ips_logL_(S, K, nobs);  
+  double logL = ggm_logL_(S, K, nobs);  
 
   RETURN_VALUE;
 }
 
 
 
-
-
-/*
-//[[Rcpp::export]]
-mat inv_qr2_(NumericMatrix X_){
-  arma::mat X = arma::mat(X_.begin(), X_.nrow(), X_.ncol(), false);
-  arma::mat Q, R;
-  arma::qr(Q,R,X);
-  mat Ri = inv(R);
-  mat out = Ri * Q.t();
-  return(out);
-}
-
-
-//[[Rcpp::export]]
-mat inv_(mat& X){
-  mat out = inv(X);
-  return(out);
-}
-*/
-
-/*
-
-//[[Rcpp::export]]
-mat solve_R(mat& A){
-  Environment base_env = Environment::namespace_env("base");
-  Function R_fun = base_env["solve"];
-  NumericMatrix result = R_fun(A);
-  mat out = as<mat>(wrap(result)); 
-  return out;  
-}
-
-//[[Rcpp::export]]
-mat solveM_R(mat& A){
-  Environment base_env = Environment::namespace_env("Matrix");
-  Function R_fun = base_env["solve"];
-  NumericMatrix result = R_fun(A);
-  mat out = as<mat>(wrap(result)); 
-  return out;  
-}
-
-//[[Rcpp::export]]
-mat solve_qr_R(mat& A){
-  Environment base_env = Environment::namespace_env("gRips");
-  Function R_fun = base_env["solve_qr"];
-  NumericMatrix result = R_fun(A);
-  mat out = as<mat>(wrap(result)); 
-  return out;  
-}
-
-*/
-
-
-/*
-    // OLD
-    uvec u_ = {(unsigned int) u};
-    
-    // BB <- parm$K[-u, u, drop=FALSE]
-    vec BB;
-    BB = K.col(u);
-    BB.shed_rows(u_);    
-    Rprintf("BB:\n"); BB.t().print();
-
-    mat CC_ = K;
-    CC_.shed_rows(u_);
-    CC_.shed_cols(u_);
-    Rprintf("CC_:\n"); CC_.print();
-    
-    // CC <- parm$K[-u, -u] - BB %*% t(BB) / as.numeric(parm$K[u, u])
-    double k_uu = as_scalar(K(u, u));
-
-    mat CC = CC_ - BB * BB.t() / k_uu;
-    Rprintf("CC:\n"); CC.print();
-
-    // DD <- CC %*% parm$Sigma[-u, u, drop=FALSE]
-    vec DD_;
-    DD_ = Sigma.col(u);
-    DD_.shed_rows(u_);
-    Rprintf("DD_:\n"); DD_.t().print();
-
-    mat DD = CC * DD_;
-    Rprintf("DD:\n"); DD.t().print(); 
-	
-    // k_uu_upd <- 1 / as.numeric(Sigma[u, u] - parm$Sigma[u, -u, drop=FALSE] %*% DD) 
-    double sigma_uu = as_scalar(Sigma(u, u));
-    double k_uu_upd = 1/(sigma_uu - as_scalar(DD_.t() * DD));
-
-    // Updates:
-    K(u, u) = k_uu_upd;    
-    // parm$K[u, u]   <- k_uu_upd
-
-    // Rcout << "u_ " << u_ << "\n";
-    replace_uc_v(K, u_, u_, -k_uu_upd * DD, shift=shift);
-
-    // parm$K[-u, u]  <- -k_uu_upd * DD 
-    replace_u_vc(K, u_, u_, -k_uu_upd * DD, shift=shift);
-    // parm$K[u, -u]  <- t.default(-k_uu_upd * DD)        
-    mat RR = CC + k_uu_upd * DD * DD.t();    
-    RR.set_size(RR.n_rows * RR.n_cols, 1);
-    replace_uc_vc(K, u_, u_, RR, shift=shift);
-    // parm$K[-u, -u] <- CC + k_uu_upd * DD %*% t(DD)    
-    Rprintf("K after smart update:\n"); K.print();
-*/
-    // NEW

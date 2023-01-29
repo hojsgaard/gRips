@@ -26,7 +26,7 @@
 #' model (number of edges + number of nodes) between successive
 #' iterations.
 #' 
-#' R-based / c++-based in combination with ips / fips.
+#' R-based / c++-based in combination with con / cov.
 #'
 #' @examples
 #' options("digits"=3)
@@ -39,10 +39,10 @@
 #'
 #' EPS = 1e-2
 #'
-#' cg = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="cpp", method="fips")
-#' ci = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="cpp", method="ips")
-#' rg = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="R",   method="fips")
-#' ri = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="R",   method="ips")
+#' cg = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="cpp", method="cov")
+#' ci = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="cpp", method="con")
+#' rg = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="R",   method="cov")
+#' ri = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="R",   method="con")
 #'
 #' K <- solve(S)
 #' (ci$K - K)  %>% abs %>% max
@@ -50,10 +50,10 @@
 #' (ri$K - K)  %>% abs %>% max
 #' (rg$K - K)  %>% abs %>% max
 #'
-#' cg = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="cpp", method="fips")
-#' ci = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="cpp", method="ips")
-#' rg = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="R",   method="fips")
-#' ri = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="R",   method="ips")
+#' cg = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="cpp", method="cov")
+#' ci = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="cpp", method="con")
+#' rg = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="R",   method="cov")
+#' ri = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="R",   method="con")
 #'
 #' K <- solve(S)
 #' (ci$K - K)  %>% abs %>% max
@@ -67,7 +67,7 @@ NULL
 #' @rdname fit-ggm
 #' @export
 fit_ggm <- function(S, edges=NULL, nobs, K=NULL, iter=10000L, eps=1e-6, convcrit=1, aux=list(),
-                    engine="cpp", method="fips", print=0){
+                    engine="cpp", method="covips", print=0){
 
     if (inherits(S, "data.frame")){
         nobs = nrow(S)
@@ -95,14 +95,11 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, iter=10000L, eps=1e-6, convcrit
     aux$amat <- amat ## FIXME: Hack?
     
     engine <- match.arg(tolower(engine), c("cpp", "r"))
-    method <- match.arg(tolower(method), c("fips", "ips", "ncd", "cal", "glasso"))
-
-    ## solve_fun <- solve_qr
+    method <- match.arg(tolower(method), c("covips", "conips", "ncd", "cal", "glasso"))
     
     ## HACK - FIXME
     if (identical(method, "ncd")){
         ## cat("ncd; K is set to solve(S)\n")
-        ## K <- solve_fun(S)
         K <- diag(1, nrow(S))
     }
 
@@ -115,12 +112,12 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, iter=10000L, eps=1e-6, convcrit
     
     comb <- paste0(engine, "_", method)
     switch(comb,
-           "cpp_fips"    = {fitfun <- .c_fips_ggm_ },
-           "r_fips"      = {fitfun <- .r_fips_ggm_ },           
-           "cpp_ips"     = {fitfun <- .c_ips_ggm_  },
-           "r_ips"       = {fitfun <- .r_ips_ggm_  },
-           "cpp_ncd"     = {fitfun <- .c_ncd_ggm_  },
-           "r_ncd"       = {fitfun <- .r_ncd_ggm_  },
+           "cpp_covips"     = {fitfun <- .c_covips_ggm_ },
+           "r_covips"       = {fitfun <- .r_covips_ggm_ },           
+           "cpp_conips"     = {fitfun <- .c_conips_ggm_ },
+           "r_conips"       = {fitfun <- .r_conips_ggm_ },
+           "cpp_ncd"        = {fitfun <- .c_ncd_ggm_ },
+           "r_ncd"          = {fitfun <- .r_ncd_ggm_ },
            ## "r_cal"       = {fitfun <- .r_cal_ggm_  },
            )    
     
@@ -211,7 +208,7 @@ parse_edges <- function(edges, nvar){
         idim   = nrow(out$K),
         trKS   = sum(out$K * S),
         logL   = out$logL,
-        ## For fips / ips the lines below give the same, but for glasso there is no conv_check variable.
+        ## For cov / con the lines below give the same, but for glasso there is no conv_check variable.
         ## made   = mean_abs_diff_on_Emat_(out$Sigma, S, out$edges, 1)
         conv_check  = out$conv_check
     )
@@ -230,7 +227,7 @@ summary.gips_fit_class <- function(object, ...){
 
 
 get_init_parm <- function(S, K){
-    solve_fun <- solve_qr
+
     .parmInit <- function(S){
         list(K=diag(1/diag(S)), Sigma=diag(diag(S)))
     }

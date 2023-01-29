@@ -8,9 +8,8 @@
 ## #' @rdname fit-ggm
 ## #' @export
 ## edges can be either list or 2 x p matrix
-.r_fips_ggm_ <- function (S, Elist, Emat, nobs, K, iter=1000L, eps=1e-6, convcrit=1, aux=list(), print=FALSE){
+.r_covips_ggm_ <- function (S, Elist, Emat, nobs, K, iter=1000L, eps=1e-6, convcrit=1, aux=list(), print=FALSE){
 
-    solve_fun <- solve_qr
     t0 <- .get.time()
     inner <- get_inner_function(Elist)
 
@@ -20,7 +19,7 @@
     Scc_inv_list <- lapply(Elist, function(cc) {
         .sol(S[cc, cc, drop=FALSE])} )
 
-    logLp <- ips_logL_(S, K=parm$K, nobs=nobs)
+    logLp <- ggm_logL_(S, K=parm$K, nobs=nobs)
     ## sprintf("logL (init): %f\n", logLp) %>% cat()
     
     it <- 0L
@@ -33,7 +32,7 @@
                    conv_check = mean_abs_diff_on_Emat_(S, parm$Sigma, Emat, 1)
                },
                "2" = {
-                   logL = ips_logL_(S, K=parm$K, nobs=nobs)
+                   logL = ggm_logL_(S, K=parm$K, nobs=nobs)
                    conv_check <- abs((logL - logLp) / nparm)
                    logLp <- logL                   
                })        
@@ -41,7 +40,7 @@
     }
 
     if (convcrit==1)
-        logL  = ips_logL_(S, K=parm$K, nobs=nobs)
+        logL  = ggm_logL_(S, K=parm$K, nobs=nobs)
 
     parm <- c(parm,
               list(Sigma = solve_fun(parm$K),
@@ -58,7 +57,7 @@ get_inner_function <- function(edges){
     innerLoop_pair <- function(edges, S, parm, eps, Scc_inv_list){    
         for (j in 1:ncol(edges)){
             cc <- edges[, j]
-            parm <- .fips_ggm_update_cc_parm(S, cc, parm, Scc_inv_list)
+            parm <- .covips_ggm_update_cc_parm(S, cc, parm, Scc_inv_list)
         }
         parm
     }
@@ -66,7 +65,7 @@ get_inner_function <- function(edges){
     innerLoop_gen <- function(edges, S, parm, eps, Scc_inv_list){    
         for (j in seq_along(edges)){
             cc <- edges[[j]]
-            parm <- .fips_ggm_update_cc_parm(S, cc, parm, Scc_inv_list, j)
+            parm <- .covips_ggm_update_cc_parm(S, cc, parm, Scc_inv_list, j)
         }
         parm
     }
@@ -81,14 +80,13 @@ get_inner_function <- function(edges){
 
 
 ## edges is a list
-.r_ips_ggm_ <- function (S, Elist, Emat, nobs, K, iter=1000, eps=1e-6, convcrit=1, aux=list(), print=FALSE) 
+.r_conips_ggm_ <- function (S, Elist, Emat, nobs, K, iter=1000, eps=1e-6, convcrit=1, aux=list(), print=FALSE) 
 {
     my.complement <- function(cc, p){
         return(setdiff(1:p, cc))
     }
 
     nparm = ncol(S) + ncol(Emat)
-    solve_fun <- solve_qr
     
     ## t0 <- proc.time()
     t0 <- .get.time()
@@ -111,7 +109,7 @@ get_inner_function <- function(edges){
     else
     {
         p  <- dim(S)[1]
-        logLp = ips_logL_(S, K=K, nobs=nobs)
+        logLp = ggm_logL_(S, K=K, nobs=nobs)
 
         Scc_inv_list <-
             lapply(Elist, function(cc) {
@@ -138,7 +136,7 @@ get_inner_function <- function(edges){
                        conv_check = mean_abs_diff_on_Emat_(S, solve_fun(K), Emat, 1)
                    },
                    "2" = {
-                       logL = ips_logL_(S, K=K, nobs=nobs)
+                       logL = ggm_logL_(S, K=K, nobs=nobs)
                        conv_check <- abs((logL - logLp) / nparm)
                        logLp <- logL                   
                    })
@@ -154,7 +152,7 @@ get_inner_function <- function(edges){
     }
 
     if (convcrit == 1)
-        logL  = ips_logL_(S, K=out$K, nobs=nobs)
+        logL  = ggm_logL_(S, K=out$K, nobs=nobs)
    
     out$logL  = logL
     out

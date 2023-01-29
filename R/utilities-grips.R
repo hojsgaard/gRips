@@ -13,31 +13,33 @@ generate_n01 <- function(n.obs, nvar, seed=2022){
 }
 
 
-## FIXME : Need a solve_fun 
-
-solve_qr <- function(A, b=NULL){
-    if (is.null(b))
-        solve.qr(qr(A))
-    else
-        solve.qr(qr(A)) %*% b
+solve_fun <- function(A, b=NULL){
+    solve_qr <- function(A, b=NULL){
+        if (is.null(b))
+            solve.qr(qr(A))
+        else
+            solve.qr(qr(A)) %*% b
+    }
+    
+    ## solve_ginv <- function(A, b=NULL){
+    ##     if (is.null(b))
+    ##         MASS::ginv(A)
+    ##     else
+    ##         MASS::ginv(A) %*% b
+    ## }
+    
+    ## solveM <- function(A, b=NULL){
+    ##     if (is.null(b))
+    ##         Matrix::solve(A)
+    ##     else
+    ##         Matrix::solve(A, b)
+    ## }
+    
+    solve_qr(A, b)
 }
 
-solve_ginv <- function(A, b=NULL){
-    if (is.null(b))
-        MASS::ginv(A)
-    else
-        MASS::ginv(A) %*% b
-}
-
-solveM <- function(A, b=NULL){
-    if (is.null(b))
-        Matrix::solve(A)
-    else
-        Matrix::solve(A, b)
-}
-
-ips_logL <- function(S, K, nobs){
-    nobs*(log(det(K)) - sum(S*K))/2
+ggm_logL <- function(S, K, nobs){
+    nobs * (log(det(K)) - sum(S * K)) / 2
 }
 
 

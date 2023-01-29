@@ -137,12 +137,12 @@ Scc_list_ <- function(S, edges0) {
     .Call('_gRips_Scc_list_', PACKAGE = 'gRips', S, edges0)
 }
 
-.c_ips_ggm_ <- function(S, Elist, Emat, nobs, K, iter, eps, convcrit, print, aux) {
-    .Call('_gRips_ips_ggm_', PACKAGE = 'gRips', S, Elist, Emat, nobs, K, iter, eps, convcrit, print, aux)
+.c_conips_ggm_ <- function(S, Elist, Emat, nobs, K, iter, eps, convcrit, print, aux) {
+    .Call('_gRips_conips_ggm_', PACKAGE = 'gRips', S, Elist, Emat, nobs, K, iter, eps, convcrit, print, aux)
 }
 
-.c_fips_ggm_ <- function(S, Elist, Emat, nobs, K, iter, eps, convcrit, print, aux) {
-    .Call('_gRips_fips_ggm_', PACKAGE = 'gRips', S, Elist, Emat, nobs, K, iter, eps, convcrit, print, aux)
+.c_covips_ggm_ <- function(S, Elist, Emat, nobs, K, iter, eps, convcrit, print, aux) {
+    .Call('_gRips_covips_ggm_', PACKAGE = 'gRips', S, Elist, Emat, nobs, K, iter, eps, convcrit, print, aux)
 }
 
 as_emat2amat_ <- function(emat, d) {
@@ -201,8 +201,8 @@ list2Emat_ <- function(E, shift = 1L) {
     .Call('_gRips_list2Emat_', PACKAGE = 'gRips', E, shift)
 }
 
-ips_logL_ <- function(S, K, nobs) {
-    .Call('_gRips_ips_logL_', PACKAGE = 'gRips', S, K, nobs)
+ggm_logL_ <- function(S, K, nobs) {
+    .Call('_gRips_ggm_logL_', PACKAGE = 'gRips', S, K, nobs)
 }
 
 list2row_ <- function(input_list, d = 2L) {

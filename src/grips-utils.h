@@ -13,7 +13,7 @@ const int erp=0; // ERROR PRINTING
 #define as_num(cc) NumericVector(cc.begin(), cc.end())
 
 int method2int_(CharacterVector method);
-double ips_logL_(mat& S, mat& K, int nobs);
+double ggm_logL_(mat& S, mat& K, int nobs);
 mat initSigma_(mat& S);
 mat initK_(mat& S);
 double get_conv_ref(const List& aux);
@@ -38,7 +38,7 @@ double get_conv_ref(const List& aux);
   case 1:					\
     break;					\
   case 2:					\
-    logLp = ips_logL_(S, K, nobs);		\
+    logLp = ggm_logL_(S, K, nobs);		\
     break;					\
   case 3:					\
     conv_ref = get_conv_ref(aux);		\
@@ -49,7 +49,7 @@ double get_conv_ref(const List& aux);
 
 #define PRINT_CONV_CHECK1			                \
   if ((print > 0) && ((itcount % 1) == 0)) {			\
-  logL  = ips_logL_(S, K, nobs);				\
+  logL  = ggm_logL_(S, K, nobs);				\
   sprintf(buffer, "itcount=%4i, logL=%f, nparm=%4f, mad=%f\n",	\
 	  itcount, logL, nparm, mad);				\
   Rcout << buffer;						\
@@ -65,13 +65,13 @@ double get_conv_ref(const List& aux);
 
 
 #define CONV_CHECK_LOGL_DIFF			\
-  logL  = ips_logL_(S, K, nobs);		\
+  logL  = ggm_logL_(S, K, nobs);		\
   conv_check = fabs(logL - logLp)  / nparm;	\
   logLp = logL;					\
 
 
 #define CONV_CHECK_LOGL_DIFF_REF			\
-  logL  = ips_logL_(S, K, nobs);			\
+  logL  = ggm_logL_(S, K, nobs);			\
   conv_check = fabs(logL - conv_ref) / nparm;		\
   logLp = logL;						\
 

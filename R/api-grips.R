@@ -5,7 +5,7 @@
 ##
 ## -----------------------------------------------
 
-.fips_ggm_update_cc_parm <- function(S, cc, parm, Scc_inv_list, j)
+.covips_ggm_update_cc_parm <- function(S, cc, parm, Scc_inv_list, j)
 {
 
     ## sprintf("parm-start:\n") %>% cat(); print(parm)
@@ -94,7 +94,7 @@
 }
 
 .getSaux_ips <- function(Scc, Laux){
-    ## cat(".getSaux_ips \n"); print(Scc)
+    ## cat(".getSaux_i \n"); print(Scc)
     Scc
 }
 
