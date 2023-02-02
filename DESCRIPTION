@@ -1,6 +1,6 @@
 Package: gRips
 Type: Package
-Title: Restricted Iterative Proportional Scaling Algorithms for Graphical Models
+Title: Restricted Iterative Proportional Scaling Algorithms for Graphical Models etc.
 Version: 0.1.3
 Author: Søren Højsgaard <sorenh@math.aau.dk>, Steffen Lauritzen <lauritzen@math.ku.dk>
 Maintainer: Søren Højsgaard <sorenh@math.aau.dk>
