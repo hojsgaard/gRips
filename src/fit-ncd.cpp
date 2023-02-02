@@ -287,8 +287,7 @@ List outerloop2_(mat& Sigma, mat& K, umat& Emat, umat& Emat_c, mat& amat, double
   bool update_K = true;
   
   double dif2, conv_crit;
-  
-  // double d = 1.234;
+
   double d = det(Sigma);
 
   if (d > 0){
