@@ -65,9 +65,9 @@ update_row_Sigma2 <- function(u, parm, amat, print=FALSE){
 
 
 ## Without S
-update_row_K2 <- function(u, parm, update_K=TRUE, print=FALSE){
+update_row_K2 <- function(u, parm, smart_K=TRUE, print=FALSE){
 
-    if (update_K){
+    if (smart_K){
         ## cat("smart update of K\n"); print(parm$K)
         BB <- parm$K[-u, u, drop=FALSE]
         ## cat("BB:\n"); print(t(BB))        
@@ -96,11 +96,11 @@ update_row_K2 <- function(u, parm, update_K=TRUE, print=FALSE){
 
 
 ## WITHOUT S
-innerloop2_update_Sigma_K2 <- function(parm, amat, update_K=TRUE, print=FALSE){
+innerloop2_update_Sigma_K2 <- function(parm, amat, smart_K=TRUE, print=FALSE){
     ## cat("innerloop2_update_Sigma_K\n")
     for (u in 1:nrow(amat)){
         update_row_Sigma2(u, parm, amat, print=print)
-        update_row_K2    (u, parm, update_K=update_K, print=print)
+        update_row_K2    (u, parm, smart_K=smart_K, print=print)
     }
 }
 
@@ -143,7 +143,7 @@ outerloop1 <- function(parm, Emat, Emat_c, amat, eps, maxit=1000){
 
 outerloop2 <- function(parm, Emat, Emat_c, amat, eps, maxit=1000){
 
-    update_K <- TRUE
+    smart_K <- TRUE
     
     is_invertible <- function(S){det(S) > 0}
     
@@ -159,7 +159,7 @@ outerloop2 <- function(parm, Emat, Emat_c, amat, eps, maxit=1000){
     it2       <- 0
     converged <- FALSE
     while (!converged){
-        innerloop2_update_Sigma_K2(parm, amat, update_K=update_K)
+        innerloop2_update_Sigma_K2(parm, amat, smart_K=smart_K)
         dif2 <- diff_fun(parm$Sigma, parm$K, Emat_c)
         it2  <- it2 + 1
         conv_crit <- dif2

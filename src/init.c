@@ -45,7 +45,7 @@ extern SEXP _gRips_max_diff_on_Emat_(SEXP, SEXP, SEXP);
 extern SEXP _gRips_mean_abs_diff_on_Elist_(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _gRips_mean_abs_diff_on_Emat_(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _gRips_ncd_ggm_(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP _gRips_outerloop1_(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP _gRips_outerloop1_(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _gRips_remove_elem(SEXP, SEXP, SEXP);
 extern SEXP _gRips_remove_rows(SEXP, SEXP, SEXP);
 extern SEXP _gRips_rep_nout(SEXP, SEXP);
@@ -59,8 +59,6 @@ extern SEXP _gRips_replace_uv_(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _gRips_setdiff_(SEXP, SEXP);
 extern SEXP _gRips_unique_cols(SEXP);
 extern SEXP _gRips_unique_rows(SEXP);
-extern SEXP _gRips_update_row_K_(SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP _gRips_update_row_Sigma_(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _gRips_vec2mat(SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
@@ -101,7 +99,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_gRips_mean_abs_diff_on_Elist_",      (DL_FUNC) &_gRips_mean_abs_diff_on_Elist_,       4},
     {"_gRips_mean_abs_diff_on_Emat_",       (DL_FUNC) &_gRips_mean_abs_diff_on_Emat_,        4},
     {"_gRips_ncd_ggm_",                     (DL_FUNC) &_gRips_ncd_ggm_,                     10},
-    {"_gRips_outerloop1_",                  (DL_FUNC) &_gRips_outerloop1_,                   8},
+    {"_gRips_outerloop1_",                  (DL_FUNC) &_gRips_outerloop1_,                   9},
     {"_gRips_remove_elem",                  (DL_FUNC) &_gRips_remove_elem,                   3},
     {"_gRips_remove_rows",                  (DL_FUNC) &_gRips_remove_rows,                   3},
     {"_gRips_rep_nout",                     (DL_FUNC) &_gRips_rep_nout,                      2},
@@ -115,8 +113,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_gRips_setdiff_",                     (DL_FUNC) &_gRips_setdiff_,                      2},
     {"_gRips_unique_cols",                  (DL_FUNC) &_gRips_unique_cols,                   1},
     {"_gRips_unique_rows",                  (DL_FUNC) &_gRips_unique_rows,                   1},
-    {"_gRips_update_row_K_",                (DL_FUNC) &_gRips_update_row_K_,                 5},
-    {"_gRips_update_row_Sigma_",            (DL_FUNC) &_gRips_update_row_Sigma_,             4},
     {"_gRips_vec2mat",                      (DL_FUNC) &_gRips_vec2mat,                       3},
     {NULL, NULL, 0}
 };

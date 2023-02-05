@@ -39,10 +39,10 @@
 #'
 #' EPS = 1e-2
 #'
-#' cg = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="cpp", method="cov")
-#' ci = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="cpp", method="con")
-#' rg = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="R",   method="cov")
-#' ri = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="R",   method="con")
+#' cg = fit_ggm(S, gl, nobs=nobs, eps=EPS, method="cov")
+#' ci = fit_ggm(S, gl, nobs=nobs, eps=EPS, method="con")
+#' rg = fit_ggm(S, gl, nobs=nobs, eps=EPS, method="cov", aux=list(engine="R"))
+#' ri = fit_ggm(S, gl, nobs=nobs, eps=EPS, method="con", aux=list(engine="R"))
 #'
 #' K <- solve(S)
 #' (ci$K - K)  %>% abs %>% max
@@ -50,10 +50,10 @@
 #' (ri$K - K)  %>% abs %>% max
 #' (rg$K - K)  %>% abs %>% max
 #'
-#' cg = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="cpp", method="cov")
-#' ci = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="cpp", method="con")
-#' rg = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="R",   method="cov")
-#' ri = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="R",   method="con")
+#' cg = fit_ggm(S, em, nobs=nobs, eps=EPS, method="cov")
+#' ci = fit_ggm(S, em, nobs=nobs, eps=EPS, method="con")
+#' rg = fit_ggm(S, em, nobs=nobs, eps=EPS, method="cov", aux=list(engine="R"))
+#' ri = fit_ggm(S, em, nobs=nobs, eps=EPS, method="con", aux=list(engine="R"))
 #'
 #' K <- solve(S)
 #' (ci$K - K)  %>% abs %>% max
@@ -67,48 +67,44 @@ NULL
 #' @rdname fit-ggm
 #' @export
 fit_ggm <- function(S, edges=NULL, nobs, K=NULL, iter=10000L, eps=1e-6, convcrit=1, aux=list(),
-                    engine="cpp", method="covips", print=0){
+                    method="covips", print=0){
 
     if (inherits(S, "data.frame")){
         nobs = nrow(S)
         S <- cov2cor(cov(S))      
     }
-    
-    ## t0 <- proc.time()
     t0 <- .get.time()
 
     if (is.null(K)) {
-        ## cat("Generating initial K\n")
         K <- .initK(S)
     }
-
+    
+    edges <- parse_edges(edges, nrow(S))
+    Elist <- .form2glist(edges)
+    Emat <- as_elist2emat(Elist)
     
     ## cat("edges (in): \n"); print(edges)
-    edges <- parse_edges(edges, nrow(S))
     ## cat("edges (tmp): \n"); print(edges)    
-    Elist <- .form2glist(edges)
     ## cat("edges (to use): \n"); print(edges) ## A list
     ## Emat <- list2Emat_(edges, shift=0)
 
-    Emat <- as_elist2emat(Elist)
-    amat <- as_emat2amat(Emat, nrow(S))
-    aux$amat <- amat ## FIXME: Hack?
-    
-    engine <- match.arg(tolower(engine), c("cpp", "r"))
+    aux0 <- list(smart_K    = TRUE,
+                 approx     = 0,
+                 eps_approx = 1e-4,
+                 engine     = "cpp",
+                 amat       = as_emat2amat(Emat, nrow(S)) ## FIXME: DO this only for ncd?
+                 )
+
+    aux0[names(aux)] <- aux    
+    engine <- match.arg(tolower(aux0$engine), c("cpp", "r"))
     method <- match.arg(tolower(method), c("covips", "conips", "ncd", "cal", "glasso"))
     
-    ## HACK - FIXME
     if (identical(method, "ncd")){
-        ## cat("ncd; K is set to solve(S)\n")
         K <- diag(1, nrow(S))
     }
-
-    ## cat(sprintf("TIME: %f\n", .get.diff.time(t0, "millisecs")))
-
     
-    
-    if (print)
-        cat("engine: ", engine, " method: ", method, "\n")
+    if (print >= 1)
+        cat("+ engine: ", engine, " method: ", method, "\n")
     
     comb <- paste0(engine, "_", method)
     switch(comb,
@@ -118,13 +114,13 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, iter=10000L, eps=1e-6, convcrit
            "r_conips"       = {fitfun <- .r_conips_ggm_ },
            "cpp_ncd"        = {fitfun <- .c_ncd_ggm_ },
            "r_ncd"          = {fitfun <- .r_ncd_ggm_ },
-           ## "r_cal"       = {fitfun <- .r_cal_ggm_  },
+           ## "r_cal"       = {fitfun <- .r_cal_ggm_  },           
            )    
     
     out <- fitfun(S=S, Elist=Elist, Emat=Emat,
-                    nobs=nobs, K=K, iter=iter, eps=eps, convcrit=convcrit, print=print, aux=aux)
-    out <- c(out, list(edges=Emat, nobs=nobs, eps=eps))
+                    nobs=nobs, K=K, iter=iter, eps=eps, convcrit=convcrit, print=print, aux=aux0)
 
+    out <- c(out, list(edges=Emat, nobs=nobs, eps=eps))
     out   <- .finalize_fit(out, S=S, t0=t0, method=method, engine=engine)
     class(out) <- "gips_fit_class"
     out

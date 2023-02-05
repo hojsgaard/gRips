@@ -161,16 +161,8 @@ diff_fun_ <- function(Sigma, K, emc) {
     .Call('_gRips_diff_fun_', PACKAGE = 'gRips', Sigma, K, emc)
 }
 
-update_row_K_ <- function(u, Sigma, K, update_K = FALSE, print = FALSE) {
-    .Call('_gRips_update_row_K_', PACKAGE = 'gRips', u, Sigma, K, update_K, print)
-}
-
-update_row_Sigma_ <- function(u, Sigma, amat, print = FALSE) {
-    .Call('_gRips_update_row_Sigma_', PACKAGE = 'gRips', u, Sigma, amat, print)
-}
-
-outerloop1_ <- function(Sigma, K, Emat, Emat_c, amat, nobs, eps, maxit) {
-    .Call('_gRips_outerloop1_', PACKAGE = 'gRips', Sigma, K, Emat, Emat_c, amat, nobs, eps, maxit)
+outerloop1_ <- function(Sigma, K, Emat, Emat_c, amat, nobs, eps, maxit, print = 0L) {
+    .Call('_gRips_outerloop1_', PACKAGE = 'gRips', Sigma, K, Emat, Emat_c, amat, nobs, eps, maxit, print)
 }
 
 .c_ncd_ggm_ <- function(S, Elist, Emat, nobs, K, iter, eps, convcrit, print, aux) {

@@ -164,31 +164,61 @@ void covips_ggm_update_cc_parm0_(const mat& Scc, const uvec& cc0, mat& K, mat& S
 
 
 void covips_ggm_update_cc_parm_(const mat& Scc, const uvec& cc0, mat& K, mat& Sigma,
-				      const mat& Scc_inv)
+				const mat& Scc_inv,
+				int& nupdates,
+				int approx=0, double eps_approx=0.0, int print=0)
 {
   
   mat Kcc      = K.submat(cc0, cc0);	
   mat Sigmacc  = Sigma.submat(cc0, cc0);
-  
-  mat Kstar  = inv(Sigmacc);
-  
-  mat Kupd   = Scc_inv + Kcc - Kstar;
+  mat Kstar    = inv(Sigmacc);
+  mat Kupd     = Scc_inv + Kcc - Kstar;
   K.submat(cc0, cc0) = Kupd;
   // K.submat(cc0, cc0) = Scc_inv + Kcc - Kstar;
 
   mat Haux   = Kstar - Kstar * Scc * Kstar;  // Was Saux
-  Sigma -= Sigma.cols(cc0) * Haux * Sigma.rows(cc0);
+
+  if (approx == 0){
+    nupdates++;
+    Sigma -= Sigma.cols(cc0) * Haux * Sigma.rows(cc0);
+  } else {
+
+    mat AAt = Sigma.rows(cc0) * Sigma.cols(cc0);
+    mat HAAt = Haux * AAt ;
+    double dd = accu(HAAt * HAAt) / accu(AAt); 
+    
+    if (dd > eps_approx){
+      if (print>=4){
+	Rprintf("++++ updating dd %12.9f", dd);cc0.t().print();
+      }
+      nupdates++;
+      Sigma -= Sigma.cols(cc0) * Haux * Sigma.rows(cc0);     
+    }
+    else
+      {
+	if (print>=4) {
+	  Rprintf("not updating dd %12.9f", dd);cc0.t().print();
+	}
+      }
+  }
   // Sigma -= Sigma.cols(cc0) * (Kstar - Kstar * Scc * Kstar) * Sigma.rows(cc0);
 }
 
 
 void covips_inner_(const mat& S, const List& Elist0,
-		  mat& K, mat& Sigma, List& Scc_list, List& Scc_inv_list)
+		   mat& K, mat& Sigma, List& Scc_list, List& Scc_inv_list,
+		   int& nupdates,
+		   int approx=0, double eps_approx=0.0, int print=0)
 {
+  nupdates=0;
   for (int i=0; i < Elist0.length(); ++i){
     uvec cc0 = Elist0[i];
-    covips_ggm_update_cc_parm_(Scc_list[i], cc0, K, Sigma, Scc_inv_list[i]);
+    covips_ggm_update_cc_parm_(Scc_list[i], cc0, K, Sigma, Scc_inv_list[i],
+			       nupdates=nupdates,
+			       approx=approx, eps_approx=eps_approx,			       
+			       print=print);
   }
+  if (print>=3)Rprintf("+++ nupdates: %d\n", nupdates);
 }
 
 //[[Rcpp::export(.c_covips_ggm_)]] 
@@ -196,6 +226,10 @@ List covips_ggm_(mat& S, List& Elist, umat& Emat, int& nobs,
 	       mat K,       
 	       int& iter, double& eps, int& convcrit, int& print, List& aux){
 
+  // bool smart_K      = aux["smart_K"];
+  int  approx       = aux["approx"];
+  double eps_approx = aux["eps_approx"];
+  
   double logL, logLp, mad, conv_check=9999, conv_ref;
   char buffer[200];
   int itcount  = 0;
@@ -216,9 +250,14 @@ List covips_ggm_(mat& S, List& Elist, umat& Emat, int& nobs,
   
   List Scc_inv_list = Scc_inv_list_(S, Elist0);
   List Scc_list     = Scc_list_(S, Elist0);
-
+  int nupdates=0;
+  
+  
   for (; itcount < iter; ){  
-    covips_inner_(S, Elist0, K, Sigma, Scc_list, Scc_inv_list);
+    covips_inner_(S=S, Elist0=Elist0, K=K, Sigma=Sigma, Scc_list=Scc_list, Scc_inv_list=Scc_inv_list,
+		  nupdates=nupdates,
+		  approx=approx, eps_approx=eps_approx,
+		  print=print);
     ++itcount;      
     
     if (true){ 

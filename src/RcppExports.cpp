@@ -894,38 +894,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// update_row_K_
-mat update_row_K_(int u, mat& Sigma, mat& K, bool update_K, bool print);
-RcppExport SEXP _gRips_update_row_K_(SEXP uSEXP, SEXP SigmaSEXP, SEXP KSEXP, SEXP update_KSEXP, SEXP printSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type u(uSEXP);
-    Rcpp::traits::input_parameter< mat& >::type Sigma(SigmaSEXP);
-    Rcpp::traits::input_parameter< mat& >::type K(KSEXP);
-    Rcpp::traits::input_parameter< bool >::type update_K(update_KSEXP);
-    Rcpp::traits::input_parameter< bool >::type print(printSEXP);
-    rcpp_result_gen = Rcpp::wrap(update_row_K_(u, Sigma, K, update_K, print));
-    return rcpp_result_gen;
-END_RCPP
-}
-// update_row_Sigma_
-mat update_row_Sigma_(int u, mat& Sigma, const mat& amat, bool print);
-RcppExport SEXP _gRips_update_row_Sigma_(SEXP uSEXP, SEXP SigmaSEXP, SEXP amatSEXP, SEXP printSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type u(uSEXP);
-    Rcpp::traits::input_parameter< mat& >::type Sigma(SigmaSEXP);
-    Rcpp::traits::input_parameter< const mat& >::type amat(amatSEXP);
-    Rcpp::traits::input_parameter< bool >::type print(printSEXP);
-    rcpp_result_gen = Rcpp::wrap(update_row_Sigma_(u, Sigma, amat, print));
-    return rcpp_result_gen;
-END_RCPP
-}
 // outerloop1_
-List outerloop1_(mat& Sigma, mat& K, umat& Emat, umat& Emat_c, mat& amat, int& nobs, double& eps, int& maxit);
-RcppExport SEXP _gRips_outerloop1_(SEXP SigmaSEXP, SEXP KSEXP, SEXP EmatSEXP, SEXP Emat_cSEXP, SEXP amatSEXP, SEXP nobsSEXP, SEXP epsSEXP, SEXP maxitSEXP) {
+List outerloop1_(mat& Sigma, mat& K, umat& Emat, umat& Emat_c, mat& amat, int& nobs, double& eps, int& maxit, int print);
+RcppExport SEXP _gRips_outerloop1_(SEXP SigmaSEXP, SEXP KSEXP, SEXP EmatSEXP, SEXP Emat_cSEXP, SEXP amatSEXP, SEXP nobsSEXP, SEXP epsSEXP, SEXP maxitSEXP, SEXP printSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -937,12 +908,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int& >::type nobs(nobsSEXP);
     Rcpp::traits::input_parameter< double& >::type eps(epsSEXP);
     Rcpp::traits::input_parameter< int& >::type maxit(maxitSEXP);
-    rcpp_result_gen = Rcpp::wrap(outerloop1_(Sigma, K, Emat, Emat_c, amat, nobs, eps, maxit));
+    Rcpp::traits::input_parameter< int >::type print(printSEXP);
+    rcpp_result_gen = Rcpp::wrap(outerloop1_(Sigma, K, Emat, Emat_c, amat, nobs, eps, maxit, print));
     return rcpp_result_gen;
 END_RCPP
 }
 // ncd_ggm_
-List ncd_ggm_(mat& S, List& Elist, umat& Emat, int& nobs, mat K, int& iter, double& eps, int& convcrit, int& print, List& aux);
+List ncd_ggm_(mat& S, List& Elist, umat& Emat, int& nobs, mat K, int& iter, double& eps, int& convcrit, int print, List& aux);
 RcppExport SEXP _gRips_ncd_ggm_(SEXP SSEXP, SEXP ElistSEXP, SEXP EmatSEXP, SEXP nobsSEXP, SEXP KSEXP, SEXP iterSEXP, SEXP epsSEXP, SEXP convcritSEXP, SEXP printSEXP, SEXP auxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -955,7 +927,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int& >::type iter(iterSEXP);
     Rcpp::traits::input_parameter< double& >::type eps(epsSEXP);
     Rcpp::traits::input_parameter< int& >::type convcrit(convcritSEXP);
-    Rcpp::traits::input_parameter< int& >::type print(printSEXP);
+    Rcpp::traits::input_parameter< int >::type print(printSEXP);
     Rcpp::traits::input_parameter< List& >::type aux(auxSEXP);
     rcpp_result_gen = Rcpp::wrap(ncd_ggm_(S, Elist, Emat, nobs, K, iter, eps, convcrit, print, aux));
     return rcpp_result_gen;

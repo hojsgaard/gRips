@@ -14,7 +14,6 @@ fit_ggm(
   eps = 1e-06,
   convcrit = 1,
   aux = list(),
-  engine = "cpp",
   method = "covips",
   print = 0
 )
@@ -37,11 +36,11 @@ x p matrix of integers.}
 
 \item{aux}{A list of form name=value.}
 
-\item{engine}{Either \code{"R"} or \code{"cpp"}.}
-
 \item{method}{Either `"ips"` or `"fips"`.}
 
 \item{print}{Should output from fitting be printed?}
+
+\item{engine}{Either \code{"R"} or \code{"cpp"}.}
 }
 \description{
 Fit Gaussian graphical models using various algorithms.
@@ -68,10 +67,10 @@ em <- matrix(c(1,2, 2,3, 1,3, 3,4, 3,5, 4,5), nrow=2)
 
 EPS = 1e-2
 
-cg = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="cpp", method="cov")
-ci = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="cpp", method="con")
-rg = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="R",   method="cov")
-ri = fit_ggm(S, gl, nobs=nobs, eps=EPS, engine="R",   method="con")
+cg = fit_ggm(S, gl, nobs=nobs, eps=EPS, method="cov")
+ci = fit_ggm(S, gl, nobs=nobs, eps=EPS, method="con")
+rg = fit_ggm(S, gl, nobs=nobs, eps=EPS, method="cov", aux=list(engine="R"))
+ri = fit_ggm(S, gl, nobs=nobs, eps=EPS, method="con", aux=list(engine="R"))
 
 K <- solve(S)
 (ci$K - K)  \%>\% abs \%>\% max
@@ -79,10 +78,10 @@ K <- solve(S)
 (ri$K - K)  \%>\% abs \%>\% max
 (rg$K - K)  \%>\% abs \%>\% max
 
-cg = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="cpp", method="cov")
-ci = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="cpp", method="con")
-rg = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="R",   method="cov")
-ri = fit_ggm(S, em, nobs=nobs, eps=EPS, engine="R",   method="con")
+cg = fit_ggm(S, em, nobs=nobs, eps=EPS, method="cov")
+ci = fit_ggm(S, em, nobs=nobs, eps=EPS, method="con")
+rg = fit_ggm(S, em, nobs=nobs, eps=EPS, method="cov", aux=list(engine="R"))
+ri = fit_ggm(S, em, nobs=nobs, eps=EPS, method="con", aux=list(engine="R"))
 
 K <- solve(S)
 (ci$K - K)  \%>\% abs \%>\% max
