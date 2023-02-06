@@ -7,16 +7,19 @@
 \alias{emat_sort}
 \alias{order_rows}
 \alias{emat_saturated_model}
-\alias{emat_loop_model0}
-\alias{emat_random_tree0}
-\alias{emat_loop_model}
+\alias{model_saturated}
 \alias{emat_random_tree}
-\alias{emat_line_model}
-\alias{emat_star_model}
-\alias{emat_grid_model}
+\alias{model_random_tree}
 \alias{emat_rectangular_grid}
+\alias{model_rectangular_grid}
+\alias{emat_line_model}
+\alias{model_line}
+\alias{emat_star_model}
+\alias{model_star}
+\alias{emat_loop_model}
+\alias{model_loop}
 \alias{emat_random_model}
-\alias{emat_cq_random_model}
+\alias{model_random}
 \title{Edge matrix operations}
 \usage{
 emat_compare(emat1, emat2)
@@ -29,34 +32,40 @@ order_rows(emat)
 
 emat_saturated_model(index)
 
-emat_loop_model0(index)
-
-emat_random_tree0(index)
-
-emat_loop_model(index, prob = 0)
+model_saturated(index, type = "emat")
 
 emat_random_tree(index, prob = 0)
 
-emat_line_model(index)
-
-emat_star_model(index)
-
-emat_grid_model(nr.nc)
+model_random_tree(index, prob = 0, type = "emat")
 
 emat_rectangular_grid(dim)
 
+model_rectangular_grid(dim, type = "emat")
+
+emat_line_model(index)
+
+model_line(index, type = "emat")
+
+emat_star_model(index)
+
+model_star(index, type = "emat")
+
+emat_loop_model(index, prob = 0)
+
+model_loop(index, prob = 0, type = "emat")
+
 emat_random_model(index, prob = 0.1)
 
-emat_cq_random_model(index, prob = 0.1)
+model_random(index, prob = 0.1, type = "emat")
 }
 \arguments{
 \item{emat, emat1, emat2}{Edge matrix (a 2 x p matrix)}
 
 \item{index}{A vector of integers}
 
-\item{prob}{Probability of any edge being present.}
+\item{type}{Output type.}
 
-\item{nr.nc}{Vector with number of rows and columns.}
+\item{prob}{Probability of any edge being present.}
 
 \item{dim}{A vector with dimensions}
 }

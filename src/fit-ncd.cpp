@@ -233,7 +233,7 @@ List outerloop1_(mat& Sigma, mat& K, umat& Emat, umat& Emat_c, mat& amat, int& n
   if (print >=2){
     Rprintf("++ Running outerloop1\n");
   }
-  
+    
   double mad, conv_crit;
   // double logLp = ggm_logL_(Sigma, K, nobs);
   
@@ -243,6 +243,7 @@ List outerloop1_(mat& Sigma, mat& K, umat& Emat, umat& Emat_c, mat& amat, int& n
   while (!converged){
     innerloop1_update_Sigma_(Sigma, amat, print);
     mad = mean_abs_diff_non_edge_(Sigma, Sigma_prev, Emat_c); // FIXME for testing
+
     Sigma_prev = Sigma;
     conv_crit = mad;
     // Rprintf("conv_crit %f\n", conv_crit);
@@ -262,28 +263,11 @@ List outerloop2_(mat& Sigma, mat& K, umat& Emat, umat& Emat_c, mat& amat, double
 		 int print=0){
 
   if (print >=2){
-    if (smart_K)
-      Rprintf("++ Running outerloop2 with smart update of K\n");
-    else
-      Rprintf("++ Running outerloop2 with brute force update of K\n");
+    if (smart_K)  Rprintf("++ Running outerloop2 - smart update of K\n");
+    else          Rprintf("++ Running outerloop2 - brute force update of K\n");
   }
 
   double dif2, conv_crit;
-
-  double d = det(Sigma);
-
-  if (d > 0){
-    K = inv_qr_(Sigma);
-    // K = eye(Sigma.n_rows, Sigma.n_cols);
-  } else {
-    stop("NCD algorithm failed");
-  }
-
-  // Rprintf("Sigma, K and KSigma (before updating)\n");
-  // mat KSig = K * Sigma;  Sigma.print(); K.print(); KSig.print();
-
-  // diff = KSig - eye(K.n_rows, K.n_cols);
-  
   bool converged = false;
   int it2 = 0;
   while (!converged){
@@ -317,19 +301,20 @@ List ncd_ggm_(mat& S, List& Elist, umat& Emat, int& nobs,
     Rprintf("+++++ amat:\n"); amat.print();
     Rprintf("+++++ emat_c:\n"); Emat_c.print();
   }
-  
+
   List res1 = outerloop1_(Sigma, K, Emat, Emat_c, amat, nobs, eps, iter, print);
-  // Rprintf("Sigma after outerloop1:\n"); Sigma.print();
-  // Rprintf("outerloop1 iter = %d\n", (int) res1["iter"]);
+
+  uword rnk = arma::rank(Sigma);  
+  if (rnk >= Sigma.n_cols){
+    K = inv_qr_(Sigma);
+  } else {
+    REprintf("Rank of Sigma = %d nobs = %d\n", rnk, nobs);
+    stop("NCD algorithm failed");
+  }
   
   List res2 = outerloop2_(Sigma, K, Emat, Emat_c, amat, eps, iter,
 			  smart_K=smart_K, approx=approx, eps_approx=eps_approx, 
 			  print=print);
-  // Rprintf("Sigma and K after outerloop2 :\n"); Sigma.print(); K.print();
-  // Rprintf("outerloop2 iter = %d\n", (int) res2["iter"]);
-  
-  // Rprintf("Sigma:\n"); Sigma.print();
-  // Rprintf("K:\n"); K.print();
 
   int itcount = (int) res2["iter"] + (int) res1["iter"];
   double conv_check = res2["conv_crit"];
@@ -338,8 +323,15 @@ List ncd_ggm_(mat& S, List& Elist, umat& Emat, int& nobs,
   RETURN_VALUE;
 }
 
+  // Rprintf("Sigma after outerloop1:\n"); Sigma.print();
+  // Rprintf("outerloop1 iter = %d\n", (int) res1["iter"]);
 
 
+  // Rprintf("Sigma and K after outerloop2 :\n"); Sigma.print(); K.print();
+  // Rprintf("outerloop2 iter = %d\n", (int) res2["iter"]);
+  
+  // Rprintf("Sigma:\n"); Sigma.print();
+  // Rprintf("K:\n"); K.print();
 
 
     // replace_uv_(K,  u__,  u__,   k_uu_upd2,  shift=shift); 

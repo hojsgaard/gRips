@@ -8,7 +8,7 @@
 #' @param dim A vector with dimensions
 #' @param index A vector of integers
 #' @param prob Probability of any edge being present.
-#' @param nr.nc Vector with number of rows and columns.
+#' @param type Output type.
 #'
 #' @author Søren Højsgaard, \email{sorenh@@math.aau.dk}
 #' @examples
@@ -66,6 +66,7 @@ order_rows <- function(emat){
     emat
 }
 
+## #################################################################
 
 
 #' @rdname emat-operations
@@ -76,63 +77,55 @@ emat_saturated_model <- function(index){
 
 #' @rdname emat-operations
 #' @export
-emat_loop_model0 <- function(index){
-    if (length(index) == 2) matrix(index)
-    else unname(rbind(index, c(index[-1], index[1])))
+model_saturated <- function(index, type="emat"){
+    type <- match.arg(type, c("emat", "glist", "cliq", "amat"))
+    em <- emat_saturated_model(index)
+    switch(type,
+           "emat" ={em},
+           "glist"={as_emat2glist(em)},
+           "cliq" ={as_emat2cq(em, max(index))},
+           "amat" ={as_emat2amat(em, max(index))}
+           )        
 }
 
 
 
-#' @rdname emat-operations
-#' @export
-emat_random_tree0 <- function(index){
-    ## Based on https://en.wikipedia.org/wiki/Pr%C3%BCfer_sequence
-    N <- max(index)
-    emat <- matrix(0, nrow=2, ncol=N-1)
-    degree <- rep(1, N)
-    S <- sample(N, N-2, replace=TRUE)
-    for (i in S){
-        degree[i] <- degree[i] + 1
-    }
-    
-    k <- 1
-    for (i in S){
-        for (j in seq_len(N)){
-            ## cat(sprintf("i %d j %d\n", i, j))
-            if (degree[j] == 1){
-                edge <- c(j, i)
-                ## cat("edge: \n"); print(edge)
-                emat[, k] <- edge
-                k <- k + 1
-                degree[i] <- degree[i] - 1
-                degree[j] <- degree[j] - 1
-                break
-            }
-        }    
-    }
-    emat[, k] <- which(degree == 1)    
-    emat
-}
 
-
-#' @rdname emat-operations
-#' @export
-emat_loop_model <- function(index, prob=0){
-    if ((prob < 0) || (prob > 1)) stop("prob must be in [0, 1]")
-    if (prob < 1e-6)
-        return(emat_loop_model0(index))
-    
-    emat1 <- emat_loop_model0(index)
-    emat2 <- emat_random_model(index, prob)
-    ee   <- cbind(order_rows(emat1), order_rows(emat2))
-    emat <- t.default(unique(t.default(ee)))
-    emat
-}
-
+## #################################################################
 
 #' @rdname emat-operations
 #' @export
 emat_random_tree <- function(index, prob=0){
+
+    emat_random_tree0 <- function(index){
+        ## Based on https://en.wikipedia.org/wiki/Pr%C3%BCfer_sequence
+        N <- max(index)
+        emat <- matrix(0, nrow=2, ncol=N-1)
+        degree <- rep(1, N)
+        S <- sample(N, N-2, replace=TRUE)
+        for (i in S){
+            degree[i] <- degree[i] + 1
+        }
+        
+        k <- 1
+        for (i in S){
+            for (j in seq_len(N)){
+                ## cat(sprintf("i %d j %d\n", i, j))
+                if (degree[j] == 1){
+                    edge <- c(j, i)
+                    ## cat("edge: \n"); print(edge)
+                    emat[, k] <- edge
+                    k <- k + 1
+                    degree[i] <- degree[i] - 1
+                    degree[j] <- degree[j] - 1
+                    break
+                }
+            }    
+        }
+        emat[, k] <- which(degree == 1)    
+        emat
+    }
+
     if ((prob < 0) || (prob > 1)) stop("prob must be in [0, 1]")
     if (prob < 1e-6)
         return(emat_random_tree0(index))
@@ -144,52 +137,21 @@ emat_random_tree <- function(index, prob=0){
     emat
 }
 
-
-
 #' @rdname emat-operations
 #' @export
-emat_line_model <- function(index){
-  unname(rbind(index[-length(index)], index[-1]))
+model_random_tree <- function(index, prob=0, type="emat"){
+    type <- match.arg(type, c("emat", "glist", "cliq", "amat"))
+    em <- emat_random_tree(index, prob)
+    switch(type,
+           "emat" ={em},
+           "glist"={as_emat2glist(em)},
+           "cliq" ={as_emat2cq(em, max(index))},
+           "amat" ={as_emat2amat(em, max(index))}
+           )        
 }
 
-#' @rdname emat-operations
-#' @export
-emat_star_model <- function(index){
-    unname(rbind(index[1], index[-1]))
-}
 
-#' @rdname emat-operations
-#' @export
-emat_grid_model <- function(nr.nc){
-    if (length(nr.nc==1))
-        nr.nc <- rep(nr.nc, 2)
-    
-    nr <- nr.nc[1]
-    nc <- nr.nc[2]
-    
-    ## first row of edges
-    rr <- rbind(
-        1:(nc-1),
-        2:nc
-    )
-    
-    ## first column of edges
-    bb <- 0:(nr-1)*nc + 1
-    cc <- rbind(
-        bb[1:(nr-1)],
-        bb[2:nr]
-    )
-
-    . <- NULL
-    ## all rows of edges
-    roe <- lapply((0:(nr-1))*nc, function(r) rr + r) %>% do.call(cbind, .)
-    ## all columns of edges
-    coe <- lapply((0:(nc-1)), function(c) cc + c) %>% do.call(cbind, .)
-    
-    grid <- cbind(roe, coe)
-    grid
-}
-
+## #################################################################
 
 #' @rdname emat-operations
 #' @export
@@ -214,8 +176,7 @@ emat_rectangular_grid <- function(dim){
         bb[1:(nr-1)],
         bb[2:nr]
     )
-    
-    
+        
     ## all rows of edges
     roe <- lapply((0:(nr-1))*nc, function(r) rr + r)  |>  do.call(cbind, args=_)
     ## all columns of edges
@@ -225,6 +186,101 @@ emat_rectangular_grid <- function(dim){
     out
 }
 
+#' @rdname emat-operations
+#' @export
+model_rectangular_grid <- function(dim, type="emat"){
+    type <- match.arg(type, c("emat", "glist", "cliq", "amat"))
+    em <- emat_rectangular_grid(dim)
+    switch(type,
+           "emat" ={em},
+           "glist"={as_emat2glist(em)},
+           "cliq" ={as_emat2cq(em, prod(dim))},
+           "amat" ={as_emat2amat(em, prod(dim))}
+           )        
+
+}
+
+## #################################################################
+
+#' @rdname emat-operations
+#' @export
+emat_line_model <- function(index){
+  unname(rbind(index[-length(index)], index[-1]))
+}
+
+#' @rdname emat-operations
+#' @export
+model_line <- function(index, type="emat"){
+    type <- match.arg(type, c("emat", "glist", "cliq", "amat"))
+    em <- emat_line_model(index)
+    switch(type,
+           "emat" ={em},
+           "glist"={as_emat2glist(em)},
+           "cliq" ={as_emat2cq(em, max(index))},
+           "amat" ={as_emat2amat(em, max(index))}
+           )        
+}
+
+
+## #################################################################
+
+#' @rdname emat-operations
+#' @export
+emat_star_model <- function(index){
+    unname(rbind(index[1], index[-1]))
+}
+
+#' @rdname emat-operations
+#' @export
+model_star <- function(index, type="emat"){
+    type <- match.arg(type, c("emat", "glist", "cliq", "amat"))
+    em <- emat_star_model(index)
+    switch(type,
+           "emat" ={em},
+           "glist"={as_emat2glist(em)},
+           "cliq" ={as_emat2cq(em, max(index))},
+           "amat" ={as_emat2amat(em, max(index))}
+           )        
+}
+
+
+## #################################################################
+
+#' @rdname emat-operations
+#' @export
+emat_loop_model <- function(index, prob=0){
+
+    emat_loop_model0 <- function(index){
+        if (length(index) == 2) matrix(index)
+        else unname(rbind(index, c(index[-1], index[1])))
+    }
+    
+    if ((prob < 0) || (prob > 1)) stop("prob must be in [0, 1]")
+    if (prob < 1e-6)
+        return(emat_loop_model0(index))
+    
+    emat1 <- emat_loop_model0(index)
+    emat2 <- emat_random_model(index, prob)
+    ee   <- cbind(order_rows(emat1), order_rows(emat2))
+    emat <- t.default(unique(t.default(ee)))
+    emat
+}
+
+#' @rdname emat-operations
+#' @export
+model_loop <- function(index, prob=0, type="emat"){
+    type <- match.arg(type, c("emat", "glist", "cliq", "amat"))
+    em <- emat_loop_model(index, prob)
+    switch(type,
+           "emat" ={em},
+           "glist"={as_emat2glist(em)},
+           "cliq" ={as_emat2cq(em, max(index))},
+           "amat" ={as_emat2amat(em, max(index))}
+           )
+}
+
+
+## #################################################################
 
 #' @rdname emat-operations
 #' @export
@@ -237,19 +293,57 @@ emat_random_model <- function(index, prob=0.1){
 
 #' @rdname emat-operations
 #' @export
-emat_cq_random_model <- function(index, prob=0.1){
-    g     <- igraph::erdos.renyi.game(max(index), prob)
-    emat  <- t(igraph::get.edgelist(g))
-    cq <- as_emat2cq(emat, max(index))
-    list(emat=emat, cq=cq)
+model_random <- function(index, prob=0.1, type="emat"){
+    type <- match.arg(type, c("emat", "glist", "cliq", "amat"))
+    em <- emat_random_model(index, prob)
+    switch(type,
+           "emat" ={em},
+           "glist"={as_emat2glist(em)},
+           "cliq" ={as_emat2cq(em, max(index))},
+           "amat" ={as_emat2amat(em, max(index))}
+           )    
 }
+
+
+
 
 ## #' @rdname emat-operations
 ## #' @export
-## emat_loop_model2 <- function(index, prob=0){
-    ## eml <- emat_loop_model(index)
-    ## ems <- emat_saturated_model(index)
-    ## emc <- emat_complement(eml, ems)
-    ## j <- sample(ncol(emc), ncol(emc) * prob)
-    ## cbind(eml, emc[,j, drop=FALSE])
+## emat_grid_model <- function(nr.nc){
+##     if (length(nr.nc==1))
+##         nr.nc <- rep(nr.nc, 2)
+    
+##     nr <- nr.nc[1]
+##     nc <- nr.nc[2]
+    
+##     ## first row of edges
+##     rr <- rbind(
+##         1:(nc-1),
+##         2:nc
+##     )
+    
+##     ## first column of edges
+##     bb <- 0:(nr-1)*nc + 1
+##     cc <- rbind(
+##         bb[1:(nr-1)],
+##         bb[2:nr]
+##     )
+
+##     . <- NULL
+##     ## all rows of edges
+##     roe <- lapply((0:(nr-1))*nc, function(r) rr + r) %>% do.call(cbind, .)
+##     ## all columns of edges
+##     coe <- lapply((0:(nc-1)), function(c) cc + c) %>% do.call(cbind, .)
+    
+##     grid <- cbind(roe, coe)
+##     grid
+## }
+
+## ' @rdname emat-operations
+## ' @export
+## emat_cq_random_model <- function(index, prob=0.1){
+    ## g     <- igraph::erdos.renyi.game(max(index), prob)
+    ## emat  <- t(igraph::get.edgelist(g))
+    ## cq <- as_emat2cq(emat, max(index))
+    ## list(emat=emat, cq=cq)
 ## }

@@ -12,7 +12,6 @@
 #' @param eps Convergence criterion.
 #' @param convcrit Convergence criterions. See section `details`.
 #' @param aux A list of form name=value.
-#' @param engine Either \code{"R"} or \code{"cpp"}.
 #' @param method Either `"ips"` or `"fips"`.
 #' @param print Should output from fitting be printed?
 #' 

@@ -39,8 +39,6 @@ x p matrix of integers.}
 \item{method}{Either `"ips"` or `"fips"`.}
 
 \item{print}{Should output from fitting be printed?}
-
-\item{engine}{Either \code{"R"} or \code{"cpp"}.}
 }
 \description{
 Fit Gaussian graphical models using various algorithms.
