@@ -24,13 +24,14 @@ double get_conv_ref(const List& aux);
 // Macros common to FIPS and IPS
 // -------------------------------------------------------------
 
-#define RETURN_VALUE				\
-  return List::create(				\
-    _["K"]     = K,				\
-    _["Sigma"] = Sigma,				\
-    _["logL"]  = logL,				\
-    _["iter"]  = itcount,			\
-    _["conv_check"] = conv_check);		\
+#define RETURN_VALUE					\
+  return List::create(					\
+  _["K"]     = K,					\
+  _["Sigma"] = Sigma,					\
+  _["logL"]  = logL,					\
+  _["iter"]  = itcount,					\
+  _["gap"]   = gap,					\
+  _["conv_check"] = conv_check);			\
 
 
 #define INIT_CONVERGENCE_CHECK			\
@@ -59,7 +60,7 @@ double get_conv_ref(const List& aux);
 #define PRINT_CONV_CHECK3						\
   if ((print > 0) && ((itcount % 1) == 0)) {				\
     sprintf(buffer, "itcount=%4i, logL=%f, logLp=%f, nparm=%4f, conv_ref=%f, conv_check=%f\n", \
-	    itcount, logL, logLp, nparm, conv_ref, conv_check);	\
+	    itcount, logL, logLp, nparm, conv_ref, conv_check);		\
     Rcout << buffer;							\
   }									\
 
@@ -68,7 +69,6 @@ double get_conv_ref(const List& aux);
   logL  = ggm_logL_(S, K, nobs);		\
   conv_check = fabs(logL - logLp)  / nparm;	\
   logLp = logL;					\
-
 
 #define CONV_CHECK_LOGL_DIFF_REF			\
   logL  = ggm_logL_(S, K, nobs);			\
