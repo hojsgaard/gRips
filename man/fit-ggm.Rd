@@ -76,17 +76,6 @@ K <- solve(S)
 (ri$K - K)  \%>\% abs \%>\% max
 (rg$K - K)  \%>\% abs \%>\% max
 
-cg = fit_ggm(S, em, nobs=nobs, eps=EPS, method="cov")
-ci = fit_ggm(S, em, nobs=nobs, eps=EPS, method="con")
-rg = fit_ggm(S, em, nobs=nobs, eps=EPS, method="cov", aux=list(engine="R"))
-ri = fit_ggm(S, em, nobs=nobs, eps=EPS, method="con", aux=list(engine="R"))
-
-K <- solve(S)
-(ci$K - K)  \%>\% abs \%>\% max
-(cg$K - K)  \%>\% abs \%>\% max
-(ri$K - K)  \%>\% abs \%>\% max
-(rg$K - K)  \%>\% abs \%>\% max
-
 }
 \author{
 Søren Højsgaard, \email{sorenh@math.aau.dk}

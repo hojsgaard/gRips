@@ -93,6 +93,17 @@ does_fit <- function(Sigma, S, emat, eps=1e-4){
 }
 
 
+#' matchKsigma
+#'
+#' @param object A gips_fit_class object
+matchKSigma <- function(object){
+    if (!inherits(object, "gips_fit_class"))
+        stop("'object' is not a gips_git_class object")
+    sum(abs((object$K %*% object$Sigma) - diag(1, nrow(object$K))))
+}
+
+
+
 #' Parameter equality
 #'
 #' @param p2a,p2b Parameter lists.
@@ -173,9 +184,8 @@ as_emat_complement <- function(emat, nvar){ # Those edges NOT in emat
 
 #' @export
 #' @rdname utilities
-as_emat2amat <-function(emat, d=-1){
+as_emat2amat <-function(emat, d){
     vn <- sort(unique(c(emat)))
-    if (d == -1) d=length(vn)
     ##print(vn)
     M <- matrix(0, nrow=d, ncol=d)
     for (j in 1:ncol(emat)){
@@ -232,17 +242,23 @@ as_glist2emat <- function(glist){
 
 #' @export
 #' @rdname utilities
-as_emat2graph  <- function(emat){
-    as(as_emat2amat(emat), "graphNEL")
+as_glist2graph <- function(glist, d){
+    as_emat2graph(as_glist2emat(glist), d=d)
 }
 
 #' @export
 #' @rdname utilities
-as_amat2edges <- function(amat, eps=1e-4){
-    amat[lower.tri(amat, diag=TRUE)] <- 0
-    e <- which(abs(amat) > eps, arr.ind = T)
-    t.default(e)
+as_glist2igraph <- function(glist, d){
+    g <- as_glist2graph(glist, d=d)
+    as(g, "igraph")
 }
+
+#' @export
+#' @rdname utilities
+as_emat2graph  <- function(emat, d){
+    as(as_emat2amat(emat, d=d), "graphNEL")
+}
+
 
 
 #' @export
@@ -280,10 +296,6 @@ as_K2amat <- function(K, eps=1e-4){
 
 #' @export
 #' @rdname utilities
-as_K2edges <- as_amat2edges
-
-#' @export
-#' @rdname utilities
 as_K2graph <- function(K){
     as(as_K2amat(zapsmall(K)), "graphNEL")
 }
@@ -304,38 +316,6 @@ as_sparse <- function(K){
             em  <- matrix(nrow=2, ncol=0)
     em
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -389,10 +369,10 @@ as_sparse <- function(K){
 }
 
 
-.getDiag <- function(S){
-    r <- nrow(S)
-    S[1 + (r+1) * (0:(r-1))]
-}
+## .getDiag <- function(S){
+    ## r <- nrow(S)
+    ## S[1 + (r+1) * (0:(r-1))]
+## }
 
 #' @export
 #' @rdname utilities
@@ -440,12 +420,13 @@ BIC.gips_fit_class <- function(object, ...){
 #' @export
 #' @rdname utilities
 print.gips_fit_class <- function(x, ...){
-  ## cat("Method: ", x$method, "\n")
+    ## cat("Method: ", x$method, "\n")
     ## xx <- c(method=x$method, eng=x$engine, x$details)
-  ## print(as.data.frame(x$details))
+    ## print(as.data.frame(x$details))
     xx <- x$details
+    xx$engine <- NULL
     print(as.data.frame(xx))
-  invisible(x)
+    invisible(x)
 }
 
 #' @export
@@ -461,23 +442,6 @@ glance.gips_fit_class <- function(x, ...){
 }
 
 
-
-
-
-
-## logLik.gips_fit_class <- function(object, ...){
-##     n <- unname(object$details["n"])
-##     if (is.null(n))
-##         stop("'n' not given; can not compute log L\n")
-##     out <- n * (log(det(object$K)) - sum(object$K * object$S)) / 2
-##     di <- sum((abs(object$K) > 1e-12)[upper.tri(object$K, diag=T)])
-
-##     attr(out, "nobs") = n
-##     attr(out, "nparm") = di
-    
-##     class(out) <- "logLik"
-##     out
-## }
 
 
 

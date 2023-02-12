@@ -25,8 +25,8 @@
 #' 
 #' @importMethodsFrom Rgraphviz plot
 #'
-#' @importFrom igraph erdos.renyi.game get.edgelist
+#' @importFrom igraph erdos.renyi.game get.edgelist coreness
+#'
+#' @importFrom glue glue
 #' 
 NULL
-
-## .dumfunction_afterimportFrom <- function(){}

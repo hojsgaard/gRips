@@ -49,17 +49,6 @@
 #' (ri$K - K)  %>% abs %>% max
 #' (rg$K - K)  %>% abs %>% max
 #'
-#' cg = fit_ggm(S, em, nobs=nobs, eps=EPS, method="cov")
-#' ci = fit_ggm(S, em, nobs=nobs, eps=EPS, method="con")
-#' rg = fit_ggm(S, em, nobs=nobs, eps=EPS, method="cov", aux=list(engine="R"))
-#' ri = fit_ggm(S, em, nobs=nobs, eps=EPS, method="con", aux=list(engine="R"))
-#'
-#' K <- solve(S)
-#' (ci$K - K)  %>% abs %>% max
-#' (cg$K - K)  %>% abs %>% max
-#' (ri$K - K)  %>% abs %>% max
-#' (rg$K - K)  %>% abs %>% max
-#'
 NULL
 
 
@@ -68,39 +57,55 @@ NULL
 fit_ggm <- function(S, edges=NULL, nobs, K=NULL, iter=10000L, eps=1e-6, convcrit=1, aux=list(),
                     method="covips", print=0){
 
+    t0 <- .get.time()
+    method <- match.arg(tolower(method),
+                        c("covips", "conips", "ncd", "cal", "glasso"))
+
     if (inherits(S, "data.frame")){
         nobs = nrow(S)
         S <- cov2cor(cov(S))      
     }
-    t0 <- .get.time()
 
-    if (is.null(K)) {
-        K <- .initK(S)
-    }
     
     edges <- parse_edges(edges, nrow(S))
     Elist <- .form2glist(edges)
     Emat <- as_elist2emat(Elist)
-    
+ 
+    max_coreness <- max(coreness(as_glist2igraph(edges, nrow(S))))
+     
+    if (max_coreness > (nobs-1)){
+        stop(glue("Max coreness ({max_coreness}) is larger than nobs ({nobs}); mle may not exist.\n"))
+    }
+        
     ## cat("edges (in): \n"); print(edges)
     ## cat("edges (tmp): \n"); print(edges)    
     ## cat("edges (to use): \n"); print(edges) ## A list
     ## Emat <- list2Emat_(edges, shift=0)
 
-    aux0 <- list(smart_K    = TRUE,
-                 approx     = 0,
-                 eps_approx = 1e-4,
+    
+    smart <- if (identical(method, "ncd"))
+                 0   # update of glasso type (fast)
+             else 1  # update as in paper
+
+    aux0 <- list(smart      = smart,  
+                 eps_smart  = 1e-4,
                  engine     = "cpp",
                  amat       = as_emat2amat(Emat, nrow(S)) ## FIXME: DO this only for ncd?
                  )
 
+    engine <- match.arg(tolower(aux0$engine),
+                        c("cpp", "r"))
+
     aux0[names(aux)] <- aux    
-    engine <- match.arg(tolower(aux0$engine), c("cpp", "r"))
-    method <- match.arg(tolower(method), c("covips", "conips", "ncd", "cal", "glasso"))
-    
-    if (identical(method, "ncd")){
-        K <- diag(1, nrow(S))
+
+    if (is.null(K)) {
+        if (identical(method, "ncd")){
+            K <- diag(1, nrow(S))
+        } else {
+            K <- .initK(S)            
+        }
     }
+
     
     if (print >= 1)
         cat("+ engine: ", engine, " method: ", method, "\n")
@@ -118,9 +123,11 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, iter=10000L, eps=1e-6, convcrit
     
     out <- fitfun(S=S, Elist=Elist, Emat=Emat,
                     nobs=nobs, K=K, iter=iter, eps=eps, convcrit=convcrit, print=print, aux=aux0)
-
-    out <- c(out, list(edges=Emat, nobs=nobs, eps=eps))
+    
+    out <- c(out, list(edges=Emat, nobs=nobs, eps=eps, max_coreness=max_coreness))
+    ## cat("Names:\n"); print(names(out))
     out   <- .finalize_fit(out, S=S, t0=t0, method=method, engine=engine)
+    ## cat("Names:\n"); print(names(out))
     class(out) <- "gips_fit_class"
     out
 }
@@ -205,7 +212,10 @@ parse_edges <- function(edges, nvar){
         logL   = out$logL,
         ## For cov / con the lines below give the same, but for glasso there is no conv_check variable.
         ## made   = mean_abs_diff_on_Emat_(out$Sigma, S, out$edges, 1)
-        conv_check  = out$conv_check
+        conv_check  = out$conv_check,
+        dgap   = out$gap,
+        ncore  = out$max_coreness
+       
     )
     out$time <- out$iter <- out$eps <- NULL
     out$dim  <- out$diff <- NULL

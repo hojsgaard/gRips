@@ -105,8 +105,6 @@ void update_row_Sigma_(int u, mat& Sigma, const mat& amat, int print=0){
     mat AA = Sigma.submat(ne_u_, ne_u_);
     vec bb = s12.rows(ne_u_);
     // vec tt = solve(AA, bb);
-
-    // mat AAi = pinv(AA);
     vec tt = pinv(AA) * bb;
 
     w = Sigma.cols(ne_u_) * tt;

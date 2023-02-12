@@ -9,13 +9,13 @@
 \alias{as_emat2elist}
 \alias{as_elist2emat}
 \alias{as_glist2emat}
+\alias{as_glist2graph}
+\alias{as_glist2igraph}
 \alias{as_emat2graph}
-\alias{as_amat2edges}
 \alias{as_amat2emat}
 \alias{as_emat2glist}
 \alias{as_glist2out_edges}
 \alias{as_K2amat}
-\alias{as_K2edges}
 \alias{as_K2graph}
 \alias{as_sparse}
 \alias{logLik.gips_fit_class}
@@ -32,7 +32,7 @@ as_emat2cq(emat, nvar = NULL)
 
 as_emat_complement(emat, nvar)
 
-as_emat2amat(emat, d = -1)
+as_emat2amat(emat, d)
 
 as_emat2elist(emat)
 
@@ -40,9 +40,11 @@ as_elist2emat(elist)
 
 as_glist2emat(glist)
 
-as_emat2graph(emat)
+as_glist2graph(glist, d)
 
-as_amat2edges(amat, eps = 1e-04)
+as_glist2igraph(glist, d)
+
+as_emat2graph(emat, d)
 
 as_amat2emat(amat, eps = 1e-04)
 
@@ -51,8 +53,6 @@ as_emat2glist(emat)
 as_glist2out_edges(glist)
 
 as_K2amat(K, eps = 1e-04)
-
-as_K2edges(amat, eps = 1e-04)
 
 as_K2graph(K)
 
