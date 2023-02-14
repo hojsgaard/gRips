@@ -16,14 +16,12 @@ status](https://github.com/r-cas/caracas/workflows/R-CMD-check/badge.svg)](https
 [![codecov.io](https://codecov.io/gh/r-cas/caracas/branch/master/graphs/badge.svg)](https://app.codecov.io/gh/r-cas/caracas?branch=master)
 <!-- badges: end -->
 
+## Online documentation
+
+See <https://hojsgaard.github.io/gRips/>.
+
 ## Installation
 
 ## Development site
 
 See <https://github.com/hojsgaard/gRips>.
-
-## Online documentation
-
-See <https://hojsgaard.github.io/gRips/>.
-
-See <https://github.com/hojsgaard/gRips/>.
