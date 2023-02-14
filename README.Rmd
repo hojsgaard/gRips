@@ -16,10 +16,6 @@ knitr::opts_chunk$set(
 
 Author: Søren Højsgaard,  Steffen Lauritzen
 
-Further info at:
-
-https://github.com/hojsgaard/gRips
-
 <!-- badges: start -->
 [![R build status](https://github.com/r-cas/caracas/workflows/R-CMD-check/badge.svg)](https://github.com/r-cas/caracas/actions) 
 [![codecov.io](https://codecov.io/gh/r-cas/caracas/branch/master/graphs/badge.svg)](https://app.codecov.io/gh/r-cas/caracas?branch=master)
