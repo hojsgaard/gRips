@@ -3,9 +3,12 @@
 \name{utes}
 \alias{utes}
 \alias{does_fit}
+\alias{matchKSigma}
 \title{Utes}
 \usage{
 does_fit(Sigma, S, emat, eps = 1e-04)
+
+matchKSigma(object)
 }
 \arguments{
 \item{Sigma, S}{Symmetrix positive definite matrices}
@@ -13,6 +16,8 @@ does_fit(Sigma, S, emat, eps = 1e-04)
 \item{emat}{Edge matrix (2 x p)}
 
 \item{eps}{Threshold}
+
+\item{object}{A gips_fit_class object}
 }
 \description{
 Utes

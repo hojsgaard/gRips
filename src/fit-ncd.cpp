@@ -49,6 +49,13 @@ mat inv_qr_(mat& X){
   return(out);
 }
 
+
+double duality_gap_(mat& S, mat& K, int nobs){
+  mat KS = K * S;
+  double out = nobs * (accu(KS) - log(det(KS)) - S.n_rows) / 2; // FIXME Fragile
+  return out;
+}
+
 // ### CALLING R FUNCTIONS
 
 
@@ -87,36 +94,40 @@ double diff_fun_(mat& Sigma, mat& K, umat emc){
 
 // ### 
 
-void update_row_Sigma_(int u, mat& Sigma, const mat& amat, int print=0){
+void update_row_Sigma_(int u, mat& Sigma, const mat& amat, int nobs, int print=0){
 
+
+  // FIXME Need not be computed each time...
   uvec u_    = {(unsigned int) u};      // convert int to uvec
   uvec ne_u_ = find(amat.rows(u_) > 0); // Returns column vector
-  if (print >= 4){
-    Rprintf("++++ Updating Sigma for u=%i\n", u);
-  }
-  // Rcout << "ne_u_: " <<  "\n"; ne_u_.t().print();
-  
-  vec w(Sigma.n_cols, fill::zeros);  
+  int deg_u  = accu(amat.rows(u_));
 
+  if (print >= 4){
+    Rprintf("++++ Updating Sigma for u=%i with degree %i\n", u, deg_u);
+  }
+
+  vec w(Sigma.n_cols, fill::zeros);  
+  vec tt;
+  
   if (ne_u_.n_rows > 0){  
     mat s12 = Sigma.cols(u_);
-    // vec tt = solve(Sigma.submat(ne_u_, ne_u_), s12.rows(ne_u_)); 
-
     mat AA = Sigma.submat(ne_u_, ne_u_);
     vec bb = s12.rows(ne_u_);
-    // vec tt = solve(AA, bb);
-    vec tt = pinv(AA) * bb;
 
+    if (deg_u > nobs){
+      tt = pinv(AA) * bb;       // Rprintf("using pinv\n");
+    } else {
+      tt = solve(AA, bb);       // Rprintf("using solve\n");      
+    }
+      
     w = Sigma.cols(ne_u_) * tt;
   }
 
   // Rprintf("inserting:\n");
-  double sigma_uu = Sigma(u, u); // Store this because element is overwritten below
-    
+  double sigma_uu = Sigma(u, u); // Store this because element is overwritten below    
   Sigma.col(u) = w;
   Sigma.row(u) = w.t();
-  Sigma(u, u)  = sigma_uu;        // Restore element
-  // Rprintf("inserting - done:\n");
+  Sigma(u, u)  = sigma_uu;       // Restore element
 }
 
 
@@ -157,8 +168,8 @@ void update_row_K_(int u, mat& Sigma, mat& K, int smart=0, double eps_smart=0.0,
     K.submat(uc_, u_) = -K_uc_u_upd;
     K.submat(u_, uc_) = trans(-K_uc_u_upd);
 
-
-    mat new2, old2;
+    mat new2, old2, RR3, dd;
+    double ee;
       
     if ((smart == 1) || (smart == 2)){
       new2 = K_uc_u_upd * (trans(K_uc_u_upd) / as_scalar(k_uu_upd2));
@@ -167,8 +178,6 @@ void update_row_K_(int u, mat& Sigma, mat& K, int smart=0, double eps_smart=0.0,
       // Rprintf("old2:\n"); old2.print();
     }
 
-    mat RR3, dd;
-    double ee;
     switch (smart) {
     case 0: // The glasso type update
       break;
@@ -192,74 +201,38 @@ void update_row_K_(int u, mat& Sigma, mat& K, int smart=0, double eps_smart=0.0,
       Rcout << "Invalid value of smart\n";
     }    
   } 
-  // Rprintf("K after brute force update:\n"); K.print();
 }
 
 
 
+void innerloop2_update_Sigma_K_(mat& Sigma, mat& K, mat& amat, int nobs,
+				int smart=0, double eps_smart=0.0, int print=0){
+  if (print >= 3){
+    Rprintf("+++ Running innerloop2_update_Sigma_K\n");
+   }
 
+  for (size_t u=0; u<amat.n_rows; u++){
+    update_row_Sigma_(u, Sigma, amat, nobs, print);
+    update_row_K_    (u, Sigma, K, smart=smart, eps_smart=eps_smart, print=print);
+  }
+}
 
-void innerloop1_update_Sigma_(mat& Sigma, mat& amat, int print=0){
+void innerloop1_update_Sigma_(mat& Sigma, mat& amat, int nobs, int print=0){
 
   if (print >= 3){
     Rprintf("+++ Running innerloop1_update_Sigma\n");
    }
   
   for (size_t u=0; u<amat.n_rows; u++){
-    update_row_Sigma_(u, Sigma, amat, print);
+    update_row_Sigma_(u, Sigma, amat, nobs, print);
   }
-}
-
-
-void innerloop2_update_Sigma_K_(mat& Sigma, mat& K, mat& amat, int smart=0, double eps_smart=0.0, int print=0){
-  if (print >= 3){
-    Rprintf("+++ Running innerloop2_update_Sigma_K\n");
-   }
-
-  // Rprintf("innerloop2_update_Sigma_K_\n");
-  for (size_t u=0; u<amat.n_rows; u++){
-    update_row_Sigma_(u, Sigma, amat, print);
-    update_row_K_    (u, Sigma, K, smart=smart, eps_smart=eps_smart, print=print);
-  }
-}
-
-
-//[[Rcpp::export]]
-List outerloop1_(mat& Sigma, mat& K, umat& Emat, umat& Emat_c, mat& amat, int& nobs, double& eps, int& maxit, int print=0){
-  int it1 = 0;
-  bool converged = false;
-
-  if (print >=2){
-    Rprintf("++ Running outerloop1\n");
-  }
-    
-  double mad, conv_crit;
-  // double logLp = ggm_logL_(Sigma, K, nobs);
-  
-  mat Sigma_prev = diagmat(Sigma.diag());
-  // Rprintf("Sigma_prev:\n"); Sigma_prev.print();
-
-  while (!converged){
-    innerloop1_update_Sigma_(Sigma, amat, print);
-    mad = mean_abs_diff_non_edge_(Sigma, Sigma_prev, Emat_c); // FIXME for testing
-
-    Sigma_prev = Sigma;
-    conv_crit = mad;
-    // Rprintf("conv_crit %f\n", conv_crit);
-      
-    it1++;
-    if ((it1 == maxit) || (conv_crit < eps)){ break;}
-  }
-
-  int itcount= it1;
-  return List::create(_["iter"]  = itcount, _["mad"]=mad); //FIXME mad should be conv_crit		
 }
 
 
 
 List outerloop2_(mat& Sigma, mat& K, umat& Emat, umat& Emat_c, mat& amat, double& eps, int& maxit,
-		 int smart=0, double eps_smart=0.0,
-		 int print=0){
+		 int rank_Sigma,
+		 int smart=0, double eps_smart=0.0, int print=0){
 
   if (print >=2){
     if (smart==3) Rprintf("++ Running outerloop2 - brute force update of K\n");
@@ -274,18 +247,44 @@ List outerloop2_(mat& Sigma, mat& K, umat& Emat, umat& Emat_c, mat& amat, double
     dif2 = diff_fun_(Sigma, K, Emat_c); // FIXME for testing
     it2++;
     conv_crit = dif2;
+    if (smart == 0) {
+      // Rprintf("smart=0; exiting..\n");
+      break;}
     if ((it2 == maxit) || (conv_crit < eps)){ break;}
   }
-
-  int itcount= it2;
-  return List::create(_["iter"] = itcount, _["conv_crit"] = conv_crit);		
-
+  return List::create(_["iter"] = it2, _["conv_crit"] = conv_crit);		
 }
 
-double duality_gap_(mat& S, mat& K, int nobs){
-  mat KS = K * S;
-  double out = nobs * (accu(KS) - log(det(KS)) - S.n_rows) / 2; // FIXME Fragile
-  return out;
+
+
+//[[Rcpp::export]]
+List outerloop1_(mat& Sigma, mat& K, umat& Emat, umat& Emat_c, mat& amat,
+		 int& nobs, double& eps, int& maxit, int print=0){
+  int it1 = 0;
+  bool converged = false;
+
+  if (print >=2){
+    Rprintf("++ Running outerloop1\n");
+  }
+    
+  double mad, conv_crit;
+  mat Sigma_prev = diagmat(Sigma.diag());
+  
+  // double logLp = ggm_logL_(Sigma, K, nobs);
+  // Rprintf("Sigma_prev:\n"); Sigma_prev.print();
+
+  while (!converged){
+    innerloop1_update_Sigma_(Sigma, amat, nobs, print);
+    mad = mean_abs_diff_non_edge_(Sigma, Sigma_prev, Emat_c); // FIXME for testing
+
+    Sigma_prev = Sigma;
+    conv_crit = mad;
+
+    it1++;
+    if ((it1 == maxit) || (conv_crit < eps)){ break;}
+  }
+
+  return List::create(_["iter"]  = it1, _["mad"]=mad); //FIXME mad should be conv_crit		
 }
 
 
@@ -298,29 +297,24 @@ List ncd_ggm_(mat& S, List& Elist, umat& Emat, int& nobs,
   int  smart       = aux["smart"];
   double eps_smart = aux["eps_smart"];
   
-  mat Sigma  = S;
-  mat amat   = as_emat2amat_(Emat-1, S.n_rows);
   umat Emat_c = as_emat_complement_(Emat - 1, S.n_rows);
+  mat amat    = as_emat2amat_(Emat-1, S.n_rows);
+  mat Sigma   = S;
 
-  if (print >= 5){
-    Rprintf("+++++ emat:\n"); Emat.print();
-    Rprintf("+++++ amat:\n"); amat.print();
-    Rprintf("+++++ emat_c:\n"); Emat_c.print();
-  }
 
   List res1 = outerloop1_(Sigma, K, Emat, Emat_c, amat, nobs, eps, iter, print);
 
-  uword rnk = arma::rank(Sigma);  
-  if (rnk >= Sigma.n_cols){
+  uword rank_Sigma = arma::rank(Sigma);  
+  if (rank_Sigma >= Sigma.n_cols){
     K = inv_qr_(Sigma);
   } else {
-    REprintf("Rank of Sigma = %d nobs = %d\n", rnk, nobs);
-    stop("NCD algorithm failed");
+    REprintf("Rank of Sigma = %d nobs = %d\n", rank_Sigma, nobs);
+    stop("NCD algorithm not convergent\n");
   }
   
   List res2 = outerloop2_(Sigma, K, Emat, Emat_c, amat, eps, iter,
-			  smart=smart, eps_smart=eps_smart, 
-			  print=print);
+			  rank_Sigma=rank_Sigma,
+			  smart=smart, eps_smart=eps_smart, print=print);
 
   double gap = duality_gap_(Sigma, K, nobs);
   int itcount = (int) res2["iter"] + (int) res1["iter"];
@@ -334,6 +328,12 @@ List ncd_ggm_(mat& S, List& Elist, umat& Emat, int& nobs,
 
 
 
+
+  // if (print >= 5){
+  //   Rprintf("+++++ emat:\n"); Emat.print();
+  //   Rprintf("+++++ amat:\n"); amat.print();
+  //   Rprintf("+++++ emat_c:\n"); Emat_c.print();
+  // }
 
 
 

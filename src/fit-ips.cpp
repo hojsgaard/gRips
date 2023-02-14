@@ -218,7 +218,7 @@ void covips_inner_(const mat& S, const List& Elist0,
 			       smart=smart, eps_smart=eps_smart,			       
 			       print=print);
   }
-  if (print>=3)Rprintf("+++ nupdates: %d\n", nupdates);
+  // if (print>=3)Rprintf("+++ nupdates: %d\n", nupdates);
 }
 
 //[[Rcpp::export(.c_covips_ggm_)]] 

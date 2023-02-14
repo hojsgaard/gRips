@@ -93,15 +93,20 @@ does_fit <- function(Sigma, S, emat, eps=1e-4){
 }
 
 
-#' matchKsigma
+#' matchKSigma
 #'
 #' @param object A gips_fit_class object
+#' @export
+#' @rdname utes
+
 matchKSigma <- function(object){
     if (!inherits(object, "gips_fit_class"))
         stop("'object' is not a gips_git_class object")
-    sum(abs((object$K %*% object$Sigma) - diag(1, nrow(object$K))))
+    ## sum(abs((object$K %*% object$Sigma) - diag(1, nrow(object$K))))
+    a <- (object$K %*% object$Sigma) - diag(1, nrow(object$K))
+    ## sqrt(sum(a^2))
+    norm(a, type="F")    
 }
-
 
 
 #' Parameter equality

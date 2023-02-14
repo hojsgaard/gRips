@@ -107,8 +107,8 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, iter=10000L, eps=1e-6, convcrit
     }
 
     
-    if (print >= 1)
-        cat("+ engine: ", engine, " method: ", method, "\n")
+    ## if (print >= 1)
+        ## cat("+ engine: ", engine, " method: ", method, "\n")
     
     comb <- paste0(engine, "_", method)
     switch(comb,
