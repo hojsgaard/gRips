@@ -1,20 +1,9 @@
----
-output: github_document
----
 
 <!-- README.md is generated from README.Rmd. Please edit only README.Rmd! -->
 
-```{r, echo = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  message = FALSE
-)
-```
-
 # `gRips`: Restricted Iterative Proportional Scaling Algorithms for Graphical Models
 
-Author: Søren Højsgaard,  Steffen Lauritzen
+Author: Søren Højsgaard, Steffen Lauritzen
 
 ## Online documentation
 
@@ -25,6 +14,3 @@ See <https://hojsgaard.github.io/gRips/>.
 ## Development site
 
 See <https://github.com/hojsgaard/gRips>.
-
-
-
