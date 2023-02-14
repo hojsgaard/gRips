@@ -24,4 +24,4 @@ See <https://github.com/hojsgaard/gRips>.
 
 ## Online documentation
 
-See <https://hojsgaar.github.io/gRips/>.
+See <https://hojsgaard.github.io/gRips/>.
