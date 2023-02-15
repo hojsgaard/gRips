@@ -77,17 +77,13 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, iter=10000L, eps=1e-6, convcrit
         stop(glue("Max coreness ({max_coreness}) is larger than nobs ({nobs}); mle may not exist.\n"))
     }
         
-    ## cat("edges (in): \n"); print(edges)
-    ## cat("edges (tmp): \n"); print(edges)    
-    ## cat("edges (to use): \n"); print(edges) ## A list
-    ## Emat <- list2Emat_(edges, shift=0)
-
     
     smart <- if (identical(method, "ncd"))
                  0   # update of glasso type (fast)
              else 1  # update as in paper
 
-    aux0 <- list(smart      = smart,  
+    aux0 <- list(version=1,
+                 smart      = smart,  
                  eps_smart  = 1e-4,
                  engine     = "cpp",
                  amat       = as_emat2amat(Emat, nrow(S)) ## FIXME: DO this only for ncd?
@@ -131,6 +127,12 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, iter=10000L, eps=1e-6, convcrit
     class(out) <- "gips_fit_class"
     out
 }
+
+
+    ## cat("edges (in): \n"); print(edges)
+    ## cat("edges (tmp): \n"); print(edges)    
+    ## cat("edges (to use): \n"); print(edges) ## A list
+    ## Emat <- list2Emat_(edges, shift=0)
 
 
 
