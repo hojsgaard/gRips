@@ -52,7 +52,14 @@ mat inv_qr_(mat& X){
 
 double duality_gap_(mat& S, mat& K, int nobs){
   mat KS = K * S;
-  double out = nobs * (accu(KS) - log(det(KS)) - S.n_rows) / 2; // FIXME Fragile
+
+  double val, sign;
+  log_det(val, sign, KS);
+
+  // double out = nobs * (accu(K % S) - log(det(KS)) - S.n_rows) / 2; // FIXME Fragile
+
+  double out = nobs * (accu(K % S) - val - S.n_rows) / 2; // FIXME Fragile
+
   return out;
 }
 
@@ -91,11 +98,11 @@ double diff_fun_(mat& Sigma, mat& K, umat emc){
   return out;
 }
 
-
-// ### 
+// ### ###################################################
+// ### NCD FUNCTIONS
+// ### ###################################################
 
 void update_row_Sigma_(int u, mat& Sigma, const mat& amat, int nobs, int print=0){
-
 
   // FIXME Need not be computed each time...
   uvec u_    = {(unsigned int) u};      // convert int to uvec
@@ -114,7 +121,7 @@ void update_row_Sigma_(int u, mat& Sigma, const mat& amat, int nobs, int print=0
     mat AA = Sigma.submat(ne_u_, ne_u_);
     vec bb = s12.rows(ne_u_);
 
-    if (deg_u > nobs){
+    if (deg_u > nobs - 1){
       tt = pinv(AA) * bb;       // Rprintf("using pinv\n");
     } else {
       tt = solve(AA, bb);       // Rprintf("using solve\n");      
@@ -134,10 +141,8 @@ void update_row_Sigma_(int u, mat& Sigma, const mat& amat, int nobs, int print=0
 void update_row_K_(int u, mat& Sigma, mat& K, int smart=0, double eps_smart=0.0, int print=0){
   
   if (print >= 4){
-    if (smart == 3)
-      Rprintf("++++ Updating (brute force) K for u=%i\n", u);
-    else
-      Rprintf("++++ Updating (smart) K for u = %3i, smart=%i \n", u, smart);
+    if (smart == 3) Rprintf("++++ Updating (brute force) K for u=%i\n", u);
+    else            Rprintf("++++ Updating (smart) K for u = %3i, smart=%i \n", u, smart);
   }
 
   if (smart==3){
@@ -153,48 +158,45 @@ void update_row_K_(int u, mat& Sigma, mat& K, int smart=0, double eps_smart=0.0,
     double k_uu     = as_scalar(K(u, u));    
     double sigma_uu = as_scalar(Sigma(u, u));
 
-    mat K_uc_u      = K.submat(uc_, u_);
-    mat K_uc_uc     = K.submat(uc_, uc_);
-    mat Sigma_uc_u  = Sigma.submat(uc_, u_);
+    mat K_ucu      = K.submat(uc_, u_);
+    mat K_ucuc     = K.submat(uc_, uc_);
+    mat Sigma_ucu  = Sigma.submat(uc_, u_);
     
-    mat CC2 = K_uc_uc - K_uc_u * (trans(K_uc_u) / k_uu);
-    mat DD2 = CC2 * Sigma_uc_u;
+    mat CC2 = K_ucuc - K_ucu * (trans(K_ucu) / k_uu);
+
+    mat DD2 = CC2 * Sigma_ucu;
 
     // DO UPDATE
-    mat k_uu_upd2  = 1 / (sigma_uu - trans(Sigma_uc_u) * DD2);
-    mat K_uc_u_upd = as_scalar(k_uu_upd2) * DD2;
-    	
-    K(u, u) = as_scalar(k_uu_upd2);
-    K.submat(uc_, u_) = -K_uc_u_upd;
-    K.submat(u_, uc_) = trans(-K_uc_u_upd);
+    mat k2_uu  = 1 / (sigma_uu - trans(Sigma_ucu) * DD2);
+    mat K2_ucu = as_scalar(k2_uu) * DD2;
+    
+    K(u, u)           = as_scalar(k2_uu);
+    K.submat(uc_, u_) = -K2_ucu;
+    K.submat(u_, uc_) = trans(-K2_ucu);
 
-    mat new2, old2, RR3, dd;
-    double ee;
+    mat RR2, RR, K2_ucuc, Kdiff_ucu;
+    double Kdiff_norm;
       
-    if ((smart == 1) || (smart == 2)){
-      new2 = K_uc_u_upd * (trans(K_uc_u_upd) / as_scalar(k_uu_upd2));
-      old2 = K_uc_u     * (trans(K_uc_u)     / as_scalar(k_uu));
-      // Rprintf("new2:\n"); new2.print();
-      // Rprintf("old2:\n"); old2.print();
+    if ((smart == 1) || (smart == 2)){ // full update or approximate update 
+      RR2 = K2_ucu * (trans(K2_ucu) / as_scalar(k2_uu));
+      RR  = K_ucu  * (trans(K_ucu)  / as_scalar(k_uu));
     }
 
     switch (smart) {
-    case 0: // The glasso type update
+    case 0: // The kalif type update
       break;
     case 1: // Update as described in paper
-      RR3  = K_uc_uc + new2 - old2;
-      K.submat(uc_, uc_) = RR3;
+      K2_ucuc  = K_ucuc + RR2 - RR;
+      K.submat(uc_, uc_) = K2_ucuc;
       break;
     case 2: // Approximate updates
-      dd = K_uc_u_upd - K_uc_u;
-      // Rprintf("dd:\n"); dd.print();
-      ee = accu(dd.t() * dd) / Sigma.n_rows;      
-      // Rprintf("ee: %d\n", ee);
-      if (ee >= eps_smart){
+      Kdiff_ucu = K2_ucu - K_ucu;
+      Kdiff_norm = accu(Kdiff_ucu.t() * Kdiff_ucu) / Sigma.n_rows;      
+      if (Kdiff_norm >= eps_smart){
     	if (print >= 4)
-	  Rprintf("++++ Updating u=%3i ee = %f\n", u, ee);
-    	RR3  = K_uc_uc + new2 - old2;
-    	K.submat(uc_, uc_) = RR3;
+	  Rprintf("++++ Updating u=%3i Kdiff_norm = %f\n", u, Kdiff_norm);
+    	K2_ucuc  = K_ucuc + RR2 - RR;
+    	K.submat(uc_, uc_) = K2_ucuc;
       }
       break;
     default:
@@ -212,8 +214,8 @@ void innerloop2_update_Sigma_K_(mat& Sigma, mat& K, mat& amat, int nobs,
    }
 
   for (size_t u=0; u<amat.n_rows; u++){
-    update_row_Sigma_(u, Sigma, amat, nobs, print);
-    update_row_K_    (u, Sigma, K, smart=smart, eps_smart=eps_smart, print=print);
+    update_row_Sigma_(u=u, Sigma=Sigma, amat=amat, nobs=nobs, print=print);    
+    update_row_K_    (u=u, Sigma=Sigma, K=K, smart=smart, eps_smart=eps_smart, print=print);
   }
 }
 
@@ -221,16 +223,16 @@ void innerloop1_update_Sigma_(mat& Sigma, mat& amat, int nobs, int print=0){
 
   if (print >= 3){
     Rprintf("+++ Running innerloop1_update_Sigma\n");
-   }
+  }
   
   for (size_t u=0; u<amat.n_rows; u++){
-    update_row_Sigma_(u, Sigma, amat, nobs, print);
+    update_row_Sigma_(u=u, Sigma=Sigma, amat=amat, nobs=nobs, print=print);
   }
 }
 
 
 
-List outerloop2_(mat& Sigma, mat& K, umat& Emat, umat& Emat_c, mat& amat, double& eps, int& maxit,
+List outerloop2_(mat& Sigma, mat& K, umat& Emat, umat& Emat_c, mat& amat, int nobs, double& eps, int& maxit,
 		 int rank_Sigma,
 		 int smart=0, double eps_smart=0.0, int print=0){
 
@@ -243,7 +245,8 @@ List outerloop2_(mat& Sigma, mat& K, umat& Emat, umat& Emat_c, mat& amat, double
   bool converged = false;
   int it2 = 0;
   while (!converged){
-    innerloop2_update_Sigma_K_(Sigma, K, amat, smart=smart, eps_smart=eps_smart, print=print);
+    innerloop2_update_Sigma_K_(Sigma=Sigma, K=K, amat=amat, nobs=nobs,
+			       smart=smart, eps_smart=eps_smart, print=print);
     dif2 = diff_fun_(Sigma, K, Emat_c); // FIXME for testing
     it2++;
     conv_crit = dif2;
@@ -259,22 +262,20 @@ List outerloop2_(mat& Sigma, mat& K, umat& Emat, umat& Emat_c, mat& amat, double
 
 //[[Rcpp::export]]
 List outerloop1_(mat& Sigma, mat& K, umat& Emat, umat& Emat_c, mat& amat,
-		 int& nobs, double& eps, int& maxit, int print=0){
-  int it1 = 0;
-  bool converged = false;
+		 int& nobs, double& eps, int maxit, int print=0){
 
   if (print >=2){
     Rprintf("++ Running outerloop1\n");
   }
+
+  int it1 = 0;
+  bool converged = false;
     
   double mad, conv_crit;
   mat Sigma_prev = diagmat(Sigma.diag());
-  
-  // double logLp = ggm_logL_(Sigma, K, nobs);
-  // Rprintf("Sigma_prev:\n"); Sigma_prev.print();
 
   while (!converged){
-    innerloop1_update_Sigma_(Sigma, amat, nobs, print);
+    innerloop1_update_Sigma_(Sigma=Sigma, amat=amat, nobs=nobs, print=print);
     mad = mean_abs_diff_non_edge_(Sigma, Sigma_prev, Emat_c); // FIXME for testing
 
     Sigma_prev = Sigma;
@@ -288,41 +289,87 @@ List outerloop1_(mat& Sigma, mat& K, umat& Emat, umat& Emat_c, mat& amat,
 }
 
 
+#define CHECK_K							\
+  uword rank_Sigma = arma::rank(Sigma);				\
+  if (rank_Sigma >= Sigma.n_cols){				\
+    K = inv_qr_(Sigma);						\
+  } else {							\
+  REprintf("Rank of Sigma = %d nobs = %d\n", rank_Sigma, nobs);	\
+  stop("NCD algorithm not convergent\n");			\
+  }								\
+
+
+// FIXME Hvis kalif-update så er K = I tilstrækkeligt.
+
 
 //[[Rcpp::export(.c_ncd_ggm_)]]
 List ncd_ggm_(mat& S, List& Elist, umat& Emat, int& nobs,
 	       mat K,       
-	       int& iter, double& eps, int& convcrit, int print, List& aux){
+	       int iter, double& eps, int& convcrit, int print, List& aux){
 
-  int  smart       = aux["smart"];
+  int version      = aux["version"];
+  int smart        = aux["smart"];
   double eps_smart = aux["eps_smart"];
+
   
   umat Emat_c = as_emat_complement_(Emat - 1, S.n_rows);
   mat amat    = as_emat2amat_(Emat-1, S.n_rows);
   mat Sigma   = S;
+  List res1, res2;
+  double gap;
 
+  double conv_check;
 
-  List res1 = outerloop1_(Sigma, K, Emat, Emat_c, amat, nobs, eps, iter, print);
-
-  uword rank_Sigma = arma::rank(Sigma);  
-  if (rank_Sigma >= Sigma.n_cols){
-    K = inv_qr_(Sigma);
-  } else {
-    REprintf("Rank of Sigma = %d nobs = %d\n", rank_Sigma, nobs);
-    stop("NCD algorithm not convergent\n");
-  }
+  int maxit;
   
-  List res2 = outerloop2_(Sigma, K, Emat, Emat_c, amat, eps, iter,
-			  rank_Sigma=rank_Sigma,
-			  smart=smart, eps_smart=eps_smart, print=print);
+  res1 = outerloop1_(Sigma=Sigma, K=K, Emat=Emat, Emat_c=Emat_c, amat=amat,
+		     nobs=nobs, eps=eps, maxit=iter, print=print);  
+  CHECK_K;
+    
+  switch (version){
 
-  double gap = duality_gap_(Sigma, K, nobs);
+  case 1: // The glasso type update
+    Rprintf("version 1\n");
+    conv_check = res1["mad"];    
+    smart = 0; // Califa update
+    res2 = outerloop2_(Sigma=Sigma, K=K, Emat=Emat, Emat_c=Emat_c, amat=amat, nobs=nobs, eps=eps, maxit=iter,
+		       rank_Sigma=rank_Sigma,
+		       smart=smart, eps_smart=eps_smart, print=print);    
+    gap = duality_gap_(Sigma, K, nobs);
+    break;
+
+  case 2:
+    Rprintf("version 2\n");
+    smart = 1; // Full update 
+    res2 = outerloop2_(Sigma=Sigma, K=K, Emat=Emat, Emat_c=Emat_c, amat=amat, nobs=nobs, eps=eps, maxit=iter,
+		       rank_Sigma=rank_Sigma,
+		       smart=smart, eps_smart=eps_smart, print=print);    
+    conv_check = res2["conv_crit"];
+    smart = 0; // Califa update 
+    res2 = outerloop2_(Sigma=Sigma, K=K, Emat=Emat, Emat_c=Emat_c, amat=amat, nobs=nobs, eps=eps, maxit=iter,
+		       rank_Sigma=rank_Sigma,
+		       smart=smart, eps_smart=eps_smart, print=print);    
+    
+    gap = duality_gap_(Sigma, K, nobs);
+    break;
+    
+  default:
+    Rprintf("'version' must be 1 or 2\n");
+  }
+
+  
   int itcount = (int) res2["iter"] + (int) res1["iter"];
-  double conv_check = res2["conv_crit"];
+  
   double logL = ggm_logL_(S, K, nobs);  
 
   RETURN_VALUE;
 }
+
+
+
+
+
+
 
 
 
