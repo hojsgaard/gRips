@@ -102,6 +102,53 @@ double diff_fun_(mat& Sigma, mat& K, umat emc){
 // ### NCD FUNCTIONS
 // ### ###################################################
 
+
+void update_row_(int u, mat& Sigma, mat& K, const mat& amat, int nobs, int print=0){
+
+  // FIXME Need not be computed each time...
+  uvec u_    = {(unsigned int) u};      // convert int to uvec
+  uvec ne_u_ = find(amat.rows(u_) > 0); // Returns column vector
+  int deg_u  = accu(amat.rows(u_));
+
+  if (print >= 4){ Rprintf("++++ Updating Sigma for u=%i with degree %i\n", u, deg_u); }
+
+  vec beta_pad(Sigma.n_cols, fill::zeros);  
+  vec beta_star;
+
+  mat s12, s_unu, AA;
+  
+  if (ne_u_.n_rows > 0){  
+    s12 = Sigma.cols(u_);
+    AA = Sigma.submat(ne_u_, ne_u_);
+    s_unu = s12.rows(ne_u_);
+    // Rprintf("s_unu\n"); s_unu.print();
+    // Rprintf("s12\n"); s12.print();
+    
+    if (deg_u > nobs - 1){
+      beta_star = pinv(AA) * s_unu;       // Rprintf("using pinv\n");
+    } else {
+      beta_star = solve(AA, s_unu);       // Rprintf("using solve\n");      
+    }
+    beta_pad.elem(ne_u_) = beta_star;
+  }
+  
+  double k2_uu = 1 / as_scalar(Sigma(u, u) - accu(s_unu % beta_star));
+  vec K_unu = - beta_star * k2_uu;
+  // K_unu.print();
+  
+  K.submat(ne_u_, u_) = K_unu;
+  K.submat(u_, ne_u_) = trans(K_unu);
+  K(u, u) = k2_uu;
+}
+
+void get_K_from_Sigma_(mat& Sigma, mat& K, mat& amat, int nobs, int print=0){
+
+    for (size_t u=0; u<amat.n_rows; u++){
+      update_row_(u=u, Sigma=Sigma, K=K, amat=amat, nobs=nobs, print=print);    
+  }  
+}
+
+
 void update_row_Sigma_(int u, mat& Sigma, const mat& amat, int nobs, int print=0){
 
   // FIXME Need not be computed each time...
@@ -114,20 +161,19 @@ void update_row_Sigma_(int u, mat& Sigma, const mat& amat, int nobs, int print=0
   }
 
   vec w(Sigma.n_cols, fill::zeros);  
-  vec tt;
+  vec beta_star;
   
   if (ne_u_.n_rows > 0){  
     mat s12 = Sigma.cols(u_);
     mat AA = Sigma.submat(ne_u_, ne_u_);
-    vec bb = s12.rows(ne_u_);
+    vec s_unu = s12.rows(ne_u_);
 
     if (deg_u > nobs - 1){
-      tt = pinv(AA) * bb;       // Rprintf("using pinv\n");
+      beta_star = pinv(AA) * s_unu;       // Rprintf("using pinv\n");
     } else {
-      tt = solve(AA, bb);       // Rprintf("using solve\n");      
+      beta_star = solve(AA, s_unu);       // Rprintf("using solve\n");      
     }
-      
-    w = Sigma.cols(ne_u_) * tt;
+    w = Sigma.cols(ne_u_) * beta_star;
   }
 
   // Rprintf("inserting:\n");
@@ -320,7 +366,7 @@ List ncd_ggm_(mat& S, List& Elist, umat& Emat, int& nobs,
 
   double conv_check;
 
-  int maxit;
+  int maxit, itcount;
   
   res1 = outerloop1_(Sigma=Sigma, K=K, Emat=Emat, Emat_c=Emat_c, amat=amat,
 		     nobs=nobs, eps=eps, maxit=iter, print=print);  
@@ -332,10 +378,13 @@ List ncd_ggm_(mat& S, List& Elist, umat& Emat, int& nobs,
     Rprintf("version 1\n");
     conv_check = res1["mad"];    
     smart = 0; // Califa update
-    res2 = outerloop2_(Sigma=Sigma, K=K, Emat=Emat, Emat_c=Emat_c, amat=amat, nobs=nobs, eps=eps, maxit=iter,
-		       rank_Sigma=rank_Sigma,
-		       smart=smart, eps_smart=eps_smart, print=print);    
+    // res2 = outerloop2_(Sigma=Sigma, K=K, Emat=Emat, Emat_c=Emat_c, amat=amat, nobs=nobs, eps=eps, maxit=iter,
+		       // rank_Sigma=rank_Sigma,
+		       // smart=smart, eps_smart=eps_smart, print=print);    
+
+    get_K_from_Sigma_(Sigma=Sigma, K=K, amat=amat, nobs=nobs, print=print);
     gap = duality_gap_(Sigma, K, nobs);
+    itcount = (int) res1["iter"];    
     break;
 
   case 2:
@@ -351,6 +400,7 @@ List ncd_ggm_(mat& S, List& Elist, umat& Emat, int& nobs,
 		       smart=smart, eps_smart=eps_smart, print=print);    
     
     gap = duality_gap_(Sigma, K, nobs);
+    itcount = (int) res2["iter"] + (int) res1["iter"];
     break;
     
   default:
@@ -358,7 +408,7 @@ List ncd_ggm_(mat& S, List& Elist, umat& Emat, int& nobs,
   }
 
   
-  int itcount = (int) res2["iter"] + (int) res1["iter"];
+
   
   double logL = ggm_logL_(S, K, nobs);  
 
