@@ -209,7 +209,6 @@ void update_row_K_(int u, mat& Sigma, mat& K, int smart=0, double eps_smart=0.0,
     mat Sigma_ucu  = Sigma.submat(uc_, u_);
     
     mat CC2 = K_ucuc - K_ucu * (trans(K_ucu) / k_uu);
-
     mat DD2 = CC2 * Sigma_ucu;
 
     // DO UPDATE
@@ -294,6 +293,7 @@ List outerloop2_(mat& Sigma, mat& K, umat& Emat, umat& Emat_c, mat& amat, int no
     innerloop2_update_Sigma_K_(Sigma=Sigma, K=K, amat=amat, nobs=nobs,
 			       smart=smart, eps_smart=eps_smart, print=print);
     dif2 = diff_fun_(Sigma, K, Emat_c); // FIXME for testing
+    Rprintf("dif2 : %f\n", dif2);
     it2++;
     conv_crit = dif2;
     if (smart == 0) {
@@ -356,7 +356,6 @@ List ncd_ggm_(mat& S, List& Elist, umat& Emat, int& nobs,
   int version      = aux["version"];
   int smart        = aux["smart"];
   double eps_smart = aux["eps_smart"];
-
   
   umat Emat_c = as_emat_complement_(Emat - 1, S.n_rows);
   mat amat    = as_emat2amat_(Emat-1, S.n_rows);
@@ -365,7 +364,6 @@ List ncd_ggm_(mat& S, List& Elist, umat& Emat, int& nobs,
   double gap;
 
   double conv_check;
-
   int maxit, itcount;
   
   res1 = outerloop1_(Sigma=Sigma, K=K, Emat=Emat, Emat_c=Emat_c, amat=amat,
@@ -377,11 +375,6 @@ List ncd_ggm_(mat& S, List& Elist, umat& Emat, int& nobs,
   case 1: // The glasso type update
     Rprintf("version 1\n");
     conv_check = res1["mad"];    
-    smart = 0; // Califa update
-    // res2 = outerloop2_(Sigma=Sigma, K=K, Emat=Emat, Emat_c=Emat_c, amat=amat, nobs=nobs, eps=eps, maxit=iter,
-		       // rank_Sigma=rank_Sigma,
-		       // smart=smart, eps_smart=eps_smart, print=print);    
-
     get_K_from_Sigma_(Sigma=Sigma, K=K, amat=amat, nobs=nobs, print=print);
     gap = duality_gap_(Sigma, K, nobs);
     itcount = (int) res1["iter"];    
@@ -394,10 +387,6 @@ List ncd_ggm_(mat& S, List& Elist, umat& Emat, int& nobs,
 		       rank_Sigma=rank_Sigma,
 		       smart=smart, eps_smart=eps_smart, print=print);    
     conv_check = res2["conv_crit"];
-    smart = 0; // Califa update 
-    res2 = outerloop2_(Sigma=Sigma, K=K, Emat=Emat, Emat_c=Emat_c, amat=amat, nobs=nobs, eps=eps, maxit=iter,
-		       rank_Sigma=rank_Sigma,
-		       smart=smart, eps_smart=eps_smart, print=print);    
     
     gap = duality_gap_(Sigma, K, nobs);
     itcount = (int) res2["iter"] + (int) res1["iter"];
@@ -406,10 +395,7 @@ List ncd_ggm_(mat& S, List& Elist, umat& Emat, int& nobs,
   default:
     Rprintf("'version' must be 1 or 2\n");
   }
-
-  
-
-  
+ 
   double logL = ggm_logL_(S, K, nobs);  
 
   RETURN_VALUE;

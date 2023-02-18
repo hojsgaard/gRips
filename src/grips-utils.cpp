@@ -63,7 +63,7 @@ double ggm_logL_(mat& S, mat& K, int nobs)
   // Rf_PrintValue(wrap(trKS));
   double val, sign;
   log_det(val, sign, K);
-  //double logL = nobs * (log(det(K)) - trKS) / 2;
+  // double logL = nobs * (log(det(K)) - trKS) / 2;
   double logL = nobs * (val - trKS) / 2;
 
   return logL;
