@@ -184,22 +184,23 @@ void update_row_Sigma_(int u, mat& Sigma, const mat& amat, int nobs, int print=0
 }
 
 
-void update_row_K_(int u, mat& Sigma, mat& K, int smart=0, double eps_smart=0.0, int print=0){
+void update_row_K_(int u, mat& Sigma, mat& K, const mat& amat, int smart=0, double eps_smart=0.0, int print=0){
   
-  if (print >= 4){
-    if (smart == 3) Rprintf("++++ Updating (brute force) K for u=%i\n", u);
-    else            Rprintf("++++ Updating (smart) K for u = %3i, smart=%i \n", u, smart);
-  }
-
   if (smart==3){
     K = inv_qr_(Sigma);    
   } else {
 
     uvec u_  = {(unsigned int) u};    
-    ivec u__ = {(int) u};
-
+    uvec ub_ = find(amat.rows(u_) > 0); // Returns column vector
+    int deg_u  = accu(amat.rows(u_));
     arma::uvec uc_  = arma::linspace<arma::uvec>(0, K.n_cols - 1, K.n_cols);
     uc_.shed_rows(u_);
+
+    // ivec u__ = {(int) u};
+    if (print >= 4){
+      Rprintf("++++ Updating K for u=%i with degree %i\n", u, deg_u);
+      Rprintf("++++ ub_: ");  ub_.t().print();
+    }
 
     double k_uu     = as_scalar(K(u, u));    
     double sigma_uu = as_scalar(Sigma(u, u));
@@ -207,48 +208,76 @@ void update_row_K_(int u, mat& Sigma, mat& K, int smart=0, double eps_smart=0.0,
     mat K_ucu      = K.submat(uc_, u_);
     mat K_ucuc     = K.submat(uc_, uc_);
     mat Sigma_ucu  = Sigma.submat(uc_, u_);
-    
-    mat CC2 = K_ucuc - K_ucu * (trans(K_ucu) / k_uu);
-    mat DD2 = CC2 * Sigma_ucu;
+    mat CC2        = K_ucuc - K_ucu * (trans(K_ucu) / k_uu);
+    mat DD2        = CC2 * Sigma_ucu;
+    mat k2_uu      = 1 / (sigma_uu - trans(Sigma_ucu) * DD2);
+    mat K2_ucu     = as_scalar(k2_uu) * DD2;
 
-    // DO UPDATE
-    mat k2_uu  = 1 / (sigma_uu - trans(Sigma_ucu) * DD2);
-    mat K2_ucu = as_scalar(k2_uu) * DD2;
-    
+    // DO UPDATE    
+    mat RR2, RR, K2_ucuc;
+
     K(u, u)           = as_scalar(k2_uu);
     K.submat(uc_, u_) = -K2_ucu;
     K.submat(u_, uc_) = trans(-K2_ucu);
-
-    mat RR2, RR, K2_ucuc, Kdiff_ucu;
-    double Kdiff_norm;
       
-    if ((smart == 1) || (smart == 2)){ // full update or approximate update 
-      RR2 = K2_ucu * (trans(K2_ucu) / as_scalar(k2_uu));
-      RR  = K_ucu  * (trans(K_ucu)  / as_scalar(k_uu));
-    }
+    RR2 = K2_ucu * (trans(K2_ucu) / as_scalar(k2_uu));
+    RR  = K_ucu  * (trans(K_ucu)  / as_scalar(k_uu));
+    K2_ucuc  = K_ucuc + RR2 - RR;
+    K.submat(uc_, uc_) = K2_ucuc;
 
-    switch (smart) {
-    case 0: // The kalif type update
-      break;
-    case 1: // Update as described in paper
-      K2_ucuc  = K_ucuc + RR2 - RR;
-      K.submat(uc_, uc_) = K2_ucuc;
-      break;
-    case 2: // Approximate updates
-      Kdiff_ucu = K2_ucu - K_ucu;
-      Kdiff_norm = accu(Kdiff_ucu.t() * Kdiff_ucu) / Sigma.n_rows;      
-      if (Kdiff_norm >= eps_smart){
-    	if (print >= 4)
-	  Rprintf("++++ Updating u=%3i Kdiff_norm = %f\n", u, Kdiff_norm);
-    	K2_ucuc  = K_ucuc + RR2 - RR;
-    	K.submat(uc_, uc_) = K2_ucuc;
-      }
-      break;
-    default:
-      Rcout << "Invalid value of smart\n";
-    }    
+
+    // mat K_ubu      = K.submat(ub_, u_);
+    // mat K_ubub     = K.submat(ub_, ub_);
+    // mat Sigma_ubu  = Sigma.submat(ub_, u_);
+    // mat CC3        = K_ubub - K_ubu * (trans(K_ubu) / k_uu);
+    // mat DD3        = CC3 * Sigma_ubu;
+    // mat k3_uu      = 1 / (sigma_uu - trans(Sigma_ubu) * DD3);
+    // mat K3_ubu     = as_scalar(k3_uu) * DD3;
+
+    // mat AA3, AA, K3_ubub;
+
+    // K(u, u)           = as_scalar(k3_uu);
+    // K.submat(ub_, u_) = -K3_ubu;
+    // K.submat(u_, ub_) = trans(-K3_ubu);
+
+    // AA3 = K3_ubu * (trans(K3_ubu) / as_scalar(k3_uu));
+    // AA  = K_ubu  * (trans(K_ubu)  / as_scalar(k_uu));  
+    // K3_ubub  = K_ubub + AA3 - AA;
+    // K.submat(ub_, ub_) = K3_ubub;        
+
   } 
 }
+
+
+
+
+
+
+
+    // RR.print();
+    // AA.print();
+    // Rprintf("K2_ucu:\n"); K2_ucu.t().print();
+    // Rprintf("K_ucu:\n"); K_ucu.t().print();
+    
+    // switch (smart) {
+    // case 0: // The kalif type update
+    //   break;
+    // case 1: // Update as described in paper
+      
+    //   break;
+    // case 2: // Approximate updates
+    //   Kdiff_ucu = K2_ucu - K_ucu;
+    //   Kdiff_norm = accu(Kdiff_ucu.t() * Kdiff_ucu) / Sigma.n_rows;      
+    //   if (Kdiff_norm >= eps_smart){
+    // 	if (print >= 4)
+    // 	  Rprintf("++++ Updating u=%3i Kdiff_norm = %f\n", u, Kdiff_norm);
+    // 	K2_ucuc  = K_ucuc + RR2 - RR;
+    // 	K.submat(uc_, uc_) = K2_ucuc;
+    //   }
+    //   break;
+    // default:
+    //   Rcout << "Invalid value of smart\n";
+    // }
 
 
 
@@ -259,8 +288,8 @@ void innerloop2_update_Sigma_K_(mat& Sigma, mat& K, mat& amat, int nobs,
    }
 
   for (size_t u=0; u<amat.n_rows; u++){
-    update_row_Sigma_(u=u, Sigma=Sigma, amat=amat, nobs=nobs, print=print);    
-    update_row_K_    (u=u, Sigma=Sigma, K=K, smart=smart, eps_smart=eps_smart, print=print);
+    update_row_Sigma_(u=u, Sigma=Sigma,      amat=amat, nobs=nobs, print=print);    
+    update_row_K_    (u=u, Sigma=Sigma, K=K, amat=amat, smart=smart, eps_smart=eps_smart, print=print);
   }
 }
 
