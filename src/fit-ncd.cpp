@@ -191,8 +191,8 @@ void update_K_row_(int u, mat& Sigma, mat& K, const mat& amat, int smart=0, doub
 
 void innerloop1_update_Sigma_(mat& Sigma, mat& amat, int nobs, int print=0){
 
-  if (print >= 3){
-    Rprintf("+++ Running innerloop1_update_Sigma\n");
+  if (print >= 4){
+    Rprintf("++++ Running innerloop1_update_Sigma\n");
   }
   
   for (size_t u=0; u<amat.n_rows; u++){
@@ -265,12 +265,15 @@ List outerloop2_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int no
     innerloop2_update_Sigma_K_(Sigma=Sigma, K=K, amat=amat, nobs=nobs,
 			       smart=smart, eps_smart=eps_smart, print=print);
     
-    dif2 = diff_fun_(Sigma, K, emat_c); // FIXME for testing
-    conv_crit = dif2;
+    // dif2 = diff_fun_(Sigma, K, emat_c); // FIXME for testing
+    // conv_crit = dif2;
 
     mat Delta = K - project_K_onto_G_(K, emat_c);
     mno = mnormone_(Delta);
     conv_crit = mno;
+
+    if (print>=3)
+      Rprintf("+++ innerloop2 iter : %d mno : %f\n", iter, mno);
     
     iter++;
     if ((iter == maxiter) || (conv_crit < eps)){
@@ -372,16 +375,20 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
 
   double eps2 = MIN(eps, 1.0/Sigma.n_rows);  
   double mno;
-  
+
+  // FIXME NOTICE SCALING OG EPS2
   res1 = outerloop1_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat,
-		     nobs=nobs, eps=eps2, maxiter=maxiter, print=print);  
+		     nobs=nobs, eps=eps2/100, maxiter=maxiter, print=print);
+  
   iter1 = res1["iter"];
+  if (print>=2)
+    Rprintf("++ outerloop1 iterations : %d\n", iter1);
   
   CHECK_K;
   
   switch (version){    
   case 1: 
-    Rprintf("version 1 - full\n");
+    // Rprintf("version 1 - full\n");
     
     // Check that Sigma has full rank
     if (!has_full_rank(Sigma)){
@@ -394,6 +401,9 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
 			 rank_Sigma=rank_Sigma,
 			 smart=smart, eps_smart=eps_smart, print=print);
       iter2 = res2["iter"];
+      if (print>=2)
+	Rprintf("++ outerloop2 iterations : %d\n", iter2);
+      
       K2 = project_K_onto_G_(K, emat_c);
       Delta = K - K2;
       mno = mnormone_(Delta);
@@ -412,7 +422,7 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
     break;
       
   case 0:
-    Rprintf("version 0 - fast\n");
+    // Rprintf("version 0 - fast\n");
     if (!has_full_rank(Sigma)){
       // logL = NA; K=NA, dgap=NA
       // abort
