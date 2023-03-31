@@ -12,6 +12,8 @@ const int erp=0; // ERROR PRINTING
 
 #define as_num(cc) NumericVector(cc.begin(), cc.end())
 
+mat project_K_onto_G_(mat& K, umat& emc);
+double mnormone_(mat& Delta);
 int method2int_(CharacterVector method);
 double ggm_logL_(mat& S, mat& K, int nobs);
 mat initSigma_(mat& S);
@@ -21,7 +23,7 @@ double get_conv_ref(const List& aux);
 
 
 // -------------------------------------------------------------
-// Macros common to FIPS and IPS
+// Macros common to COVIPS and CONIPS
 // -------------------------------------------------------------
 
 #define RETURN_VALUE					\
@@ -64,12 +66,11 @@ double get_conv_ref(const List& aux);
     Rcout << buffer;							\
   }									\
 
-
 #define CONV_CHECK_LOGL_DIFF			\
   logL  = ggm_logL_(S, K, nobs);		\
   conv_check = fabs(logL - logLp)  / nparm;	\
   logLp = logL;					\
-
+  
 #define CONV_CHECK_LOGL_DIFF_REF			\
   logL  = ggm_logL_(S, K, nobs);			\
   conv_check = fabs(logL - conv_ref) / nparm;		\

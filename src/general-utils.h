@@ -12,7 +12,10 @@ typedef Rcpp::CharacterVector chr_vec;
 
 arma::mat unique_rows(const arma::mat& m);
 arma::mat unique_cols(const arma::mat& m);
-arma::mat list2Emat_ (const List& E, int shift=1);
+arma::mat list_to_emat (const List& lst, int shift=1);
+mat as_emat2amat_(umat emat, int d);
+umat as_emat_complement_(umat emat, int d);
+
 
 SEXP clone_(SEXP& x);
 chr_vec list_names_(List lst);

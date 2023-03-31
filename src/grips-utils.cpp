@@ -13,6 +13,30 @@ typedef Rcpp::CharacterVector chr_vec;
 // ---------------------------------------------------------------------
 
 
+// [[Rcpp::export]]
+mat project_K_onto_G_(mat& K, umat& emc){
+
+  uvec r0 = {0}, r1 = {1};
+  mat emc2 = conv_to<mat>::from(emc);
+  uvec s0 = conv_to<uvec>::from(emc2.rows(r0));
+  uvec s1 = conv_to<uvec>::from(emc2.rows(r1));
+  for (size_t j=0; j<emc.n_cols; j++){
+    // Rcout << s0[j] << "  " << s1[j] << "\n"; 
+    K(s0[j], s1[j]) = 0;
+    K(s1[j], s0[j]) = 0;
+  }
+  return(K);
+}
+
+// [[Rcpp::export]]
+double mnormone_(mat& Delta){
+  rowvec s = sum(abs(Delta));
+  // s.print();
+  return(max(s));
+}
+// mnormone(Delta) = max_v(\sum_u |Delta_{uv}|)
+
+
 double get_conv_ref(const List& aux){
   CharacterVector vn = list_names_(aux);
   if (vn.length()){

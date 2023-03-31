@@ -8,7 +8,7 @@
 #'     x p matrix of integers.
 #' @param nobs Number of observations
 #' @param K Initial value of concentration matrix.
-#' @param iter Maximum number of iterations.
+#' @param maxiter Maximum number of iterations.
 #' @param eps Convergence criterion.
 #' @param convcrit Convergence criterions. See section `details`.
 #' @param aux A list of form name=value.
@@ -54,7 +54,7 @@ NULL
 
 #' @rdname fit-ggm
 #' @export
-fit_ggm <- function(S, edges=NULL, nobs, K=NULL, iter=10000L, eps=1e-6, convcrit=1, aux=list(),
+fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxiter=10000L, eps=1e-6, convcrit=1, aux=list(),
                     method="covips", print=0){
 
     t0 <- .get.time()
@@ -68,8 +68,8 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, iter=10000L, eps=1e-6, convcrit
 
     
     edges <- parse_edges(edges, nrow(S))
-    Elist <- .form2glist(edges)
-    Emat <- as_elist2emat(Elist)
+    elist <- .form2glist(edges)
+    Emat <- as_elist2emat(elist)
  
     max_coreness <- max(coreness(as_glist2igraph(edges, nrow(S))))
      
@@ -117,8 +117,8 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, iter=10000L, eps=1e-6, convcrit
            ## "r_cal"       = {fitfun <- .r_cal_ggm_  },           
            )    
     
-    out <- fitfun(S=S, Elist=Elist, Emat=Emat,
-                    nobs=nobs, K=K, iter=iter, eps=eps, convcrit=convcrit, print=print, aux=aux0)
+    out <- fitfun(S=S, elist=elist, emat=Emat,
+                  nobs=nobs, K=K, maxiter=maxiter, eps=eps, convcrit=convcrit, print=print, aux=aux0)
     
     out <- c(out, list(edges=Emat, nobs=nobs, eps=eps, max_coreness=max_coreness))
     ## cat("Names:\n"); print(names(out))

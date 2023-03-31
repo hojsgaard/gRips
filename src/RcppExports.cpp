@@ -14,6 +14,17 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// inv_qr_
+mat inv_qr_(mat& X);
+RcppExport SEXP _gRips_inv_qr_(SEXP XSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type X(XSEXP);
+    rcpp_result_gen = Rcpp::wrap(inv_qr_(X));
+    return rcpp_result_gen;
+END_RCPP
+}
 // setdiff_
 arma::uvec setdiff_(arma::uvec x, arma::uvec y);
 RcppExport SEXP _gRips_setdiff_(SEXP xSEXP, SEXP ySEXP) {
@@ -474,24 +485,24 @@ RcppExport SEXP _gRips_califa_(SEXP SSEXP, SEXP SigmaSEXP, SEXP SigmaoldSEXP) {
     UNPROTECT(1);
     return rcpp_result_gen;
 }
-// diff_on_Emat_
-vec diff_on_Emat_(const mat& S, const mat& Sigma, const umat& E, int shift);
-static SEXP _gRips_diff_on_Emat__try(SEXP SSEXP, SEXP SigmaSEXP, SEXP ESEXP, SEXP shiftSEXP) {
+// diff_on_emat_
+vec diff_on_emat_(const mat& S, const mat& Sigma, const umat& E, int shift);
+static SEXP _gRips_diff_on_emat__try(SEXP SSEXP, SEXP SigmaSEXP, SEXP ESEXP, SEXP shiftSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< const mat& >::type Sigma(SigmaSEXP);
     Rcpp::traits::input_parameter< const umat& >::type E(ESEXP);
     Rcpp::traits::input_parameter< int >::type shift(shiftSEXP);
-    rcpp_result_gen = Rcpp::wrap(diff_on_Emat_(S, Sigma, E, shift));
+    rcpp_result_gen = Rcpp::wrap(diff_on_emat_(S, Sigma, E, shift));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _gRips_diff_on_Emat_(SEXP SSEXP, SEXP SigmaSEXP, SEXP ESEXP, SEXP shiftSEXP) {
+RcppExport SEXP _gRips_diff_on_emat_(SEXP SSEXP, SEXP SigmaSEXP, SEXP ESEXP, SEXP shiftSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_gRips_diff_on_Emat__try(SSEXP, SigmaSEXP, ESEXP, shiftSEXP));
+        rcpp_result_gen = PROTECT(_gRips_diff_on_emat__try(SSEXP, SigmaSEXP, ESEXP, shiftSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -548,24 +559,24 @@ RcppExport SEXP _gRips_diff_on_Elist_(SEXP SSEXP, SEXP SigmaSEXP, SEXP ESEXP, SE
     UNPROTECT(1);
     return rcpp_result_gen;
 }
-// max_abs_diff_on_Emat_
-double max_abs_diff_on_Emat_(const mat& Sigma, const mat& S, const umat& E, int shift);
-static SEXP _gRips_max_abs_diff_on_Emat__try(SEXP SigmaSEXP, SEXP SSEXP, SEXP ESEXP, SEXP shiftSEXP) {
+// max_abs_diff_on_emat_
+double max_abs_diff_on_emat_(const mat& Sigma, const mat& S, const umat& E, int shift);
+static SEXP _gRips_max_abs_diff_on_emat__try(SEXP SigmaSEXP, SEXP SSEXP, SEXP ESEXP, SEXP shiftSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const mat& >::type Sigma(SigmaSEXP);
     Rcpp::traits::input_parameter< const mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< const umat& >::type E(ESEXP);
     Rcpp::traits::input_parameter< int >::type shift(shiftSEXP);
-    rcpp_result_gen = Rcpp::wrap(max_abs_diff_on_Emat_(Sigma, S, E, shift));
+    rcpp_result_gen = Rcpp::wrap(max_abs_diff_on_emat_(Sigma, S, E, shift));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _gRips_max_abs_diff_on_Emat_(SEXP SigmaSEXP, SEXP SSEXP, SEXP ESEXP, SEXP shiftSEXP) {
+RcppExport SEXP _gRips_max_abs_diff_on_emat_(SEXP SigmaSEXP, SEXP SSEXP, SEXP ESEXP, SEXP shiftSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_gRips_max_abs_diff_on_Emat__try(SigmaSEXP, SSEXP, ESEXP, shiftSEXP));
+        rcpp_result_gen = PROTECT(_gRips_max_abs_diff_on_emat__try(SigmaSEXP, SSEXP, ESEXP, shiftSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -585,24 +596,24 @@ RcppExport SEXP _gRips_max_abs_diff_on_Emat_(SEXP SigmaSEXP, SEXP SSEXP, SEXP ES
     UNPROTECT(1);
     return rcpp_result_gen;
 }
-// mean_abs_diff_on_Emat_
-double mean_abs_diff_on_Emat_(const mat& Sigma, const mat& S, const umat& E, int shift);
-static SEXP _gRips_mean_abs_diff_on_Emat__try(SEXP SigmaSEXP, SEXP SSEXP, SEXP ESEXP, SEXP shiftSEXP) {
+// mean_abs_diff_on_emat_
+double mean_abs_diff_on_emat_(const mat& Sigma, const mat& S, const umat& E, int shift);
+static SEXP _gRips_mean_abs_diff_on_emat__try(SEXP SigmaSEXP, SEXP SSEXP, SEXP ESEXP, SEXP shiftSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const mat& >::type Sigma(SigmaSEXP);
     Rcpp::traits::input_parameter< const mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< const umat& >::type E(ESEXP);
     Rcpp::traits::input_parameter< int >::type shift(shiftSEXP);
-    rcpp_result_gen = Rcpp::wrap(mean_abs_diff_on_Emat_(Sigma, S, E, shift));
+    rcpp_result_gen = Rcpp::wrap(mean_abs_diff_on_emat_(Sigma, S, E, shift));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _gRips_mean_abs_diff_on_Emat_(SEXP SigmaSEXP, SEXP SSEXP, SEXP ESEXP, SEXP shiftSEXP) {
+RcppExport SEXP _gRips_mean_abs_diff_on_emat_(SEXP SigmaSEXP, SEXP SSEXP, SEXP ESEXP, SEXP shiftSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_gRips_mean_abs_diff_on_Emat__try(SigmaSEXP, SSEXP, ESEXP, shiftSEXP));
+        rcpp_result_gen = PROTECT(_gRips_mean_abs_diff_on_emat__try(SigmaSEXP, SSEXP, ESEXP, shiftSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -696,23 +707,23 @@ RcppExport SEXP _gRips_mean_abs_diff_on_Elist_(SEXP SigmaSEXP, SEXP SSEXP, SEXP 
     UNPROTECT(1);
     return rcpp_result_gen;
 }
-// max_diff_on_Emat_
-double max_diff_on_Emat_(const mat& Sigma, const mat& S, const mat& E);
-static SEXP _gRips_max_diff_on_Emat__try(SEXP SigmaSEXP, SEXP SSEXP, SEXP ESEXP) {
+// max_diff_on_emat_
+double max_diff_on_emat_(const mat& Sigma, const mat& S, const mat& E);
+static SEXP _gRips_max_diff_on_emat__try(SEXP SigmaSEXP, SEXP SSEXP, SEXP ESEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const mat& >::type Sigma(SigmaSEXP);
     Rcpp::traits::input_parameter< const mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< const mat& >::type E(ESEXP);
-    rcpp_result_gen = Rcpp::wrap(max_diff_on_Emat_(Sigma, S, E));
+    rcpp_result_gen = Rcpp::wrap(max_diff_on_emat_(Sigma, S, E));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _gRips_max_diff_on_Emat_(SEXP SigmaSEXP, SEXP SSEXP, SEXP ESEXP) {
+RcppExport SEXP _gRips_max_diff_on_emat_(SEXP SigmaSEXP, SEXP SSEXP, SEXP ESEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_gRips_max_diff_on_Emat__try(SigmaSEXP, SSEXP, ESEXP));
+        rcpp_result_gen = PROTECT(_gRips_max_diff_on_emat__try(SigmaSEXP, SSEXP, ESEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -781,18 +792,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// Scc_inv_list_
-List Scc_inv_list_(const mat& S, const List& edges0);
-RcppExport SEXP _gRips_Scc_inv_list_(SEXP SSEXP, SEXP edges0SEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const mat& >::type S(SSEXP);
-    Rcpp::traits::input_parameter< const List& >::type edges0(edges0SEXP);
-    rcpp_result_gen = Rcpp::wrap(Scc_inv_list_(S, edges0));
-    return rcpp_result_gen;
-END_RCPP
-}
 // Scc_list_
 List Scc_list_(const mat& S, const List& edges0);
 RcppExport SEXP _gRips_Scc_list_(SEXP SSEXP, SEXP edges0SEXP) {
@@ -805,79 +804,55 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// Scc_inv_list_
+List Scc_inv_list_(const mat& S, const List& edges0);
+RcppExport SEXP _gRips_Scc_inv_list_(SEXP SSEXP, SEXP edges0SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< const List& >::type edges0(edges0SEXP);
+    rcpp_result_gen = Rcpp::wrap(Scc_inv_list_(S, edges0));
+    return rcpp_result_gen;
+END_RCPP
+}
 // conips_ggm_
-List conips_ggm_(arma::mat& S, List& Elist, umat& Emat, int& nobs, arma::mat K, int& iter, double& eps, int& convcrit, int& print, List& aux);
-RcppExport SEXP _gRips_conips_ggm_(SEXP SSEXP, SEXP ElistSEXP, SEXP EmatSEXP, SEXP nobsSEXP, SEXP KSEXP, SEXP iterSEXP, SEXP epsSEXP, SEXP convcritSEXP, SEXP printSEXP, SEXP auxSEXP) {
+List conips_ggm_(arma::mat& S, List& elist, umat& emat, int& nobs, arma::mat K, int& maxiter, double& eps, int& convcrit, int& print, List& aux);
+RcppExport SEXP _gRips_conips_ggm_(SEXP SSEXP, SEXP elistSEXP, SEXP ematSEXP, SEXP nobsSEXP, SEXP KSEXP, SEXP maxiterSEXP, SEXP epsSEXP, SEXP convcritSEXP, SEXP printSEXP, SEXP auxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat& >::type S(SSEXP);
-    Rcpp::traits::input_parameter< List& >::type Elist(ElistSEXP);
-    Rcpp::traits::input_parameter< umat& >::type Emat(EmatSEXP);
+    Rcpp::traits::input_parameter< List& >::type elist(elistSEXP);
+    Rcpp::traits::input_parameter< umat& >::type emat(ematSEXP);
     Rcpp::traits::input_parameter< int& >::type nobs(nobsSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type K(KSEXP);
-    Rcpp::traits::input_parameter< int& >::type iter(iterSEXP);
+    Rcpp::traits::input_parameter< int& >::type maxiter(maxiterSEXP);
     Rcpp::traits::input_parameter< double& >::type eps(epsSEXP);
     Rcpp::traits::input_parameter< int& >::type convcrit(convcritSEXP);
     Rcpp::traits::input_parameter< int& >::type print(printSEXP);
     Rcpp::traits::input_parameter< List& >::type aux(auxSEXP);
-    rcpp_result_gen = Rcpp::wrap(conips_ggm_(S, Elist, Emat, nobs, K, iter, eps, convcrit, print, aux));
+    rcpp_result_gen = Rcpp::wrap(conips_ggm_(S, elist, emat, nobs, K, maxiter, eps, convcrit, print, aux));
     return rcpp_result_gen;
 END_RCPP
 }
 // covips_ggm_
-List covips_ggm_(mat& S, List& Elist, umat& Emat, int& nobs, mat K, int& iter, double& eps, int& convcrit, int& print, List& aux);
-RcppExport SEXP _gRips_covips_ggm_(SEXP SSEXP, SEXP ElistSEXP, SEXP EmatSEXP, SEXP nobsSEXP, SEXP KSEXP, SEXP iterSEXP, SEXP epsSEXP, SEXP convcritSEXP, SEXP printSEXP, SEXP auxSEXP) {
+List covips_ggm_(mat& S, List& elist, umat& emat, int& nobs, mat K, int& maxiter, double& eps, int& convcrit, int& print, List& aux);
+RcppExport SEXP _gRips_covips_ggm_(SEXP SSEXP, SEXP elistSEXP, SEXP ematSEXP, SEXP nobsSEXP, SEXP KSEXP, SEXP maxiterSEXP, SEXP epsSEXP, SEXP convcritSEXP, SEXP printSEXP, SEXP auxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
-    Rcpp::traits::input_parameter< List& >::type Elist(ElistSEXP);
-    Rcpp::traits::input_parameter< umat& >::type Emat(EmatSEXP);
+    Rcpp::traits::input_parameter< List& >::type elist(elistSEXP);
+    Rcpp::traits::input_parameter< umat& >::type emat(ematSEXP);
     Rcpp::traits::input_parameter< int& >::type nobs(nobsSEXP);
     Rcpp::traits::input_parameter< mat >::type K(KSEXP);
-    Rcpp::traits::input_parameter< int& >::type iter(iterSEXP);
+    Rcpp::traits::input_parameter< int& >::type maxiter(maxiterSEXP);
     Rcpp::traits::input_parameter< double& >::type eps(epsSEXP);
     Rcpp::traits::input_parameter< int& >::type convcrit(convcritSEXP);
     Rcpp::traits::input_parameter< int& >::type print(printSEXP);
     Rcpp::traits::input_parameter< List& >::type aux(auxSEXP);
-    rcpp_result_gen = Rcpp::wrap(covips_ggm_(S, Elist, Emat, nobs, K, iter, eps, convcrit, print, aux));
-    return rcpp_result_gen;
-END_RCPP
-}
-// as_emat2amat_
-mat as_emat2amat_(umat emat, int d);
-RcppExport SEXP _gRips_as_emat2amat_(SEXP ematSEXP, SEXP dSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< umat >::type emat(ematSEXP);
-    Rcpp::traits::input_parameter< int >::type d(dSEXP);
-    rcpp_result_gen = Rcpp::wrap(as_emat2amat_(emat, d));
-    return rcpp_result_gen;
-END_RCPP
-}
-// as_emat_complement_
-umat as_emat_complement_(umat emat, int d, int shift);
-RcppExport SEXP _gRips_as_emat_complement_(SEXP ematSEXP, SEXP dSEXP, SEXP shiftSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< umat >::type emat(ematSEXP);
-    Rcpp::traits::input_parameter< int >::type d(dSEXP);
-    Rcpp::traits::input_parameter< int >::type shift(shiftSEXP);
-    rcpp_result_gen = Rcpp::wrap(as_emat_complement_(emat, d, shift));
-    return rcpp_result_gen;
-END_RCPP
-}
-// inv_qr_
-mat inv_qr_(mat& X);
-RcppExport SEXP _gRips_inv_qr_(SEXP XSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< mat& >::type X(XSEXP);
-    rcpp_result_gen = Rcpp::wrap(inv_qr_(X));
+    rcpp_result_gen = Rcpp::wrap(covips_ggm_(S, elist, emat, nobs, K, maxiter, eps, convcrit, print, aux));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -895,41 +870,55 @@ BEGIN_RCPP
 END_RCPP
 }
 // outerloop1_
-List outerloop1_(mat& Sigma, mat& K, umat& Emat, umat& Emat_c, mat& amat, int& nobs, double& eps, int maxit, int print);
-RcppExport SEXP _gRips_outerloop1_(SEXP SigmaSEXP, SEXP KSEXP, SEXP EmatSEXP, SEXP Emat_cSEXP, SEXP amatSEXP, SEXP nobsSEXP, SEXP epsSEXP, SEXP maxitSEXP, SEXP printSEXP) {
+List outerloop1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int& nobs, double& eps, int maxiter, int print);
+RcppExport SEXP _gRips_outerloop1_(SEXP SigmaSEXP, SEXP KSEXP, SEXP ematSEXP, SEXP emat_cSEXP, SEXP amatSEXP, SEXP nobsSEXP, SEXP epsSEXP, SEXP maxiterSEXP, SEXP printSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< mat& >::type Sigma(SigmaSEXP);
     Rcpp::traits::input_parameter< mat& >::type K(KSEXP);
-    Rcpp::traits::input_parameter< umat& >::type Emat(EmatSEXP);
-    Rcpp::traits::input_parameter< umat& >::type Emat_c(Emat_cSEXP);
+    Rcpp::traits::input_parameter< umat& >::type emat(ematSEXP);
+    Rcpp::traits::input_parameter< umat& >::type emat_c(emat_cSEXP);
     Rcpp::traits::input_parameter< mat& >::type amat(amatSEXP);
     Rcpp::traits::input_parameter< int& >::type nobs(nobsSEXP);
     Rcpp::traits::input_parameter< double& >::type eps(epsSEXP);
-    Rcpp::traits::input_parameter< int >::type maxit(maxitSEXP);
+    Rcpp::traits::input_parameter< int >::type maxiter(maxiterSEXP);
     Rcpp::traits::input_parameter< int >::type print(printSEXP);
-    rcpp_result_gen = Rcpp::wrap(outerloop1_(Sigma, K, Emat, Emat_c, amat, nobs, eps, maxit, print));
+    rcpp_result_gen = Rcpp::wrap(outerloop1_(Sigma, K, emat, emat_c, amat, nobs, eps, maxiter, print));
     return rcpp_result_gen;
 END_RCPP
 }
+// Sigma_to_K_
+void Sigma_to_K_(mat& Sigma, mat& K, mat& amat, int nobs, int print);
+RcppExport SEXP _gRips_Sigma_to_K_(SEXP SigmaSEXP, SEXP KSEXP, SEXP amatSEXP, SEXP nobsSEXP, SEXP printSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type Sigma(SigmaSEXP);
+    Rcpp::traits::input_parameter< mat& >::type K(KSEXP);
+    Rcpp::traits::input_parameter< mat& >::type amat(amatSEXP);
+    Rcpp::traits::input_parameter< int >::type nobs(nobsSEXP);
+    Rcpp::traits::input_parameter< int >::type print(printSEXP);
+    Sigma_to_K_(Sigma, K, amat, nobs, print);
+    return R_NilValue;
+END_RCPP
+}
 // ncd_ggm_
-List ncd_ggm_(mat& S, List& Elist, umat& Emat, int& nobs, mat K, int iter, double& eps, int& convcrit, int print, List& aux);
-RcppExport SEXP _gRips_ncd_ggm_(SEXP SSEXP, SEXP ElistSEXP, SEXP EmatSEXP, SEXP nobsSEXP, SEXP KSEXP, SEXP iterSEXP, SEXP epsSEXP, SEXP convcritSEXP, SEXP printSEXP, SEXP auxSEXP) {
+List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs, mat K, int maxiter, double& eps, int& convcrit, int print, List& aux);
+RcppExport SEXP _gRips_ncd_ggm_(SEXP SSEXP, SEXP elistSEXP, SEXP ematSEXP, SEXP nobsSEXP, SEXP KSEXP, SEXP maxiterSEXP, SEXP epsSEXP, SEXP convcritSEXP, SEXP printSEXP, SEXP auxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
-    Rcpp::traits::input_parameter< List& >::type Elist(ElistSEXP);
-    Rcpp::traits::input_parameter< umat& >::type Emat(EmatSEXP);
+    Rcpp::traits::input_parameter< List& >::type elist(elistSEXP);
+    Rcpp::traits::input_parameter< umat& >::type emat(ematSEXP);
     Rcpp::traits::input_parameter< int& >::type nobs(nobsSEXP);
     Rcpp::traits::input_parameter< mat >::type K(KSEXP);
-    Rcpp::traits::input_parameter< int >::type iter(iterSEXP);
+    Rcpp::traits::input_parameter< int >::type maxiter(maxiterSEXP);
     Rcpp::traits::input_parameter< double& >::type eps(epsSEXP);
     Rcpp::traits::input_parameter< int& >::type convcrit(convcritSEXP);
     Rcpp::traits::input_parameter< int >::type print(printSEXP);
     Rcpp::traits::input_parameter< List& >::type aux(auxSEXP);
-    rcpp_result_gen = Rcpp::wrap(ncd_ggm_(S, Elist, Emat, nobs, K, iter, eps, convcrit, print, aux));
+    rcpp_result_gen = Rcpp::wrap(ncd_ggm_(S, elist, emat, nobs, K, maxiter, eps, convcrit, print, aux));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -989,15 +978,62 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// list2Emat_
-arma::mat list2Emat_(const List& E, int shift);
-RcppExport SEXP _gRips_list2Emat_(SEXP ESEXP, SEXP shiftSEXP) {
+// list_to_emat
+arma::mat list_to_emat(const List& lst, int shift);
+RcppExport SEXP _gRips_list_to_emat(SEXP lstSEXP, SEXP shiftSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const List& >::type E(ESEXP);
+    Rcpp::traits::input_parameter< const List& >::type lst(lstSEXP);
     Rcpp::traits::input_parameter< int >::type shift(shiftSEXP);
-    rcpp_result_gen = Rcpp::wrap(list2Emat_(E, shift));
+    rcpp_result_gen = Rcpp::wrap(list_to_emat(lst, shift));
+    return rcpp_result_gen;
+END_RCPP
+}
+// as_emat2amat_
+mat as_emat2amat_(umat emat, int d);
+RcppExport SEXP _gRips_as_emat2amat_(SEXP ematSEXP, SEXP dSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< umat >::type emat(ematSEXP);
+    Rcpp::traits::input_parameter< int >::type d(dSEXP);
+    rcpp_result_gen = Rcpp::wrap(as_emat2amat_(emat, d));
+    return rcpp_result_gen;
+END_RCPP
+}
+// as_emat_complement_
+umat as_emat_complement_(umat emat, int d);
+RcppExport SEXP _gRips_as_emat_complement_(SEXP ematSEXP, SEXP dSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< umat >::type emat(ematSEXP);
+    Rcpp::traits::input_parameter< int >::type d(dSEXP);
+    rcpp_result_gen = Rcpp::wrap(as_emat_complement_(emat, d));
+    return rcpp_result_gen;
+END_RCPP
+}
+// project_K_onto_G_
+mat project_K_onto_G_(mat& K, umat& emc);
+RcppExport SEXP _gRips_project_K_onto_G_(SEXP KSEXP, SEXP emcSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type K(KSEXP);
+    Rcpp::traits::input_parameter< umat& >::type emc(emcSEXP);
+    rcpp_result_gen = Rcpp::wrap(project_K_onto_G_(K, emc));
+    return rcpp_result_gen;
+END_RCPP
+}
+// mnormone_
+double mnormone_(mat& Delta);
+RcppExport SEXP _gRips_mnormone_(SEXP DeltaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type Delta(DeltaSEXP);
+    rcpp_result_gen = Rcpp::wrap(mnormone_(Delta));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1096,13 +1132,13 @@ static int _gRips_RcppExport_validate(const char* sig) {
         signatures.insert("double(*max_abs_diag_diff_)(const mat&,const mat&)");
         signatures.insert("double(*max_diag_diff_)(const mat&,const mat&)");
         signatures.insert("double(*califa_)(const mat&,const mat&,const mat&)");
-        signatures.insert("vec(*diff_on_Emat_)(const mat&,const mat&,const umat&,int)");
+        signatures.insert("vec(*diff_on_emat_)(const mat&,const mat&,const umat&,int)");
         signatures.insert("vec(*diff_on_Elist_)(const mat&,const mat&,const List&,int)");
-        signatures.insert("double(*max_abs_diff_on_Emat_)(const mat&,const mat&,const umat&,int)");
-        signatures.insert("double(*mean_abs_diff_on_Emat_)(const mat&,const mat&,const umat&,int)");
+        signatures.insert("double(*max_abs_diff_on_emat_)(const mat&,const mat&,const umat&,int)");
+        signatures.insert("double(*mean_abs_diff_on_emat_)(const mat&,const mat&,const umat&,int)");
         signatures.insert("double(*max_abs_diff_on_Elist_)(const mat&,const mat&,const List&,int)");
         signatures.insert("double(*mean_abs_diff_on_Elist_)(const mat&,const mat&,const List&,int)");
-        signatures.insert("double(*max_diff_on_Emat_)(const mat&,const mat&,const mat&)");
+        signatures.insert("double(*max_diff_on_emat_)(const mat&,const mat&,const mat&)");
         signatures.insert("double(*max_abs_diff_on_EK_)(const mat&,const mat&,const mat&,const mat&)");
         signatures.insert("Rcpp::NumericMatrix(*list2row_)(Rcpp::List,int)");
         signatures.insert("Rcpp::NumericMatrix(*list2col_)(Rcpp::List,int)");
@@ -1119,13 +1155,13 @@ RcppExport SEXP _gRips_RcppExport_registerCCallable() {
     R_RegisterCCallable("gRips", "_gRips_max_abs_diag_diff_", (DL_FUNC)_gRips_max_abs_diag_diff__try);
     R_RegisterCCallable("gRips", "_gRips_max_diag_diff_", (DL_FUNC)_gRips_max_diag_diff__try);
     R_RegisterCCallable("gRips", "_gRips_califa_", (DL_FUNC)_gRips_califa__try);
-    R_RegisterCCallable("gRips", "_gRips_diff_on_Emat_", (DL_FUNC)_gRips_diff_on_Emat__try);
+    R_RegisterCCallable("gRips", "_gRips_diff_on_emat_", (DL_FUNC)_gRips_diff_on_emat__try);
     R_RegisterCCallable("gRips", "_gRips_diff_on_Elist_", (DL_FUNC)_gRips_diff_on_Elist__try);
-    R_RegisterCCallable("gRips", "_gRips_max_abs_diff_on_Emat_", (DL_FUNC)_gRips_max_abs_diff_on_Emat__try);
-    R_RegisterCCallable("gRips", "_gRips_mean_abs_diff_on_Emat_", (DL_FUNC)_gRips_mean_abs_diff_on_Emat__try);
+    R_RegisterCCallable("gRips", "_gRips_max_abs_diff_on_emat_", (DL_FUNC)_gRips_max_abs_diff_on_emat__try);
+    R_RegisterCCallable("gRips", "_gRips_mean_abs_diff_on_emat_", (DL_FUNC)_gRips_mean_abs_diff_on_emat__try);
     R_RegisterCCallable("gRips", "_gRips_max_abs_diff_on_Elist_", (DL_FUNC)_gRips_max_abs_diff_on_Elist__try);
     R_RegisterCCallable("gRips", "_gRips_mean_abs_diff_on_Elist_", (DL_FUNC)_gRips_mean_abs_diff_on_Elist__try);
-    R_RegisterCCallable("gRips", "_gRips_max_diff_on_Emat_", (DL_FUNC)_gRips_max_diff_on_Emat__try);
+    R_RegisterCCallable("gRips", "_gRips_max_diff_on_emat_", (DL_FUNC)_gRips_max_diff_on_emat__try);
     R_RegisterCCallable("gRips", "_gRips_max_abs_diff_on_EK_", (DL_FUNC)_gRips_max_abs_diff_on_EK__try);
     R_RegisterCCallable("gRips", "_gRips_list2row_", (DL_FUNC)_gRips_list2row__try);
     R_RegisterCCallable("gRips", "_gRips_list2col_", (DL_FUNC)_gRips_list2col__try);

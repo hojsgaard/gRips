@@ -2,6 +2,8 @@
 using namespace arma;
 using namespace Rcpp;
 
+mat inv_qr_(mat& X);
+
 arma::uvec setdiff_(arma::uvec x, arma::uvec y);
 arma::vec rep_nout(vec x, int nout);
 arma::mat vec2mat(arma::vec x, int nrow, int ncol);

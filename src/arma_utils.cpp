@@ -2,6 +2,16 @@
 using namespace arma;
 using namespace Rcpp;
 
+
+//[[Rcpp::export]]
+mat inv_qr_(mat& X){
+  arma::mat Q, R;
+  arma::qr(Q,R,X);
+  mat Ri = inv(R);
+  mat out = Ri * Q.t();
+  return(out);
+}
+
 // [[Rcpp::export]]
 arma::uvec setdiff_(arma::uvec x, arma::uvec y){    
     // x = arma::unique(x);
@@ -160,10 +170,6 @@ arma::mat replace_uv_(arma::mat& M, arma::ivec u, arma::ivec v, arma::vec value,
 void as_colvec(arma::mat& M){
   M.set_size(M.n_rows * M.n_cols, 1);
 }
-
-
-
-
 
 // [[Rcpp::export]]
 arma::mat extract_uv_(arma::mat& M, arma::ivec u, arma::ivec v, int shift=1){

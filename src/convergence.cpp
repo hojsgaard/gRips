@@ -9,6 +9,7 @@
 using namespace Rcpp;
 using namespace arma;
 
+
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #define MIN(a,b) (((a)>(b))?(b):(a))
 
@@ -121,7 +122,7 @@ double califa_(const mat& S, const mat& Sigma, const mat& Sigmaold)
 
 
 //[[Rcpp::export]] 
-vec diff_on_Emat_(const mat& S, const mat& Sigma, const umat& E, int shift=1){
+vec diff_on_emat_(const mat& S, const mat& Sigma, const umat& E, int shift=1){
   uvec eids = sub2ind(size(S), E - shift);           // Obtain Element IDs
   vec v = S.elem(eids) - Sigma.elem(eids);   // Values of the Elements
   vec d = S.diag() - Sigma.diag();
@@ -131,12 +132,12 @@ vec diff_on_Emat_(const mat& S, const mat& Sigma, const umat& E, int shift=1){
 
 //[[Rcpp::export]] 
 vec diff_on_Elist_(const mat& S, const mat& Sigma, const List& E, int shift=1){
-  umat Emat = conv_to<umat>::from(list2Emat_(E, shift));
-  // Emat.print();
-  return diff_on_Emat_(S, Sigma, Emat, 0);
-  // return diff_on_Emat_(S, Sigma, Emat, shift);
+  umat emat = conv_to<umat>::from(list_to_emat(E, shift));
+  // emat.print();
+  return diff_on_emat_(S, Sigma, emat, 0);
+  // return diff_on_emat_(S, Sigma, emat, shift);
 
-  // uvec eids = sub2ind( size(S), Emat);           // Obtain Element IDs
+  // uvec eids = sub2ind( size(S), emat);           // Obtain Element IDs
   // vec v = S.elem( eids ) - Sigma.elem( eids );   // Values of the Elements
   // vec d = S.diag() - Sigma.diag();
   // vec out = join_cols(d, v);
@@ -145,14 +146,14 @@ vec diff_on_Elist_(const mat& S, const mat& Sigma, const List& E, int shift=1){
 }
 
 //[[Rcpp::export]] 
-double max_abs_diff_on_Emat_(const mat& Sigma, const mat& S, const umat& E, int shift=1){
-  vec d = diff_on_Emat_(Sigma, S, E, shift);
+double max_abs_diff_on_emat_(const mat& Sigma, const mat& S, const umat& E, int shift=1){
+  vec d = diff_on_emat_(Sigma, S, E, shift);
   return max(abs(d));
 }
 
 //[[Rcpp::export]] 
-double mean_abs_diff_on_Emat_(const mat& Sigma, const mat& S, const umat& E, int shift=1){
-  vec d = diff_on_Emat_(Sigma, S, E, shift);
+double mean_abs_diff_on_emat_(const mat& Sigma, const mat& S, const umat& E, int shift=1){
+  vec d = diff_on_emat_(Sigma, S, E, shift);
   return (sum(abs(d)) / d.size());
 }
 
@@ -183,7 +184,7 @@ double mean_abs_diff_on_Elist_(const mat& Sigma, const mat& S, const List& E, in
 // ----------------------------------------------------------------------
 
 //[[Rcpp::export]] 
-double max_diff_on_Emat_(const mat& Sigma, const mat& S, const mat& E){
+double max_diff_on_emat_(const mat& Sigma, const mat& S, const mat& E){
   double out=0, dd; //, v1, v2;
   int u, v;
 
@@ -366,7 +367,7 @@ bool does_model_fit_to_data_ips(mat& S, umat& EE, mat& K, mat& Sigma,
   double dd1, maxvar = 1; //max_abs_diag_(S);
   double N = S.n_rows;
   
-  dd1 = max_abs_diff_on_Emat_(S, Sigma, EE) / N;
+  dd1 = max_abs_diff_on_emat_(S, Sigma, EE) / N;
   bool does_fit = dd1 < (maxvar * eps);
   //printf(".does_model_fit_to_data_ips (cpp) d=%15e, s=%15e, does_fit=%i\n", d, s, does_fit);
   return does_fit;   

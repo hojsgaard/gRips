@@ -86,39 +86,60 @@ int find_str_ (const char* st, chr_vec x){
   if (it == x.end()) out=-1;
   
   // Rcout << out  << endl;
-  return out;
-  
+  return out;  
 }
-
-
 
 
 // ---------------------------------------------------------------------
 // *** Convert list of vectors into edge matrix (a 2xp matrix) ***
 // ---------------------------------------------------------------------
 
-// THIS FN IS VERY SLOW
+// THIS FN IS VERY SLOW; Probably way faster to create amat first.
 
 //[[Rcpp::export]] 
-arma::mat list2Emat_ (const List& E, int shift=1){
+arma::mat list_to_emat (const List& lst, int shift=1){
 
-  int nc=E.length(), nr=0,  m;
+  int nc=lst.length(), nr=0,  m;
   if (nc==0) return(mat(2,0));
 
-  nr = as<vec>(E[0]).size();  
-  for (int i=0; i<E.length(); ++i){
-    m = as<vec>(E[i]).size();
-    if (m != nr) stop("element %i is of different length than the previous\n", i+1);
+  nr = as<vec>(lst[0]).size();  
+  for (int i=0; i<lst.length(); ++i){
+    m = as<vec>(lst[i]).size();
+    if (m != nr)
+      stop("element %i is of different length than the previous\n", i+1);
   }
 
   mat result_mat(nr, nc);
   size_t kk = 0;
    
-  for (int i = 0; i < E.length(); ++i){
-    vec gg = sort(as<vec>(E[i])) - shift;
+  for (int i = 0; i < lst.length(); ++i){
+    vec gg = sort(as<vec>(lst[i])) - shift;
     result_mat.col(kk++) = gg;
   }
 
   result_mat = unique_cols(result_mat);
   return result_mat;
+}
+
+
+//[[Rcpp::export]]
+mat as_emat2amat_(umat emat, int d){
+  mat amat = zeros(d, d);
+  uvec eids = sub2ind(size(amat), emat);
+  vec vals = ones(emat.n_cols, 1);
+  amat(eids) = vals;  
+  amat = amat + amat.t();
+  return amat;
+}
+
+//[[Rcpp::export]]
+umat as_emat_complement_(umat emat, int d){
+
+  mat amat = as_emat2amat_(emat, d);
+  amat = amat - 1;
+  amat = trimatl(amat);
+  amat.diag().zeros();
+  uvec indices = find(amat < 0);
+  umat ematc   = ind2sub(size(amat), indices);
+  return ematc;  
 }

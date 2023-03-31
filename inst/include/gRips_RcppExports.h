@@ -172,17 +172,17 @@ namespace gRips {
         return Rcpp::as<double >(rcpp_result_gen);
     }
 
-    inline vec diff_on_Emat_(const mat& S, const mat& Sigma, const umat& E, int shift = 1) {
-        typedef SEXP(*Ptr_diff_on_Emat_)(SEXP,SEXP,SEXP,SEXP);
-        static Ptr_diff_on_Emat_ p_diff_on_Emat_ = NULL;
-        if (p_diff_on_Emat_ == NULL) {
-            validateSignature("vec(*diff_on_Emat_)(const mat&,const mat&,const umat&,int)");
-            p_diff_on_Emat_ = (Ptr_diff_on_Emat_)R_GetCCallable("gRips", "_gRips_diff_on_Emat_");
+    inline vec diff_on_emat_(const mat& S, const mat& Sigma, const umat& E, int shift = 1) {
+        typedef SEXP(*Ptr_diff_on_emat_)(SEXP,SEXP,SEXP,SEXP);
+        static Ptr_diff_on_emat_ p_diff_on_emat_ = NULL;
+        if (p_diff_on_emat_ == NULL) {
+            validateSignature("vec(*diff_on_emat_)(const mat&,const mat&,const umat&,int)");
+            p_diff_on_emat_ = (Ptr_diff_on_emat_)R_GetCCallable("gRips", "_gRips_diff_on_emat_");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_diff_on_Emat_(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(Sigma)), Shield<SEXP>(Rcpp::wrap(E)), Shield<SEXP>(Rcpp::wrap(shift)));
+            rcpp_result_gen = p_diff_on_emat_(Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(Sigma)), Shield<SEXP>(Rcpp::wrap(E)), Shield<SEXP>(Rcpp::wrap(shift)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
@@ -214,17 +214,17 @@ namespace gRips {
         return Rcpp::as<vec >(rcpp_result_gen);
     }
 
-    inline double max_abs_diff_on_Emat_(const mat& Sigma, const mat& S, const umat& E, int shift = 1) {
-        typedef SEXP(*Ptr_max_abs_diff_on_Emat_)(SEXP,SEXP,SEXP,SEXP);
-        static Ptr_max_abs_diff_on_Emat_ p_max_abs_diff_on_Emat_ = NULL;
-        if (p_max_abs_diff_on_Emat_ == NULL) {
-            validateSignature("double(*max_abs_diff_on_Emat_)(const mat&,const mat&,const umat&,int)");
-            p_max_abs_diff_on_Emat_ = (Ptr_max_abs_diff_on_Emat_)R_GetCCallable("gRips", "_gRips_max_abs_diff_on_Emat_");
+    inline double max_abs_diff_on_emat_(const mat& Sigma, const mat& S, const umat& E, int shift = 1) {
+        typedef SEXP(*Ptr_max_abs_diff_on_emat_)(SEXP,SEXP,SEXP,SEXP);
+        static Ptr_max_abs_diff_on_emat_ p_max_abs_diff_on_emat_ = NULL;
+        if (p_max_abs_diff_on_emat_ == NULL) {
+            validateSignature("double(*max_abs_diff_on_emat_)(const mat&,const mat&,const umat&,int)");
+            p_max_abs_diff_on_emat_ = (Ptr_max_abs_diff_on_emat_)R_GetCCallable("gRips", "_gRips_max_abs_diff_on_emat_");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_max_abs_diff_on_Emat_(Shield<SEXP>(Rcpp::wrap(Sigma)), Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(E)), Shield<SEXP>(Rcpp::wrap(shift)));
+            rcpp_result_gen = p_max_abs_diff_on_emat_(Shield<SEXP>(Rcpp::wrap(Sigma)), Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(E)), Shield<SEXP>(Rcpp::wrap(shift)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
@@ -235,17 +235,17 @@ namespace gRips {
         return Rcpp::as<double >(rcpp_result_gen);
     }
 
-    inline double mean_abs_diff_on_Emat_(const mat& Sigma, const mat& S, const umat& E, int shift = 1) {
-        typedef SEXP(*Ptr_mean_abs_diff_on_Emat_)(SEXP,SEXP,SEXP,SEXP);
-        static Ptr_mean_abs_diff_on_Emat_ p_mean_abs_diff_on_Emat_ = NULL;
-        if (p_mean_abs_diff_on_Emat_ == NULL) {
-            validateSignature("double(*mean_abs_diff_on_Emat_)(const mat&,const mat&,const umat&,int)");
-            p_mean_abs_diff_on_Emat_ = (Ptr_mean_abs_diff_on_Emat_)R_GetCCallable("gRips", "_gRips_mean_abs_diff_on_Emat_");
+    inline double mean_abs_diff_on_emat_(const mat& Sigma, const mat& S, const umat& E, int shift = 1) {
+        typedef SEXP(*Ptr_mean_abs_diff_on_emat_)(SEXP,SEXP,SEXP,SEXP);
+        static Ptr_mean_abs_diff_on_emat_ p_mean_abs_diff_on_emat_ = NULL;
+        if (p_mean_abs_diff_on_emat_ == NULL) {
+            validateSignature("double(*mean_abs_diff_on_emat_)(const mat&,const mat&,const umat&,int)");
+            p_mean_abs_diff_on_emat_ = (Ptr_mean_abs_diff_on_emat_)R_GetCCallable("gRips", "_gRips_mean_abs_diff_on_emat_");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_mean_abs_diff_on_Emat_(Shield<SEXP>(Rcpp::wrap(Sigma)), Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(E)), Shield<SEXP>(Rcpp::wrap(shift)));
+            rcpp_result_gen = p_mean_abs_diff_on_emat_(Shield<SEXP>(Rcpp::wrap(Sigma)), Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(E)), Shield<SEXP>(Rcpp::wrap(shift)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
@@ -298,17 +298,17 @@ namespace gRips {
         return Rcpp::as<double >(rcpp_result_gen);
     }
 
-    inline double max_diff_on_Emat_(const mat& Sigma, const mat& S, const mat& E) {
-        typedef SEXP(*Ptr_max_diff_on_Emat_)(SEXP,SEXP,SEXP);
-        static Ptr_max_diff_on_Emat_ p_max_diff_on_Emat_ = NULL;
-        if (p_max_diff_on_Emat_ == NULL) {
-            validateSignature("double(*max_diff_on_Emat_)(const mat&,const mat&,const mat&)");
-            p_max_diff_on_Emat_ = (Ptr_max_diff_on_Emat_)R_GetCCallable("gRips", "_gRips_max_diff_on_Emat_");
+    inline double max_diff_on_emat_(const mat& Sigma, const mat& S, const mat& E) {
+        typedef SEXP(*Ptr_max_diff_on_emat_)(SEXP,SEXP,SEXP);
+        static Ptr_max_diff_on_emat_ p_max_diff_on_emat_ = NULL;
+        if (p_max_diff_on_emat_ == NULL) {
+            validateSignature("double(*max_diff_on_emat_)(const mat&,const mat&,const mat&)");
+            p_max_diff_on_emat_ = (Ptr_max_diff_on_emat_)R_GetCCallable("gRips", "_gRips_max_diff_on_emat_");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_max_diff_on_Emat_(Shield<SEXP>(Rcpp::wrap(Sigma)), Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(E)));
+            rcpp_result_gen = p_max_diff_on_emat_(Shield<SEXP>(Rcpp::wrap(Sigma)), Shield<SEXP>(Rcpp::wrap(S)), Shield<SEXP>(Rcpp::wrap(E)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
