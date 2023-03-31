@@ -12,7 +12,7 @@ const int erp=0; // ERROR PRINTING
 
 #define as_num(cc) NumericVector(cc.begin(), cc.end())
 
-mat project_K_onto_G_(mat& K, umat& emc);
+mat project_K_onto_G_(const mat& K, const umat& emc);
 double mnormone_(mat& Delta);
 int method2int_(CharacterVector method);
 double ggm_logL_(mat& S, mat& K, int nobs);

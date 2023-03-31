@@ -101,9 +101,9 @@ List conips_ggm_(arma::mat& S, List& elist, umat& emat, int& nobs,
   umat emat0   = emat - 1;
 
   umat emat_c  = as_emat_complement_(emat-1, S.n_rows);
-  double eps2  = MIN(eps, 1.0/S.n_rows);  
+  // double eps2  = MIN(eps, 1.0/S.n_rows);  
   mat dif, Delta;
-  double mn;
+  double mno;
 
   // Variables for conips
   mat Sigma;
@@ -129,10 +129,11 @@ List conips_ggm_(arma::mat& S, List& elist, umat& emat, int& nobs,
       conv_check = mad;
       dif = S - Sigma;
       Delta = project_K_onto_G_(dif, emat_c);
-      mn = mnormone_(Delta);
-      conv_check = mn;
-      Rprintf("conips eps2 : %f mad : %f, mn : %f\n", eps2, mad, mn);      
-      PRINT_CONV_CHECK1;
+      mno = mnormone_(Delta);
+      conv_check = mno;
+      if (print>=3)
+	Rprintf("+++ conips eps : %f mad : %f, mno : %f\n", eps, mad, mno);      
+      // PRINT_CONV_CHECK1;
       break;
     case 2:
       CONV_CHECK_LOGL_DIFF;
@@ -205,9 +206,9 @@ List covips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
   umat emat0   = emat - 1;
   
   umat emat_c  = as_emat_complement_(emat-1, S.n_rows);
-  double eps2  = MIN(eps, 1.0/S.n_rows);  
+  // double eps2  = MIN(eps, 1.0/S.n_rows);  
   mat dif, Delta;
-  double mn;
+  double mno;
   
   
   // Variables for covips
@@ -240,21 +241,57 @@ List covips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
       conv_check = mad;
       dif = S - Sigma;
       Delta = project_K_onto_G_(dif, emat_c);
-      mn = mnormone_(Delta);
-      conv_check = mn;
-      Rprintf("covips eps2 : %f mad : %f, mn : %f\n", eps2, mad, mn);
-      PRINT_CONV_CHECK1;	
+      mno = mnormone_(Delta);
+      conv_check = mno;
+      if (print>=3)
+	Rprintf("+++ covips eps : %f mad : %f, mno : %f\n", eps, mad, mno);
+      // PRINT_CONV_CHECK1;	
       break;
     case 2:
       CONV_CHECK_LOGL_DIFF;
       break;
     }	
-    if (conv_check < eps2) break;
+    if (conv_check < eps) break;
   }
   
   logL = ggm_logL_(S, K, nobs);  
   RETURN_VALUE;
 }
+
+
+//[[Rcpp::export(.c_coxips_ggm_)]] 
+List coxips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
+		 mat K,       
+		 int& maxiter, double& eps, int& convcrit, int& print, List& aux){
+  int version = aux["version"];
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

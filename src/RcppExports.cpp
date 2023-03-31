@@ -856,6 +856,26 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// coxips_ggm_
+List coxips_ggm_(mat& S, List& elist, umat& emat, int& nobs, mat K, int& maxiter, double& eps, int& convcrit, int& print, List& aux);
+RcppExport SEXP _gRips_coxips_ggm_(SEXP SSEXP, SEXP elistSEXP, SEXP ematSEXP, SEXP nobsSEXP, SEXP KSEXP, SEXP maxiterSEXP, SEXP epsSEXP, SEXP convcritSEXP, SEXP printSEXP, SEXP auxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< List& >::type elist(elistSEXP);
+    Rcpp::traits::input_parameter< umat& >::type emat(ematSEXP);
+    Rcpp::traits::input_parameter< int& >::type nobs(nobsSEXP);
+    Rcpp::traits::input_parameter< mat >::type K(KSEXP);
+    Rcpp::traits::input_parameter< int& >::type maxiter(maxiterSEXP);
+    Rcpp::traits::input_parameter< double& >::type eps(epsSEXP);
+    Rcpp::traits::input_parameter< int& >::type convcrit(convcritSEXP);
+    Rcpp::traits::input_parameter< int& >::type print(printSEXP);
+    Rcpp::traits::input_parameter< List& >::type aux(auxSEXP);
+    rcpp_result_gen = Rcpp::wrap(coxips_ggm_(S, elist, emat, nobs, K, maxiter, eps, convcrit, print, aux));
+    return rcpp_result_gen;
+END_RCPP
+}
 // diff_fun_
 double diff_fun_(mat& Sigma, mat& K, umat emc);
 RcppExport SEXP _gRips_diff_fun_(SEXP SigmaSEXP, SEXP KSEXP, SEXP emcSEXP) {
@@ -1015,13 +1035,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // project_K_onto_G_
-mat project_K_onto_G_(mat& K, umat& emc);
+mat project_K_onto_G_(const mat& K, const umat& emc);
 RcppExport SEXP _gRips_project_K_onto_G_(SEXP KSEXP, SEXP emcSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< mat& >::type K(KSEXP);
-    Rcpp::traits::input_parameter< umat& >::type emc(emcSEXP);
+    Rcpp::traits::input_parameter< const mat& >::type K(KSEXP);
+    Rcpp::traits::input_parameter< const umat& >::type emc(emcSEXP);
     rcpp_result_gen = Rcpp::wrap(project_K_onto_G_(K, emc));
     return rcpp_result_gen;
 END_RCPP

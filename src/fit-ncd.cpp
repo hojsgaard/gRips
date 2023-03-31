@@ -209,7 +209,7 @@ List outerloop1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat,
   }
   
   bool converged = false;    
-  double mad, conv_crit, mn;
+  double mad, conv_crit, mno;
   mat Sigma_prev = diagmat(Sigma.diag());
   int iter = 0;
 
@@ -219,17 +219,17 @@ List outerloop1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat,
     // mad = mean_abs_diff_non_edge_(Sigma, Sigma_prev, emat_c); // FIXME for testing
     // mad = max_abs_diff_non_edge_(Sigma, Sigma_prev, emat_c); // FIXME for testing
     mat Delta = Sigma - Sigma_prev;
-    mn = mnormone_(Delta);
-    // Rprintf("iter: %d eps2: %14.10f mn : %14.10f\n", iter, eps2, mn);
+    mno = mnormone_(Delta);
+    // Rprintf("iter: %d eps2: %14.10f mno : %14.10f\n", iter, eps2, mno);
     Sigma_prev = Sigma;
-    conv_crit = mn;
+    conv_crit = mno;
     iter++;
     if ((iter == maxiter) || (conv_crit < eps)){
       break;
     }
   }
 
-  return List::create(_["iter"]  = iter, _["mad"]=mn); //FIXME mad should be conv_crit		
+  return List::create(_["iter"]  = iter, _["mad"]=mno); //FIXME mad should be conv_crit		
 }
 
 
@@ -258,7 +258,7 @@ List outerloop2_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int no
     else          Rprintf("++ Running outerloop2 - smart update of K, smart=%d, eps_smart=%f\n", smart, eps_smart);
   }
 
-  double dif2, mn, conv_crit;
+  double dif2, mno, conv_crit;
   bool converged = false;
   int iter = 0;
   while (!converged){
@@ -269,8 +269,8 @@ List outerloop2_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int no
     conv_crit = dif2;
 
     mat Delta = K - project_K_onto_G_(K, emat_c);
-    mn = mnormone_(Delta);
-    conv_crit = mn;
+    mno = mnormone_(Delta);
+    conv_crit = mno;
     
     iter++;
     if ((iter == maxiter) || (conv_crit < eps)){
@@ -365,13 +365,13 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
   
   umat emat_c = as_emat_complement_(emat-1, S.n_rows);
   mat amat    = as_emat2amat_(emat-1, S.n_rows);
-  mat Sigma   = S;
+  mat Sigma   = S, K2, Delta;
   List res1, res2;
   double logL, gap, conv_check;
   int iter1, iter2, itcount;
 
   double eps2 = MIN(eps, 1.0/Sigma.n_rows);  
-
+  double mno;
   
   res1 = outerloop1_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat,
 		     nobs=nobs, eps=eps2, maxiter=maxiter, print=print);  
@@ -394,10 +394,15 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
 			 rank_Sigma=rank_Sigma,
 			 smart=smart, eps_smart=eps_smart, print=print);
       iter2 = res2["iter"];
-      K = project_K_onto_G_(K, emat_c);
+      K2 = project_K_onto_G_(K, emat_c);
+      Delta = K - K2;
+      mno = mnormone_(Delta);
+      if (print>=3)
+	Rprintf("+++ full mno : %f\n", mno);
+      conv_check = mno;
       if (iter2 < maxiter){ // Then K is posdef	
-      	logL = ggm_logL_(S, K, nobs);
-      	gap  = duality_gap_(Sigma, K, nobs);
+      	logL = ggm_logL_(S, K2, nobs);
+      	gap  = duality_gap_(Sigma, K2, nobs);
       } else {
       	REprintf("Algorithn may not have converged\n");
       	// K = NA; upper_limit_logL = formel (23)
@@ -413,23 +418,26 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
       // abort
     } else {    
       K = inv(Sigma);
-      K = project_K_onto_G_(K, emat_c);
-      if (!is_pos_def(K)){
-	REprintf("Algorithn may not have converged\n");
+      K2 = project_K_onto_G_(K, emat_c);
+      Delta = K - K2;
+      mno = mnormone_(Delta);
+      if (print>=3)
+	Rprintf("+++ fast mno : %f\n", mno);
+      conv_check = mno;      
+      if (!is_pos_def(K2)){
+	REprintf("Algorithm may not have converged\n");
 	// K = NA; upper_limit_logL = formel (23)
       } else {
-	logL = ggm_logL_(S, K, nobs);
-	gap  = duality_gap_(Sigma, K, nobs);	
+	logL = ggm_logL_(S, K2, nobs);
+	gap  = duality_gap_(Sigma, K2, nobs);	
       }
-      itcount = (int) res1["iter"];  
+      itcount = iter1 + 1;
     }
     break;
     
   default:
     Rprintf("'version' must be 0, 1\n");
   }
- 
-  logL = ggm_logL_(S, K, nobs);  
 
   RETURN_VALUE;
 }

@@ -149,6 +149,10 @@ Scc_inv_list_ <- function(S, edges0) {
     .Call('_gRips_covips_ggm_', PACKAGE = 'gRips', S, elist, emat, nobs, K, maxiter, eps, convcrit, print, aux)
 }
 
+.c_coxips_ggm_ <- function(S, elist, emat, nobs, K, maxiter, eps, convcrit, print, aux) {
+    .Call('_gRips_coxips_ggm_', PACKAGE = 'gRips', S, elist, emat, nobs, K, maxiter, eps, convcrit, print, aux)
+}
+
 diff_fun_ <- function(Sigma, K, emc) {
     .Call('_gRips_diff_fun_', PACKAGE = 'gRips', Sigma, K, emc)
 }

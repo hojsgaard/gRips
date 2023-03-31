@@ -14,18 +14,19 @@ typedef Rcpp::CharacterVector chr_vec;
 
 
 // [[Rcpp::export]]
-mat project_K_onto_G_(mat& K, umat& emc){
+mat project_K_onto_G_(const mat& K, const umat& emc){
 
+  mat K2 = K;
   uvec r0 = {0}, r1 = {1};
   mat emc2 = conv_to<mat>::from(emc);
   uvec s0 = conv_to<uvec>::from(emc2.rows(r0));
   uvec s1 = conv_to<uvec>::from(emc2.rows(r1));
   for (size_t j=0; j<emc.n_cols; j++){
     // Rcout << s0[j] << "  " << s1[j] << "\n"; 
-    K(s0[j], s1[j]) = 0;
-    K(s1[j], s0[j]) = 0;
+    K2(s0[j], s1[j]) = 0;
+    K2(s1[j], s0[j]) = 0;
   }
-  return(K);
+  return(K2);
 }
 
 // [[Rcpp::export]]
