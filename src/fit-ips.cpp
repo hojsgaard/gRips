@@ -125,14 +125,14 @@ List conips_ggm_(arma::mat& S, List& elist, umat& emat, int& nobs,
     switch(convcrit){
     case 1: 
       Sigma = inv_qr_(K); // Needed for conips only
-      mad   = mean_abs_diff_on_emat_(S, Sigma, emat0, 0);
-      conv_check = mad;
+      // mad   = mean_abs_diff_on_emat_(S, Sigma, emat0, 0);
+      // conv_check = mad;
       dif = S - Sigma;
-      Delta = project_K_onto_G_(dif, emat_c);
+      Delta = project_onto_G_(dif, emat_c);
       mno = mnormone_(Delta);
       conv_check = mno;
       if (print>=3)
-	Rprintf("+++ conips eps : %f mad : %f, mno : %f\n", eps, mad, mno);      
+	Rprintf(">>> conips iter: %4d eps: %14.10f, mno: %14.10f\n", itcount, eps, mno);
       // PRINT_CONV_CHECK1;
       break;
     case 2:
@@ -188,7 +188,7 @@ void covips_inner_(const mat& S, mat& K,
 			       smart=smart, eps_smart=eps_smart,			       
 			       print=print);
   }
-  // if (print>=3)Rprintf("+++ nupdates: %d\n", nupdates);
+  // if (print>=3)Rprintf(">>> nupdates: %d\n", nupdates);
 }
 
 //[[Rcpp::export(.c_covips_ggm_)]] 
@@ -237,14 +237,14 @@ List covips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
     
     switch(convcrit){
     case 1: 	
-      mad = mean_abs_diff_on_emat_(S, Sigma, emat0, 0);
-      conv_check = mad;
+      // mad = mean_abs_diff_on_emat_(S, Sigma, emat0, 0);
+      // conv_check = mad;
       dif = S - Sigma;
-      Delta = project_K_onto_G_(dif, emat_c);
+      Delta = project_onto_G_(dif, emat_c);
       mno = mnormone_(Delta);
       conv_check = mno;
       if (print>=3)
-	Rprintf("+++ covips eps : %f mad : %f, mno : %f\n", eps, mad, mno);
+	Rprintf(">>> covips iter: %4d eps: %14.10f, mno: %14.10f\n", itcount, eps, mno);
       // PRINT_CONV_CHECK1;	
       break;
     case 2:
@@ -384,7 +384,7 @@ List coxips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
     
   //   if (dd > eps_smart){
   //     if (print>=4){
-  // 	Rprintf("++++ updating dd %12.9f", dd);cc0.t().print();
+  // 	Rprintf(">>>> updating dd %12.9f", dd);cc0.t().print();
   //     }
   //     nupdates++;
   //     Sigma -= Sigma.cols(cc0) * Haux * Sigma.rows(cc0);     

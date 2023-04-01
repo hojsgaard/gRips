@@ -89,7 +89,7 @@ void update_Sigma_row_(int u, mat& Sigma, const mat& amat, int nobs, int print=0
   int  deg_u = accu(amat.rows(u_));
 
   if (print >= 4){
-    Rprintf("++++ Updating Sigma for u=%i with degree %i\n", u, deg_u);
+    Rprintf(">>>> Updating Sigma for u=%i with degree %i\n", u, deg_u);
   }
 
   vec w(Sigma.n_cols, fill::zeros);  
@@ -131,8 +131,8 @@ void update_K_row_(int u, mat& Sigma, mat& K, const mat& amat, int smart=0, doub
 
     // ivec u__ = {(int) u};
     if (print >= 4){
-      Rprintf("++++ Updating K for u=%i with degree %i\n", u, deg_u);
-      Rprintf("++++ ub_: ");  ub_.t().print();
+      Rprintf(">>>> Updating K for u=%i with degree %i\n", u, deg_u);
+      Rprintf(">>>> ub_: ");  ub_.t().print();
     }
 
     double k_uu     = as_scalar(K(u, u));    
@@ -192,7 +192,7 @@ void update_K_row_(int u, mat& Sigma, mat& K, const mat& amat, int smart=0, doub
 void innerloop1_update_Sigma_(mat& Sigma, mat& amat, int nobs, int print=0){
 
   if (print >= 4){
-    Rprintf("++++ Running innerloop1_update_Sigma\n");
+    Rprintf(">>>> Running innerloop1_update_Sigma\n");
   }
   
   for (size_t u=0; u<amat.n_rows; u++){
@@ -205,7 +205,7 @@ List outerloop1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat,
 		 int& nobs, double& eps, int maxiter, int print=0){
 
   if (print >=2){
-    Rprintf("++ Running outerloop1\n");
+    Rprintf(">> Running outerloop1\n");
   }
   
   bool converged = false;    
@@ -220,10 +220,14 @@ List outerloop1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat,
     // mad = max_abs_diff_non_edge_(Sigma, Sigma_prev, emat_c); // FIXME for testing
     mat Delta = Sigma - Sigma_prev;
     mno = mnormone_(Delta);
-    // Rprintf("iter: %d eps2: %14.10f mno : %14.10f\n", iter, eps2, mno);
+    iter++;
+    
+    if (print >=3){
+      Rprintf(">>> outerloop1 iter: %4d eps: %14.10f mno: %14.10f\n", iter, eps, mno);
+    }
+
     Sigma_prev = Sigma;
     conv_crit = mno;
-    iter++;
     if ((iter == maxiter) || (conv_crit < eps)){
       break;
     }
@@ -239,8 +243,8 @@ List outerloop1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat,
 
 void innerloop2_update_Sigma_K_(mat& Sigma, mat& K, mat& amat, int nobs,
 				int smart=0, double eps_smart=0.0, int print=0){
-  if (print >= 3){
-    Rprintf("+++ Running innerloop2_update_Sigma_K\n");
+  if (print >= 4){
+    Rprintf(">>>> Running innerloop2_update_Sigma_K\n");
    }
 
   for (size_t u=0; u<amat.n_rows; u++){
@@ -254,8 +258,9 @@ List outerloop2_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int no
 		 int smart=0, double eps_smart=0.0, int print=0){
 
   if (print >=2){
-    if (smart==3) Rprintf("++ Running outerloop2 - brute force update of K\n");
-    else          Rprintf("++ Running outerloop2 - smart update of K, smart=%d, eps_smart=%f\n", smart, eps_smart);
+    Rprintf(">> Running outerloop2\n");
+    // if (smart==3) Rprintf(">> Running outerloop2 - brute force update of K\n");
+    // else          Rprintf(">> Running outerloop2 - smart update of K, smart=%d, eps_smart=%f\n", smart, eps_smart);
   }
 
   double dif2, mno, conv_crit;
@@ -268,14 +273,14 @@ List outerloop2_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int no
     // dif2 = diff_fun_(Sigma, K, emat_c); // FIXME for testing
     // conv_crit = dif2;
 
-    mat Delta = K - project_K_onto_G_(K, emat_c);
+    mat Delta = K - project_onto_G_(K, emat_c);
     mno = mnormone_(Delta);
     conv_crit = mno;
+    iter++;
 
     if (print>=3)
-      Rprintf("+++ innerloop2 iter : %d mno : %f\n", iter, mno);
+      Rprintf(">>> outerloop2 iter: %4d eps: %14.10f mno: %14.10f\n", iter, eps, mno);
     
-    iter++;
     if ((iter == maxiter) || (conv_crit < eps)){
       break;
     }
@@ -296,7 +301,7 @@ void Sigma_to_K_row_(int u, mat& Sigma, mat& K, const mat& amat, int nobs, int p
   int  deg_u = accu(amat.rows(u_));
 
   if (print >= 4){
-    Rprintf("++++ Updating Sigma for u=%i with degree %i\n", u, deg_u);
+    Rprintf(">>>> Updating Sigma for u=%i with degree %i\n", u, deg_u);
   }
   
   vec beta_pad(Sigma.n_cols, fill::zeros);  
@@ -382,7 +387,7 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
   
   iter1 = res1["iter"];
   if (print>=2)
-    Rprintf("++ outerloop1 iterations : %d\n", iter1);
+    Rprintf(">> outerloop1 iterations : %d\n", iter1);
   
   CHECK_K;
   
@@ -402,13 +407,13 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
 			 smart=smart, eps_smart=eps_smart, print=print);
       iter2 = res2["iter"];
       if (print>=2)
-	Rprintf("++ outerloop2 iterations : %d\n", iter2);
+	Rprintf(">> outerloop2 iterations : %d\n", iter2);
       
-      K2 = project_K_onto_G_(K, emat_c);
+      K2 = project_onto_G_(K, emat_c);
       Delta = K - K2;
       mno = mnormone_(Delta);
       if (print>=3)
-	Rprintf("+++ full mno : %f\n", mno);
+	Rprintf(">>> fulle mno : %14.10f\n", mno);
       conv_check = mno;
       if (iter2 < maxiter){ // Then K is posdef	
       	logL = ggm_logL_(S, K2, nobs);
@@ -428,11 +433,11 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
       // abort
     } else {    
       K = inv(Sigma);
-      K2 = project_K_onto_G_(K, emat_c);
+      K2 = project_onto_G_(K, emat_c);
       Delta = K - K2;
       mno = mnormone_(Delta);
       if (print>=3)
-	Rprintf("+++ fast mno : %f\n", mno);
+	Rprintf(">>> fast mno : %14.10f\n", mno);
       conv_check = mno;      
       if (!is_pos_def(K2)){
 	REprintf("Algorithm may not have converged\n");
@@ -463,198 +468,3 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// //[[Rcpp::export(.c_ncd_ggm_)]]
-// List ncd_ggm_(mat& S, List& Elist, umat& emat, int& nobs,
-// 	       mat K,       
-// 	       int iter, double& eps, int& convcrit, int print, List& aux){
-
-//   int version      = aux["version"];
-//   int smart        = aux["smart"];
-//   double eps_smart = aux["eps_smart"];
-  
-//   umat emat_c = as_emat_complement_(emat - 1, S.n_rows);
-//   mat amat    = as_emat2amat_(emat-1, S.n_rows);
-//   mat Sigma   = S;
-//   List res1, res2;
-//   double gap, conv_check;
-//   int maxit, itcount;
-  
-//   res1 = outerloop1_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat,
-// 		     nobs=nobs, eps=eps, maxit=iter, print=print);  
-//   CHECK_K;
-    
-//   switch (version){
-
-//   case 1: // The glasso type update
-//     Rprintf("version 1\n");
-//     conv_check = res1["mad"];    
-//     K = mat(S.n_rows, S.n_rows, fill::eye);
-//     Sigma_to_K_(Sigma=Sigma, K=K, amat=amat, nobs=nobs, print=print);
-//     // FIXME: Need sanity check of K being p.d.
-//     gap = duality_gap_(Sigma, K, nobs);
-//     itcount = (int) res1["iter"];    
-//     break;
-
-//   case 2:
-//     Rprintf("version 2\n");
-//     smart = 1; // Full update 
-//     res2 = outerloop2_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat, nobs=nobs, eps=eps, maxit=iter,
-// 		       rank_Sigma=rank_Sigma,
-// 		       smart=smart, eps_smart=eps_smart, print=print);
-//     K = mat(S.n_rows, S.n_rows, fill::eye);
-//     Sigma_to_K_(Sigma=Sigma, K=K, amat=amat, nobs=nobs, print=print);
-//     // FIXME: Need sanity check of K being p.d.
-//     conv_check = res2["conv_crit"];
-    
-//     gap = duality_gap_(Sigma, K, nobs);
-//     itcount = (int) res2["iter"] + (int) res1["iter"];
-//     break;
-
-
-//   case 3:
-//     Rprintf("version 3\n");
-//     smart = 1; // Full update 
-//     res2 = outerloop2_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat, nobs=nobs, eps=eps, maxit=iter,
-// 		       rank_Sigma=rank_Sigma,
-// 		       smart=smart, eps_smart=eps_smart, print=print);    
-//     conv_check = res2["conv_crit"];
-
-//     K = project_K_onto_G_(K, emat_c);
-//     // FIXME: Need sanity check of K being p.d.
-//     gap = duality_gap_(Sigma, K, nobs);
-//     itcount = (int) res2["iter"] + (int) res1["iter"];
-//     break;
-    
-//   default:
-//     Rprintf("'version' must be 1, 2 or 3\n");
-//   }
- 
-//   double logL = ggm_logL_(S, K, nobs);  
-
-//   RETURN_VALUE;
-// }
-
-
-
-
-
-
-
-
-
-    // RR.print();
-    // AA.print();
-    // Rprintf("K2_ucu:\n"); K2_ucu.t().print();
-    // Rprintf("K_ucu:\n"); K_ucu.t().print();
-    
-    // switch (smart) {
-    // case 0: // The kalif type update
-    //   break;
-    // case 1: // Update as described in paper
-      
-    //   break;
-    // case 2: // Approximate updates
-    //   Kdiff_ucu = K2_ucu - K_ucu;
-    //   Kdiff_norm = accu(Kdiff_ucu.t() * Kdiff_ucu) / Sigma.n_rows;      
-    //   if (Kdiff_norm >= eps_smart){
-    // 	if (print >= 4)
-    // 	  Rprintf("++++ Updating u=%3i Kdiff_norm = %f\n", u, Kdiff_norm);
-    // 	K2_ucuc  = K_ucuc + RR2 - RR;
-    // 	K.submat(uc_, uc_) = K2_ucuc;
-    //   }
-    //   break;
-    // default:
-    //   Rcout << "Invalid value of smart\n";
-    // }
-
-
-  // if (print >= 5){
-  //   Rprintf("+++++ emat:\n"); emat.print();
-  //   Rprintf("+++++ amat:\n"); amat.print();
-  //   Rprintf("+++++ emat_c:\n"); emat_c.print();
-  // }
-
-
-
-  // Rprintf("Sigma after outerloop1:\n"); Sigma.print();
-  // Rprintf("outerloop1 iter = %d\n", (int) res1["iter"]);
-
-
-  // Rprintf("Sigma and K after outerloop2 :\n"); Sigma.print(); K.print();
-  // Rprintf("outerloop2 iter = %d\n", (int) res2["iter"]);
-  
-  // Rprintf("Sigma:\n"); Sigma.print();
-  // Rprintf("K:\n"); K.print();
-
-
-    // replace_uv_(K,  u__,  u__,   k_uu_upd2,  shift=shift); 
-    // replace_uv_(K,  u__, -u__,  -K_uc_u_upd, shift=shift);
-    
-    // Rprintf("K_uc_u:\n"); K_uc_u.t().print();
-    // Rprintf("K_uc_uc:\n"); K_uc_uc.print();
-    // Rprintf("Sigma_uc_u:\n"); Sigma_uc_u.t().print();
-
-    // Rprintf("CC2:\n"); CC2.print();
-    // Rprintf("DD2:\n"); DD2.t().print(); 
-
-    // for (size_t k=0; k<uc_.n_elem; k++){
-      // K(uc_(k),u) =  -K_uc_u_upd(uc_(k));
-    // }
-    // replace_uv_(K, -u__,  u__,  -K_uc_u_upd, shift=shift);
-
-
-    // arma::uvec vv_  = arma::linspace<arma::uvec>(0, K.n_cols - 1, K.n_cols);
-    // arma::uvec uc_  = setdiff_(vv_, u_);
-    // arma::uvec rr = vv_;
-    // rr.shed_rows(u_);
-    // Rprintf("uc_:\n"); uc_.print();
-    // Rprintf("rr_:\n"); rr.print();
-
-
-    // mat K_uc_u     = extract_uv_(K, -u__,  u__, shift=shift);
-    // mat K_uc_uc    = extract_uv_(K, -u__, -u__, shift=shift);
-    // mat Sigma_uc_u = extract_uv_(Sigma, -u__, u__, shift=shift);
-
-
-    
-// mat RR2 = CC2 + k_uu_upd2 * DD2 * DD2.t();
-    // mat RR2 = CC2 + K_uc_u_upd * DD2.t();
-    // Rprintf("RR2:\n"); RR2.print();    
-    // Rprintf("K2 after smart update:\n"); K2.print();    
-    // mat diff = K - K2;
-    // Rprintf("diff:\n"); diff.print();
-
-
-
-      // NOT A GOOD IDEA TIMEWISE
-      // double k_uu_upd2_inv = 1 / as_scalar(k_uu_upd2);
-      // double k_uu_inv      = 1 / as_scalar(k_uu);
-      // new2 = (k_uu_upd2_inv * K_uc_u_upd) * trans(K_uc_u_upd);
-      // old2 = (k_uu_inv      * K_uc_u)     * trans(K_uc_u);
-
-
-
-    // Rprintf("AA:\n"); AA.print();
-    // Rprintf("bb:\n"); bb.t().print();
-    // Rprintf("tt:\n"); tt.t().print();
-    
-    // vec beta(Sigma.n_cols, fill::zeros);
-    // beta.elem(ub_) = tt;
-    // w = Sigma * beta;
-    // Rprintf("beta:\n"); beta.t().print();

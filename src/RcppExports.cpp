@@ -1034,15 +1034,15 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// project_K_onto_G_
-mat project_K_onto_G_(const mat& K, const umat& emc);
-RcppExport SEXP _gRips_project_K_onto_G_(SEXP KSEXP, SEXP emcSEXP) {
+// project_onto_G_
+mat project_onto_G_(const mat& K, const umat& emc);
+RcppExport SEXP _gRips_project_onto_G_(SEXP KSEXP, SEXP emcSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const mat& >::type K(KSEXP);
     Rcpp::traits::input_parameter< const umat& >::type emc(emcSEXP);
-    rcpp_result_gen = Rcpp::wrap(project_K_onto_G_(K, emc));
+    rcpp_result_gen = Rcpp::wrap(project_onto_G_(K, emc));
     return rcpp_result_gen;
 END_RCPP
 }

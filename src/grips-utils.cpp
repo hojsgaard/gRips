@@ -14,7 +14,7 @@ typedef Rcpp::CharacterVector chr_vec;
 
 
 // [[Rcpp::export]]
-mat project_K_onto_G_(const mat& K, const umat& emc){
+mat project_onto_G_(const mat& K, const umat& emc){
 
   mat K2 = K;
   uvec r0 = {0}, r1 = {1};
@@ -29,13 +29,36 @@ mat project_K_onto_G_(const mat& K, const umat& emc){
   return(K2);
 }
 
+
+// mnormone(Delta) = max_v(\sum_u |Delta_{uv}|)
+
 // [[Rcpp::export]]
 double mnormone_(mat& Delta){
   rowvec s = sum(abs(Delta));
   // s.print();
   return(max(s));
 }
-// mnormone(Delta) = max_v(\sum_u |Delta_{uv}|)
+
+// // [[Rcpp::export]]
+// mat project_onto_G_diff_(const mat& K, const mat& K2, const umat& emc){
+//   mat Delta = K - K2;
+//   return project_onto_G_(Delta, emc);  
+// }
+
+// // [[Rcpp::export]]
+// double mnormone_diff_(mat& Delta, mat& Delta2){
+  
+//   rowvec s = sum(abs(Delta));
+//   // s.print();
+//   return(max(s));
+// }
+
+
+
+
+
+
+
 
 
 double get_conv_ref(const List& aux){
