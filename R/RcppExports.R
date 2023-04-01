@@ -201,8 +201,8 @@ as_emat_complement_ <- function(emat, d) {
     .Call('_gRips_as_emat_complement_', PACKAGE = 'gRips', emat, d)
 }
 
-project_K_onto_G_ <- function(K, emc) {
-    .Call('_gRips_project_K_onto_G_', PACKAGE = 'gRips', K, emc)
+project_onto_G_ <- function(K, emc) {
+    .Call('_gRips_project_onto_G_', PACKAGE = 'gRips', K, emc)
 }
 
 mnormone_ <- function(Delta) {
