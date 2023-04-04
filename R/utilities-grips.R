@@ -264,6 +264,12 @@ as_emat2graph  <- function(emat, d){
     as(as_emat2amat(emat, d=d), "graphNEL")
 }
 
+#' @export
+#' @rdname utilities
+as_emat2igraph <- function(emat, d){
+    igraph::make_undirected_graph(em, d)
+}
+
 
 
 #' @export
@@ -429,15 +435,21 @@ print.gips_fit_class <- function(x, ...){
     ## xx <- c(method=x$method, eng=x$engine, x$details)
     ## print(as.data.frame(x$details))
     xx <- x$details
+    xx <- as.data.frame(xx)
     xx$engine <- NULL
+    xx$ncore <- NULL
     print(as.data.frame(xx))
-    invisible(x)
+    xx
 }
 
 #' @export
 #' @rdname utilities
 summary.gips_fit_class <- function(object, ...){
-  as.data.frame(object$details)
+    xx <- as.data.frame(object$details)
+    xx$ncore <- NULL
+    xx$tpi <- with(xx, time / iter)
+    xx$tpe <- with(xx, time / (dim-idim))
+    xx
 }
 
 #' @export
