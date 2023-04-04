@@ -70,16 +70,13 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxiter=10000L, eps=1e-6, convc
     elist <- .form2glist(edges)
     emat <- as_elist2emat(elist)
     
-    ig <- as_emat2igraph(edges, nrow(S))
+    ig <- as_emat2igraph(emat, nrow(S))
     max_coreness <- max(coreness(ig))
     if (max_coreness > (nobs-1)){
         stop(glue("Max coreness ({max_coreness}) is larger than nobs ({nobs}); mle may not exist.\n"))
     }
 
-    em <<- em
-    ig <<- ig
-
-    amat <- as.matrix(as_adjacency_matrix(ig)) ## FIXME: Only needed for ncd
+    amat <- as.matrix(igraph::as_adjacency_matrix(ig)) ## FIXME: Only needed for ncd
         
     smart <- if (identical(method, "ncd"))
                  0   # update of glasso type (fast)
@@ -103,8 +100,8 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxiter=10000L, eps=1e-6, convc
         }
     }
 
-    pre_time <- .get.diff.time(t0, "millisecs")
-    cat(sprintf("Time before fitting: %f (millisecs)\n", pre_time))
+    ## pre_time <- .get.diff.time(t0, "millisecs")
+    ## cat(sprintf("Time before fitting: %f (millisecs)\n", pre_time))
         
     comb <- paste0(engine, "_", method)
     switch(comb,

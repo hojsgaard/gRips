@@ -267,7 +267,9 @@ as_emat2graph  <- function(emat, d){
 #' @export
 #' @rdname utilities
 as_emat2igraph <- function(emat, d){
-    igraph::make_undirected_graph(em, d)
+    ## cat("as_emat2igraph\n")
+    ## print(emat)
+    igraph::make_undirected_graph(emat, d)
 }
 
 
