@@ -102,7 +102,8 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxiter=10000L, eps=1e-6, convc
 
     ## pre_time <- .get.diff.time(t0, "millisecs")
     ## cat(sprintf("Time before fitting: %f (millisecs)\n", pre_time))
-        
+
+    t0 <- .get.time()
     comb <- paste0(engine, "_", method)
     switch(comb,
            "cpp_covips"     = {fitfun <- .c_covips_ggm_ },
