@@ -6,7 +6,7 @@ Author: Søren Højsgaard <sorenh@math.aau.dk>, Steffen Lauritzen <lauritzen@mat
 Maintainer: Søren Højsgaard <sorenh@math.aau.dk>
 Description: Restricted iterative proportional scaling algorithms for Gaussian graphical models.
 LazyData: true
-License: GPL (>= 2)
+License: GPL-3 + file LICENSE
 Depends:
     R (>= 3.6.0),
     methods

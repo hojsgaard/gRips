@@ -16,7 +16,7 @@ max_diag_diff <- function(S, Sigma){
 }
 
 
-diff_on_Emat <- function(Sigma, S, E){
+diff_on_emat <- function(Sigma, S, E){
   dif <- Sigma - S
   out <- c(diag(dif), dif[t(E)])
   out
@@ -26,23 +26,23 @@ diff_on_Elist <- function(Sigma, S, E){
     ## E_ <- do.call(cbind, E)
     E <- E[sapply(E, length) > 1]
     E_ <- t.default(unique(t.default(do.call(cbind, lapply(E, combn_prim, 2)))))
-    diff_on_Emat(Sigma, S, E_)
+    diff_on_emat(Sigma, S, E_)
 }
 
-max_abs_diff_on_Emat <- function(Sigma, S, E){
-    max(abs(diff_on_Emat (Sigma, S, E)))
+max_abs_diff_on_emat <- function(Sigma, S, E){
+    max(abs(diff_on_emat (Sigma, S, E)))
 }
 
 max_abs_diff_on_Elist <- function(Sigma, S, E){
     E_ <- do.call(cbind, E)
-    max_abs_diff_on_Emat(Sigma, S, E_)
+    max_abs_diff_on_emat(Sigma, S, E_)
 }
 
-mean_abs_diff_on_Emat <- function(Sigma, S, E){
-  mean(abs(diff_on_Emat (Sigma, S, E)))
+mean_abs_diff_on_emat <- function(Sigma, S, E){
+  mean(abs(diff_on_emat (Sigma, S, E)))
 }
 
-max_diff_on_Emat <- function(Sigma, S, E){
+max_diff_on_emat <- function(Sigma, S, E){
   out = max_diag_diff(S, Sigma)
   for (j in 1:ncol(E)){
       u = E[1, j]; v = E[2, j]
@@ -52,8 +52,8 @@ max_diff_on_Emat <- function(Sigma, S, E){
   out
 }
 
-avg_diff_on_Emat <- function(Sigma, S, E){
-  max(abs(diff_on_Emat (Sigma, S, E)))
+avg_diff_on_emat <- function(Sigma, S, E){
+  max(abs(diff_on_emat (Sigma, S, E)))
 }
 
 max_abs_diff_on_EK <- function(Sigma, S, E, K){
@@ -78,7 +78,7 @@ max_abs_diff_on_EK <- function(Sigma, S, E, K){
 ## ##############################################
 
 .does_model_fit_to_data_ips <- function(EE, parm, data, eps){
-    d <- max_abs_diff_on_Emat_(data, parm$Sigma, EE)
+    d <- max_abs_diff_on_emat_(data, parm$Sigma, EE)
     s <- max(abs(diag(data))) 
     out <- d < s * eps
     ##cat(sprintf(".does_model_fit_to_data_ips (R) d=%15e, s=%15e, out=%i\n", d, s, out))
@@ -87,7 +87,7 @@ max_abs_diff_on_EK <- function(Sigma, S, E, K){
 
 .does_model_fit_to_data_mtp2 <- function(EE, parm, data, eps){
     ## cat(".does_model_fit_to_data_mtp2\n")
-    d1 <- max_diff_on_Emat_(data, parm$Sigma, EE) 
+    d1 <- max_diff_on_emat_(data, parm$Sigma, EE) 
     d2 <- max_abs_diff_on_EK_(data, parm$Sigma, EE, parm$K)
     out <- !((d1 > 0) || (d2 > eps)) 
     ##cat(sprintf(".does_model_fit_to_data_mtp2 (R) d1=%15e, d2=%15e, out=%i\n", d1, d2, out))

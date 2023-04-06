@@ -87,7 +87,7 @@ get_zero_edges <- function(emat, dim){
 #' @export
 #' @rdname utes
 does_fit <- function(Sigma, S, emat, eps=1e-4){
-  v <- max_abs_diff_on_Emat(Sigma, S, emat)
+  v <- max_abs_diff_on_emat(Sigma, S, emat)
   cat("max deviation : ", v, "\n")
   v < eps
 }
@@ -223,10 +223,10 @@ as_elist2emat <- function(elist){
         b <- ed[, 1] > ed[, 2]
         ed[b,] <- ed[b, 2:1]
         ed <- ed[!duplicated.matrix(ed),,drop=FALSE]
-        Emat <- t.default(ed)
+        emat <- t.default(ed)
     } else
-        Emat <- matrix(NA, ncol=0, nrow=2)
-    Emat
+        emat <- matrix(NA, ncol=0, nrow=2)
+    emat
 }
 
 #' @export

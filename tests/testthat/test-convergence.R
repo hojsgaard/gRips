@@ -26,8 +26,8 @@ test_that("convergence", {
     expect_equal(max_abs_diag      (SS),                 max_abs_diag_      (SS))
     expect_equal(max_abs_diag_diff (SS, Sig),            max_abs_diag_diff_ (SS, Sig))
     expect_equal(max_diag_diff     (SS, Sig),            max_diag_diff_     (SS, Sig))
-    expect_equal(max_abs_diff_on_Emat (Sig, SS, EE),     max_abs_diff_on_Emat_ (SS, Sig, EE))
-    expect_equal(max_diff_on_Emat     (Sig, SS, EE),     max_diff_on_Emat_     (SS, Sig, EE))
+    expect_equal(max_abs_diff_on_emat (Sig, SS, EE),     max_abs_diff_on_emat_ (SS, Sig, EE))
+    expect_equal(max_diff_on_emat     (Sig, SS, EE),     max_diff_on_emat_     (SS, Sig, EE))
     expect_equal(max_abs_diff_on_EK(Sig, SS, EE, KK),    max_abs_diff_on_EK_(SS, Sig, EE, KK))    
 })
 

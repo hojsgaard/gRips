@@ -8,13 +8,13 @@
 ## #' @rdname fit-ggm
 ## #' @export
 ## edges can be either list or 2 x p matrix
-.r_covips_ggm_ <- function (S, Elist, Emat, nobs, K, iter=1000L, eps=1e-6, convcrit=1, aux=list(), print=FALSE){
+.r_covips_ggm_ <- function (S, Elist, emat, nobs, K, iter=1000L, eps=1e-6, convcrit=1, aux=list(), print=FALSE){
 
     t0 <- .get.time()
     inner <- get_inner_function(Elist)
 
     parm  <- get_init_parm(S, K)  
-    nparm <- ncol(S) + ncol(Emat)
+    nparm <- ncol(S) + ncol(emat)
     
     Scc_inv_list <- lapply(Elist, function(cc) {
         .sol(S[cc, cc, drop=FALSE])} )
@@ -29,7 +29,7 @@
 
         switch(convcrit,
                "1" = {
-                   conv_check = mean_abs_diff_on_Emat_(S, parm$Sigma, Emat, 1)
+                   conv_check = mean_abs_diff_on_emat_(S, parm$Sigma, emat, 1)
                },
                "2" = {
                    logL = ggm_logL_(S, K=parm$K, nobs=nobs)
@@ -80,13 +80,13 @@ get_inner_function <- function(edges){
 
 
 ## edges is a list
-.r_conips_ggm_ <- function (S, Elist, Emat, nobs, K, iter=1000, eps=1e-6, convcrit=1, aux=list(), print=FALSE) 
+.r_conips_ggm_ <- function (S, Elist, emat, nobs, K, iter=1000, eps=1e-6, convcrit=1, aux=list(), print=FALSE) 
 {
     my.complement <- function(cc, p){
         return(setdiff(1:p, cc))
     }
 
-    nparm = ncol(S) + ncol(Emat)
+    nparm = ncol(S) + ncol(emat)
     
     ## t0 <- proc.time()
     t0 <- .get.time()
@@ -133,7 +133,7 @@ get_inner_function <- function(edges){
             
             switch(convcrit,
                    "1" = {
-                       conv_check = mean_abs_diff_on_Emat_(S, solve_fun(K), Emat, 1)
+                       conv_check = mean_abs_diff_on_emat_(S, solve_fun(K), emat, 1)
                    },
                    "2" = {
                        logL = ggm_logL_(S, K=K, nobs=nobs)
