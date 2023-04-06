@@ -12,6 +12,7 @@
 \alias{as_glist2graph}
 \alias{as_glist2igraph}
 \alias{as_emat2graph}
+\alias{as_emat2igraph}
 \alias{as_amat2emat}
 \alias{as_emat2glist}
 \alias{as_glist2out_edges}
@@ -45,6 +46,8 @@ as_glist2graph(glist, d)
 as_glist2igraph(glist, d)
 
 as_emat2graph(emat, d)
+
+as_emat2igraph(emat, d)
 
 as_amat2emat(amat, eps = 1e-04)
 
