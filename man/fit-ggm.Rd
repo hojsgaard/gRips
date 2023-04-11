@@ -3,7 +3,7 @@
 \name{fit-ggm}
 \alias{fit-ggm}
 \alias{fit_ggm}
-\title{Fit Gaussian  graphical models}
+\title{Fit Gaussian graphical models}
 \usage{
 fit_ggm(
   S,

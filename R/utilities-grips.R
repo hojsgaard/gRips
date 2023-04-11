@@ -247,6 +247,13 @@ as_glist2emat <- function(glist){
 
 #' @export
 #' @rdname utilities
+as_glist2cq <- function(glist){
+    as_glist2emat(glist) |> as_emat2cq()
+}
+
+
+#' @export
+#' @rdname utilities
 as_glist2graph <- function(glist, d){
     as_emat2graph(as_glist2emat(glist), d=d)
 }
