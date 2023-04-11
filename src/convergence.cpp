@@ -1,6 +1,6 @@
 #include "RcppArmadillo.h"
-#include "grips-utils.h"
-#include "general-utils.h"
+#include "grips_utils.h"
+#include "general_utils.h"
 #include <math.h>
 
 //[[Rcpp::depends(RcppArmadillo)]]
