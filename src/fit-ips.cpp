@@ -263,8 +263,46 @@ List covips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
 List coxips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
 		 mat K,       
 		 int& maxiter, double& eps, int& convcrit, int& print, List& aux){
-  int version = aux["version"];
+
+  int version      = aux["version"];
+  int smart        = aux["smart"];
+  double eps_smart = aux["eps_smart"];
+
+  mat Sigma;
+  List elist0, clist0, Scci_list, Scc_list;
+
+  double logL, logLp, mad, conv_check=9999, conv_ref, gap=-1.0;
+  char buffer[200];
+  int itcount  = 0;
+  double nparm = S.n_cols + emat.n_cols;
+  umat emat0   = emat - 1;
   
+  umat emat_c  = as_emat_complement_(emat-1, S.n_rows);
+  mat dif, Delta;
+  double mno;
+  
+  
+  switch(version){
+  case 1: // covips
+    elist0 = clone(elist);  
+    for (int i=0; i < elist.length(); i++) {
+      elist0[i] = as<arma::uvec>(elist0[i]) - 1; // 0-based
+    }
+    
+    Scci_list = Scc_inv_list_(S, elist0);
+    Scc_list  = Scc_list_(S, elist0);
+    break;
+  case 2: // conips
+    elist0 = clone(elist);
+    clist0 = make_clist_(S, elist);
+  
+    for (int i=0; i<elist.length(); i++){
+      elist0[i] = as<arma::uvec>(elist0[i]) - 1; // 0-based
+      clist0[i] = as<arma::uvec>(clist0[i]) - 1; // 0-based			     
+    }
+
+    break;
+  }
 }
 
 
