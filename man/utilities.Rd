@@ -9,6 +9,7 @@
 \alias{as_emat2elist}
 \alias{as_elist2emat}
 \alias{as_glist2emat}
+\alias{as_glist2cq}
 \alias{as_glist2graph}
 \alias{as_glist2igraph}
 \alias{as_emat2graph}
@@ -40,6 +41,8 @@ as_emat2elist(emat)
 as_elist2emat(elist)
 
 as_glist2emat(glist)
+
+as_glist2cq(glist)
 
 as_glist2graph(glist, d)
 

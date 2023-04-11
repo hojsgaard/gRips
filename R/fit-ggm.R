@@ -1,4 +1,4 @@
-#' @title Fit Gaussian  graphical models
+#' @title Fit Gaussian graphical models
 #' @description Fit Gaussian graphical models using various algorithms.
 #' @author Søren Højsgaard, \email{sorenh@@math.aau.dk}
 #' @name fit-ggm
@@ -61,10 +61,10 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxiter=10000L, eps=1e-6, convc
     method <- match.arg(tolower(method),
                         c("covips", "conips", "ncd", "cal", "glasso"))
 
-    if (inherits(S, "data.frame")){
-        nobs = nrow(S)
-        S <- cov2cor(cov(S))      
-    }
+    ## if (inherits(S, "data.frame")){
+        ## nobs = nrow(S)
+        ## S <- cov2cor(cov(S))      
+    ## }
 
     edges <- parse_edges(edges, nrow(S))
     elist <- .form2glist(edges)
@@ -76,17 +76,13 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxiter=10000L, eps=1e-6, convc
         stop(glue("Max coreness ({max_coreness}) is larger than nobs ({nobs}); mle may not exist.\n"))
     }
 
-    amat <- as.matrix(igraph::as_adjacency_matrix(ig)) ## FIXME: Only needed for ncd
-        
-    smart <- if (identical(method, "ncd"))
-                 0   # update of glasso type (fast)
-             else 1  # update as in paper
+    ## amat <- as.matrix(igraph::as_adjacency_matrix(ig)) ## FIXME: Only needed for ncd
 
     aux0 <- list(version=1,
-                 smart      = smart,  
-                 eps_smart  = 1e-4,
-                 engine     = "cpp",
-                 amat       = amat
+                 smart      = 1,     ## FIXME Obsolete  
+                 eps_smart  = 1e-4,  ## FIXME Obsolete  
+                 engine     = "cpp"
+                 ## amat       = amat
                  )
 
     engine <- match.arg(tolower(aux0$engine), c("cpp", "r"))
@@ -96,7 +92,7 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxiter=10000L, eps=1e-6, convc
         if (identical(method, "ncd")){
             K <- diag(1, nrow(S))
         } else {
-            K <- .initK(S)            
+            K <- diag(1/diag(S))
         }
     }
 
@@ -119,14 +115,10 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxiter=10000L, eps=1e-6, convc
                   nobs=nobs, K=K, maxiter=maxiter, eps=eps, convcrit=convcrit, print=print, aux=aux0)
     
     out <- c(out, list(edges=emat, nobs=nobs, eps=eps, max_coreness=max_coreness))
-    ## cat("Names:\n"); print(names(out))
     out   <- .finalize_fit(out, S=S, t0=t0, method=method, engine=engine)
-    ## cat("Names:\n"); print(names(out))
     class(out) <- "gips_fit_class"
     out
 }
-
-
 
 
 ## 1. edges is right hand sided formula -> returns list
@@ -184,8 +176,9 @@ parse_edges <- function(edges, nvar){
 .finalize_fit <- function(out, S=S, t0=NULL, method, engine, ...){
     ## cat(".finalize_fit\n")
 
+    
     dots <- list(...)
-    dimnames(out$K)     <- dimnames(S)
+    dimnames(out$K) <- dimnames(S)
     if (inherits(out$Sigma, "matrix"))
         dimnames(out$Sigma) <- dimnames(S)
 
@@ -239,13 +232,9 @@ get_init_parm <- function(S, K){
     parm
 }
 
-## .initSigma  <- function(S){
-    ## diag(diag(S))
+## .initK <- function(S){
+##     diag(1/diag(S))
 ## }
-
-.initK <- function(S){
-    diag(1/diag(S))
-}
 
 
 
