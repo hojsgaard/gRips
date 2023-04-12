@@ -836,8 +836,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// covips_loop0_
+List covips_loop0_(mat& S, mat& K, List& elist0, mat& Sigma, List& Scc_list, List& Scci_list, int& maxiter, int nupdates, int smart, double eps_smart, int print);
+RcppExport SEXP _gRips_covips_loop0_(SEXP SSEXP, SEXP KSEXP, SEXP elist0SEXP, SEXP SigmaSEXP, SEXP Scc_listSEXP, SEXP Scci_listSEXP, SEXP maxiterSEXP, SEXP nupdatesSEXP, SEXP smartSEXP, SEXP eps_smartSEXP, SEXP printSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< mat& >::type K(KSEXP);
+    Rcpp::traits::input_parameter< List& >::type elist0(elist0SEXP);
+    Rcpp::traits::input_parameter< mat& >::type Sigma(SigmaSEXP);
+    Rcpp::traits::input_parameter< List& >::type Scc_list(Scc_listSEXP);
+    Rcpp::traits::input_parameter< List& >::type Scci_list(Scci_listSEXP);
+    Rcpp::traits::input_parameter< int& >::type maxiter(maxiterSEXP);
+    Rcpp::traits::input_parameter< int >::type nupdates(nupdatesSEXP);
+    Rcpp::traits::input_parameter< int >::type smart(smartSEXP);
+    Rcpp::traits::input_parameter< double >::type eps_smart(eps_smartSEXP);
+    Rcpp::traits::input_parameter< int >::type print(printSEXP);
+    rcpp_result_gen = Rcpp::wrap(covips_loop0_(S, K, elist0, Sigma, Scc_list, Scci_list, maxiter, nupdates, smart, eps_smart, print));
+    return rcpp_result_gen;
+END_RCPP
+}
 // covips_ggm_
-List covips_ggm_(mat& S, List& elist, umat& emat, int& nobs, mat K, int& maxiter, double& eps, int& convcrit, int& print, List& aux);
+List covips_ggm_(mat& S, List& elist, umat& emat, int& nobs, mat& K, int& maxiter, double& eps, int& convcrit, int& print, List& aux);
 RcppExport SEXP _gRips_covips_ggm_(SEXP SSEXP, SEXP elistSEXP, SEXP ematSEXP, SEXP nobsSEXP, SEXP KSEXP, SEXP maxiterSEXP, SEXP epsSEXP, SEXP convcritSEXP, SEXP printSEXP, SEXP auxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -846,7 +867,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< List& >::type elist(elistSEXP);
     Rcpp::traits::input_parameter< umat& >::type emat(ematSEXP);
     Rcpp::traits::input_parameter< int& >::type nobs(nobsSEXP);
-    Rcpp::traits::input_parameter< mat >::type K(KSEXP);
+    Rcpp::traits::input_parameter< mat& >::type K(KSEXP);
     Rcpp::traits::input_parameter< int& >::type maxiter(maxiterSEXP);
     Rcpp::traits::input_parameter< double& >::type eps(epsSEXP);
     Rcpp::traits::input_parameter< int& >::type convcrit(convcritSEXP);

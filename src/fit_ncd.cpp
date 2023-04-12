@@ -352,16 +352,6 @@ void Sigma_to_K_(mat& Sigma, mat& K, mat& amat, int nobs, int print=0){
     stop("NCD algorithm not convergent\n");				\
   }									\
 
-bool has_full_rank(mat& Sigma){
-  uword rank_Sigma = arma::rank(Sigma, sqrt(datum::eps) * Sigma.n_cols);
-  return (rank_Sigma >= Sigma.n_cols); 	    
-}
-
-bool is_pos_def(mat& Sigma){
-  uword rank_Sigma = arma::rank(Sigma, sqrt(datum::eps) * Sigma.n_cols);
-  return (rank_Sigma >= Sigma.n_cols); 	    
-}
-
 //[[Rcpp::export(.c_ncd_ggm_)]]
 List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
 	      mat K,       

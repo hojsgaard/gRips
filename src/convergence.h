@@ -1,7 +1,6 @@
 #include "RcppArmadillo.h"
 using namespace Rcpp;
 
-
 double max_abs_(const mat& S);
 double max_abs_diag_(const mat& S);
 double max_abs_diff_(const mat& S, const mat& Sigma);

@@ -154,6 +154,24 @@ impose_zero <- function(emat, K){
 #' @param d Number of columns in output.
 #'
 
+
+## system.time(
+## glist2 <- as_glist2cq(glist)
+## )
+
+## em <- as_glist2emat(glist)
+## ig <- as_emat2igraph(em)
+## igraph::max_cliques(ig)
+
+## system.time({
+## em <- as_glist2emat(glist)
+## ig <- as_emat2igraph(em)
+## gn <- as_graphnel(ig)
+## gRbase::getCliques(gn)
+## })
+
+
+
 # Convert edges to cliques
 #' @export
 #' @rdname utilities

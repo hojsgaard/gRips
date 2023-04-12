@@ -19,6 +19,7 @@ extern SEXP _gRips_califa_(SEXP, SEXP, SEXP);
 extern SEXP _gRips_clone_(SEXP);
 extern SEXP _gRips_conips_ggm_(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _gRips_covips_ggm_(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP _gRips_covips_loop0_(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _gRips_coxips_ggm_(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _gRips_diff_fun_(SEXP, SEXP, SEXP);
 extern SEXP _gRips_diff_on_Elist_(SEXP, SEXP, SEXP, SEXP);
@@ -77,6 +78,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_gRips_clone_",                       (DL_FUNC) &_gRips_clone_,                        1},
     {"_gRips_conips_ggm_",                  (DL_FUNC) &_gRips_conips_ggm_,                  10},
     {"_gRips_covips_ggm_",                  (DL_FUNC) &_gRips_covips_ggm_,                  10},
+    {"_gRips_covips_loop0_",                (DL_FUNC) &_gRips_covips_loop0_,                11},
     {"_gRips_coxips_ggm_",                  (DL_FUNC) &_gRips_coxips_ggm_,                  10},
     {"_gRips_diff_fun_",                    (DL_FUNC) &_gRips_diff_fun_,                     3},
     {"_gRips_diff_on_Elist_",               (DL_FUNC) &_gRips_diff_on_Elist_,                4},

@@ -59,12 +59,7 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxiter=10000L, eps=1e-6, convc
 
     t0 <- .get.time()
     method <- match.arg(tolower(method),
-                        c("covips", "conips", "ncd", "cal", "glasso"))
-
-    ## if (inherits(S, "data.frame")){
-        ## nobs = nrow(S)
-        ## S <- cov2cor(cov(S))      
-    ## }
+                        c("covips", "conips", "coxips", "ncd", "cal", "glasso"))
 
     edges <- parse_edges(edges, nrow(S))
     elist <- .form2glist(edges)
@@ -76,13 +71,10 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxiter=10000L, eps=1e-6, convc
         stop(glue("Max coreness ({max_coreness}) is larger than nobs ({nobs}); mle may not exist.\n"))
     }
 
-    ## amat <- as.matrix(igraph::as_adjacency_matrix(ig)) ## FIXME: Only needed for ncd
-
     aux0 <- list(version=1,
                  smart      = 1,     ## FIXME Obsolete  
                  eps_smart  = 1e-4,  ## FIXME Obsolete  
                  engine     = "cpp"
-                 ## amat       = amat
                  )
 
     engine <- match.arg(tolower(aux0$engine), c("cpp", "r"))
@@ -96,15 +88,13 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxiter=10000L, eps=1e-6, convc
         }
     }
 
-    ## pre_time <- .get.diff.time(t0, "millisecs")
-    ## cat(sprintf("Time before fitting: %f (millisecs)\n", pre_time))
-
     t0 <- .get.time()
     comb <- paste0(engine, "_", method)
     switch(comb,
            "cpp_covips"     = {fitfun <- .c_covips_ggm_ },
            "r_covips"       = {fitfun <- .r_covips_ggm_ },           
            "cpp_conips"     = {fitfun <- .c_conips_ggm_ },
+           "cpp_coxips"     = {fitfun <- .c_coxips_ggm_ },
            "r_conips"       = {fitfun <- .r_conips_ggm_ },
            "cpp_ncd"        = {fitfun <- .c_ncd_ggm_ },
            "r_ncd"          = {fitfun <- .r_ncd_ggm_ },

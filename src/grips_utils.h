@@ -12,6 +12,9 @@ const int erp=0; // ERROR PRINTING
 
 #define as_num(cc) NumericVector(cc.begin(), cc.end())
 
+bool has_full_rank(mat& Sigma);
+bool is_pos_def(mat& Sigma);
+  
 mat project_onto_G_(const mat& K, const umat& emc);
 double mnormone_(mat& Delta);
 int method2int_(CharacterVector method);

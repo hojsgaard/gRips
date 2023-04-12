@@ -12,6 +12,16 @@ typedef Rcpp::CharacterVector chr_vec;
 // *** gRips utilities ***
 // ---------------------------------------------------------------------
 
+bool has_full_rank(mat& Sigma){
+  uword rank_Sigma = arma::rank(Sigma, sqrt(datum::eps) * Sigma.n_cols);
+  return (rank_Sigma >= Sigma.n_cols); 	    
+}
+
+bool is_pos_def(mat& Sigma){
+  uword rank_Sigma = arma::rank(Sigma, sqrt(datum::eps) * Sigma.n_cols);
+  return (rank_Sigma >= Sigma.n_cols); 	    
+}
+
 
 // [[Rcpp::export]]
 mat project_onto_G_(const mat& K, const umat& emc){
