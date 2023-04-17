@@ -13,36 +13,33 @@ typedef Rcpp::CharacterVector chr_vec;
 // ---------------------------------------------------------------------
 
 // [[Rcpp::export]]
-bool has_full_rank_(mat& Sigma){
-  uword rank_Sigma = arma::rank(Sigma, sqrt(datum::eps) * Sigma.n_cols);
-  return (rank_Sigma >= Sigma.n_cols); 	    
+bool has_full_rank_(mat& Delta){
+  uword rank_Delta = arma::rank(Delta, sqrt(datum::eps) * Delta.n_cols);
+  return (rank_Delta >= Delta.n_cols); 	    
 }
 
 // [[Rcpp::export]]
-bool is_pos_def_(mat& Sigma){
-  uword rank_Sigma = arma::rank(Sigma, sqrt(datum::eps) * Sigma.n_cols);
-  return (rank_Sigma >= Sigma.n_cols); 	    
+bool is_pos_def_(mat& Delta){
+  uword rank_Delta = arma::rank(Delta, sqrt(datum::eps) * Delta.n_cols);
+  return (rank_Delta >= Delta.n_cols); 	    
 }
 
 
 // [[Rcpp::export]]
-mat project_onto_G_(const mat& K, const umat& emc){
+mat project_onto_G_(const mat& Delta, const umat& emc){
 
-  mat K2 = K;
+  mat Delta2 = Delta;
   uvec r0 = {0}, r1 = {1};
   mat emc2 = conv_to<mat>::from(emc);
   uvec s0 = conv_to<uvec>::from(emc2.rows(r0));
   uvec s1 = conv_to<uvec>::from(emc2.rows(r1));
   for (size_t j=0; j<emc.n_cols; j++){
     // Rcout << s0[j] << "  " << s1[j] << "\n"; 
-    K2(s0[j], s1[j]) = 0;
-    K2(s1[j], s0[j]) = 0;
+    Delta2(s0[j], s1[j]) = 0;
+    Delta2(s1[j], s0[j]) = 0;
   }
-  return(K2);
+  return(Delta2);
 }
-
-
-// mnorm_one(Delta) = max_v(\sum_u |Delta_{uv}|)
 
 // [[Rcpp::export]]
 double mnorm_one_(mat& Delta){
@@ -55,7 +52,7 @@ double mnorm_one_(mat& Delta){
 double mnorm_maxabs_(mat& Delta){
   rowvec s = max(abs(Delta));
   // s.print();
-  return(max(s)*Delta.n_rows);
+  return(max(s));
 }
 
 mat initSigma_(mat& S)
@@ -90,6 +87,7 @@ double ggm_logL_(mat& S, mat& K, int nobs)
   return logL;
 }
 
+// FIXME: Bruges i en macro, men det er meget gammelt
 
 double get_conv_ref(const List& aux){
   CharacterVector vn = list_names_(aux);
@@ -102,14 +100,14 @@ double get_conv_ref(const List& aux){
 }
 
 
-int method2int_(CharacterVector method){
-  CharacterVector options =
-    CharacterVector::create("ips", "mtp2", "lasso", "hybrid");
+// int method2int_(CharacterVector method){
+//   CharacterVector options =
+//     CharacterVector::create("ips", "mtp2", "lasso", "hybrid");
   
-  IntegerVector m =  match(method, options) - 1;
-  int v = (int) m[0];
-  return v;
-}
+//   IntegerVector m =  match(method, options) - 1;
+//   int v = (int) m[0];
+//   return v;
+// }
 
 
 

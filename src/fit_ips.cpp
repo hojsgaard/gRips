@@ -174,8 +174,7 @@ void covips_ggm_update_cc_parm_(const mat& Scc, const uvec& cc0, mat& K, mat& Si
 List covips_inner_(const mat& S, mat& K, 
 		   const List& elist0,
 		   mat& Sigma, List& Scc_lst, List& Scci_lst,
-		   int& nupdates,
-		   int smart=0, double eps_smart=0.0, int print=0)
+		   int print=0)
 {
   for (int i=0; i < elist0.length(); ++i){
     uvec cc0 = elist0[i];
@@ -187,8 +186,7 @@ List covips_inner_(const mat& S, mat& K,
 
 void covips_ggm_update_cc_parm0_(const mat& Scc, const uvec& cc0, mat& K, mat& Sigma,
 				 const mat& Scc_inv,
-				 int& nupdates,
-				 int smart=0, double eps_smart=0.0, int print=0)
+				 int& nupdates, double eps=0.01, int print=0)
 {
   
   mat Sigmacc  = Sigma.submat(cc0, cc0);
@@ -198,7 +196,7 @@ void covips_ggm_update_cc_parm0_(const mat& Scc, const uvec& cc0, mat& K, mat& S
 
   mat Kcc, Kupd, Haux;
   
-  if (Knorm > 0.01){
+  if (Knorm > eps){
     Kcc      = K.submat(cc0, cc0);	
     Kupd     = Scc_inv + Kcc - Kstar;
     Haux     = Kstar - Kstar * Scc * Kstar;  // Was Saux
@@ -218,49 +216,44 @@ void covips_ggm_update_cc_parm0_(const mat& Scc, const uvec& cc0, mat& K, mat& S
 void covips_inner0_(mat& S, mat& K, 
 		    List& elist0,
 		    mat& Sigma, List& Scc_lst, List& Scci_lst,
-		    int& nupdates,
-		    int smart=0, double eps_smart=0.0, int print=0)
+		    int& nupdates, double eps=0.01, int print=0)
 {
   nupdates = 0;
   for (int i=0; i < elist0.length(); ++i){
     uvec cc0 = elist0[i];
     covips_ggm_update_cc_parm0_(Scc_lst[i], cc0, K, Sigma, Scci_lst[i],
-				nupdates=nupdates,
-				print=print);
+				nupdates=nupdates, eps=eps, print=print);
   }
 }
 
 //[[Rcpp::export]]  
 List covips_loop0_(mat& S, mat& K, List& elist0, mat& Sigma,
 		   List& Scc_lst, List& Scci_lst,
+		   int& nobs, 
 		   int& maxiter,
-		   int nupdates, int smart=0, double eps_smart=0.0, int print=0){
+		   int nupdates, double eps=0.01, int print=0){
   int itcount = 0;
-
+  double threshold = elist0.length() / 1000; 
+  double logL;
+  
   for (; itcount < maxiter; ){  
     covips_inner0_(S=S, K=K, elist0=elist0, Sigma=Sigma,
   		  Scc_lst=Scc_lst, Scci_lst=Scci_lst,
-  		  nupdates=nupdates, smart=smart, eps_smart=eps_smart,
+  		  nupdates=nupdates, eps=eps,
   		  print=print);
-    if (print>=3)
-      Rprintf(">>> itcount: %d maxiter: %d nupdates: %d\n", itcount, maxiter, nupdates);
+    if (print>=3){
+      logL = ggm_logL_(S, K, nobs);  
+      Rprintf(">>> itcount: %3d maxiter: %d nupdates: %4d edges: %4d threshold: %f, logL: %14.10f\n",
+	      itcount, maxiter, nupdates, elist0.length(), threshold, logL);
+    }
     ++itcount;
-    if (nupdates <= elist0.length() / 10)
+    if (nupdates <= threshold)
       break;  
   }
   // Rprintf("itcount: %d\n", itcount);
   return List::create(_["iter"] = itcount);
 }
 
-
-// https://gallery.rcpp.org/articles/RcppClock-benchmarking-Rcpp-code/
-  // Rcpp::Clock clock;
-  
-  // clock.tick("both_naps");
-  // clock.tock("both_naps");
-  
-  // // send the times to the R global environment variable, named "naptimes"
-  // clock.stop("naptimes");
 
 //[[Rcpp::export(.c_covips_ggm_)]] 
 List covips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
@@ -273,15 +266,13 @@ List covips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
   
   double logL, logLp, conv_check=9999, gap=-1.0;
   double conv_ref; // FIXME needed??
-  int itcount  = 0;
   double nparm = S.n_cols + emat.n_cols;
   umat emat0   = emat - 1;  
   umat emat_c  = as_emat_complement_(emat-1, S.n_rows);
-  mat dif, Delta;
   double mno, maxabs;
-  mat Sigma    = initSigma_(S);  
+  mat Sigma = initSigma_(S), dif, Delta;  
   List res1, res2;
-  int iter1=0, iter2=0;
+  int iter1=0, iter2=0, itcount=0;
 
   
   INIT_CONVERGENCE_CHECK;
@@ -294,23 +285,21 @@ List covips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
   
   List Scci_lst = Scc_inv_list_(S, elist0);
   List Scc_lst  = Scc_list_(S, elist0);
-  int nupdates=0;
+  int nupdates  = 0;
   
   if (version==0){
     res1 = covips_loop0_(S=S, K=K, elist0=elist0, Sigma=Sigma,
 			 Scc_lst=Scc_lst, Scci_lst=Scci_lst,
-			 maxiter=maxiter, nupdates=nupdates,
-			 smart=smart, eps_smart=eps_smart, print=print);
+			 nobs=nobs, maxiter=maxiter, nupdates=nupdates,
+			 eps=eps, print=print);
     iter1 = res1["iter"];
     if (print>=2)
       Rprintf(">> iterations for start: %d \n", iter1);
   }
 
-  
   for (; itcount < maxiter; ){  
     res2 = covips_inner_(S=S, K=K, elist0=elist0, Sigma=Sigma,
 			 Scc_lst=Scc_lst, Scci_lst=Scci_lst,
-			 nupdates=nupdates, smart=smart, eps_smart=eps_smart,
 			 print=print);
     ++itcount;      
     switch(convcrit){
@@ -319,14 +308,14 @@ List covips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
       // conv_check = mad;
       dif = S - Sigma;
       Delta = project_onto_G_(dif, emat_c);
-      mno = mnorm_one_(Delta);
-      conv_check = mno;
+      maxabs = mnorm_maxabs_(Delta);
+      conv_check = maxabs;
       if (print>=3){
-	maxabs = mnorm_maxabs_(Delta);
+	mno  = mnorm_one_(Delta);
 	logL = ggm_logL_(S, K, nobs);  
 	Rprintf(">>> covips iter: %4d eps: %14.10f, mno: %14.10f maxabs: %14.10f logL: %14.10f\n", itcount, eps, mno, maxabs, logL);
       }
-	// PRINT_CONV_CHECK1;	
+      // PRINT_CONV_CHECK1;	
       break;
     case 2:
       CONV_CHECK_LOGL_DIFF;
@@ -398,7 +387,6 @@ List coxips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
     case 1: // covips
       covips_inner_(S=S, K=K, elist0=elist0, Sigma=Sigma,
 		    Scc_lst=Scc_lst, Scci_lst=Scci_lst,
-		    nupdates=nupdates, smart=smart, eps_smart=eps_smart,
 		    print=print);      
       break;
     case 2: // conips
@@ -506,13 +494,13 @@ List coxips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
 // }
 
 
-// void fips_inner_(const mat& S, const List& Elist0,
+// void fips_inner_(const mat& S, const List& elst0,
 		 // mat& K, mat& Sigma, List& Scc_list, List& Scc_inv_list)
 // {
-  // for (int i=0; i < Elist0.length(); ++i)
+  // for (int i=0; i < elst0.length(); ++i)
     // {
       // Rcout << "in loop" << endl;
-      // uvec cc0 = Elist0[i];
+      // uvec cc0 = elst0[i];
       // fips_ggm_update_cc_parm_(S, cc0, K, Sigma);
     // }
 // }
@@ -564,3 +552,12 @@ List coxips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
   // }
   // Sigma -= Sigma.cols(cc0) * (Kstar - Kstar * Scc * Kstar) * Sigma.rows(cc0);
 
+
+// https://gallery.rcpp.org/articles/RcppClock-benchmarking-Rcpp-code/
+  // Rcpp::Clock clock;
+  
+  // clock.tick("both_naps");
+  // clock.tock("both_naps");
+  
+  // // send the times to the R global environment variable, named "naptimes"
+  // clock.stop("naptimes");

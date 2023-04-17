@@ -93,16 +93,12 @@ max_diag_diff_ <- function(S, Sigma) {
     .Call('_gRips_max_diag_diff_', PACKAGE = 'gRips', S, Sigma)
 }
 
-califa_ <- function(S, Sigma, Sigmaold) {
-    .Call('_gRips_califa_', PACKAGE = 'gRips', S, Sigma, Sigmaold)
-}
-
 diff_on_emat_ <- function(S, Sigma, E, shift = 1L) {
     .Call('_gRips_diff_on_emat_', PACKAGE = 'gRips', S, Sigma, E, shift)
 }
 
-diff_on_Elist_ <- function(S, Sigma, E, shift = 1L) {
-    .Call('_gRips_diff_on_Elist_', PACKAGE = 'gRips', S, Sigma, E, shift)
+diff_on_elst_ <- function(S, Sigma, E, shift = 1L) {
+    .Call('_gRips_diff_on_elst_', PACKAGE = 'gRips', S, Sigma, E, shift)
 }
 
 max_abs_diff_on_emat_ <- function(Sigma, S, E, shift = 1L) {
@@ -113,20 +109,16 @@ mean_abs_diff_on_emat_ <- function(Sigma, S, E, shift = 1L) {
     .Call('_gRips_mean_abs_diff_on_emat_', PACKAGE = 'gRips', Sigma, S, E, shift)
 }
 
-max_abs_diff_on_Elist_ <- function(Sigma, S, E, shift = 1L) {
-    .Call('_gRips_max_abs_diff_on_Elist_', PACKAGE = 'gRips', Sigma, S, E, shift)
+max_abs_diff_on_elst_ <- function(Sigma, S, E, shift = 1L) {
+    .Call('_gRips_max_abs_diff_on_elst_', PACKAGE = 'gRips', Sigma, S, E, shift)
 }
 
-mean_abs_diff_on_Elist_ <- function(Sigma, S, E, shift = 1L) {
-    .Call('_gRips_mean_abs_diff_on_Elist_', PACKAGE = 'gRips', Sigma, S, E, shift)
+mean_abs_diff_on_elst_ <- function(Sigma, S, E, shift = 1L) {
+    .Call('_gRips_mean_abs_diff_on_elst_', PACKAGE = 'gRips', Sigma, S, E, shift)
 }
 
 max_diff_on_emat_ <- function(Sigma, S, E) {
     .Call('_gRips_max_diff_on_emat_', PACKAGE = 'gRips', Sigma, S, E)
-}
-
-max_abs_diff_on_EK_ <- function(S, Sigma, E, K) {
-    .Call('_gRips_max_abs_diff_on_EK_', PACKAGE = 'gRips', S, Sigma, E, K)
 }
 
 make_clist_ <- function(S, edges) {
@@ -145,8 +137,8 @@ Scc_inv_list_ <- function(S, edges0) {
     .Call('_gRips_conips_ggm_', PACKAGE = 'gRips', S, elist, emat, nobs, K, maxiter, eps, convcrit, print, aux)
 }
 
-covips_loop0_ <- function(S, K, elist0, Sigma, Scc_lst, Scci_lst, maxiter, nupdates, smart = 0L, eps_smart = 0.0, print = 0L) {
-    .Call('_gRips_covips_loop0_', PACKAGE = 'gRips', S, K, elist0, Sigma, Scc_lst, Scci_lst, maxiter, nupdates, smart, eps_smart, print)
+covips_loop0_ <- function(S, K, elist0, Sigma, Scc_lst, Scci_lst, nobs, maxiter, nupdates, eps = 0.01, print = 0L) {
+    .Call('_gRips_covips_loop0_', PACKAGE = 'gRips', S, K, elist0, Sigma, Scc_lst, Scci_lst, nobs, maxiter, nupdates, eps, print)
 }
 
 .c_covips_ggm_ <- function(S, elist, emat, nobs, K, maxiter, eps, convcrit, print, aux) {
@@ -205,16 +197,16 @@ as_emat_complement_ <- function(emat, d) {
     .Call('_gRips_as_emat_complement_', PACKAGE = 'gRips', emat, d)
 }
 
-has_full_rank_ <- function(Sigma) {
-    .Call('_gRips_has_full_rank_', PACKAGE = 'gRips', Sigma)
+has_full_rank_ <- function(Delta) {
+    .Call('_gRips_has_full_rank_', PACKAGE = 'gRips', Delta)
 }
 
-is_pos_def_ <- function(Sigma) {
-    .Call('_gRips_is_pos_def_', PACKAGE = 'gRips', Sigma)
+is_pos_def_ <- function(Delta) {
+    .Call('_gRips_is_pos_def_', PACKAGE = 'gRips', Delta)
 }
 
-project_onto_G_ <- function(K, emc) {
-    .Call('_gRips_project_onto_G_', PACKAGE = 'gRips', K, emc)
+project_onto_G_ <- function(Delta, emc) {
+    .Call('_gRips_project_onto_G_', PACKAGE = 'gRips', Delta, emc)
 }
 
 mnorm_one_ <- function(Delta) {

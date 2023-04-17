@@ -8,18 +8,16 @@ typedef Rcpp::CharacterVector chr_vec;
 
 const int erp=0; // ERROR PRINTING
 
-// const double MEPS = 1e-6;
-
 #define as_num(cc) NumericVector(cc.begin(), cc.end())
 
-bool has_full_rank_(mat& Sigma);
-bool is_pos_def_(mat& Sigma);
+bool has_full_rank_(mat& Delta);
+bool is_pos_def_(mat& Deltaxs);
   
-mat project_onto_G_(const mat& K, const umat& emc);
+mat project_onto_G_(const mat& Delta, const umat& emc);
 double mnorm_one_(mat& Delta);
 double mnorm_maxabs_(mat& Delta);
   
-int method2int_(CharacterVector method);
+// int method2int_(CharacterVector method);
 double ggm_logL_(mat& S, mat& K, int nobs);
 mat initSigma_(mat& S);
 mat initK_(mat& S);

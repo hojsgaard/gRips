@@ -15,21 +15,22 @@ extern SEXP _gRips_Sigma_to_K_(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _gRips_as_colvec(SEXP);
 extern SEXP _gRips_as_emat2amat_(SEXP, SEXP);
 extern SEXP _gRips_as_emat_complement_(SEXP, SEXP);
-extern SEXP _gRips_califa_(SEXP, SEXP, SEXP);
 extern SEXP _gRips_clone_(SEXP);
 extern SEXP _gRips_conips_ggm_(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _gRips_covips_ggm_(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP _gRips_covips_loop0_(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP _gRips_covips_loop0_(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _gRips_coxips_ggm_(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _gRips_diff_fun_(SEXP, SEXP, SEXP);
-extern SEXP _gRips_diff_on_Elist_(SEXP, SEXP, SEXP, SEXP);
+extern SEXP _gRips_diff_on_elst_(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _gRips_diff_on_emat_(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _gRips_extract_elem(SEXP, SEXP, SEXP);
 extern SEXP _gRips_extract_rows(SEXP, SEXP, SEXP);
 extern SEXP _gRips_extract_uv_(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _gRips_find_str_(SEXP, SEXP);
 extern SEXP _gRips_ggm_logL_(SEXP, SEXP, SEXP);
+extern SEXP _gRips_has_full_rank_(SEXP);
 extern SEXP _gRips_inv_qr_(SEXP);
+extern SEXP _gRips_is_pos_def_(SEXP);
 extern SEXP _gRips_list2col_(SEXP, SEXP);
 extern SEXP _gRips_list2row_(SEXP, SEXP);
 extern SEXP _gRips_list_names_(SEXP);
@@ -39,13 +40,12 @@ extern SEXP _gRips_max_abs_(SEXP);
 extern SEXP _gRips_max_abs_diag_(SEXP);
 extern SEXP _gRips_max_abs_diag_diff_(SEXP, SEXP);
 extern SEXP _gRips_max_abs_diff_(SEXP, SEXP);
-extern SEXP _gRips_max_abs_diff_on_EK_(SEXP, SEXP, SEXP, SEXP);
-extern SEXP _gRips_max_abs_diff_on_Elist_(SEXP, SEXP, SEXP, SEXP);
+extern SEXP _gRips_max_abs_diff_on_elst_(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _gRips_max_abs_diff_on_emat_(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _gRips_max_abs_diff_rel_(SEXP, SEXP);
 extern SEXP _gRips_max_diag_diff_(SEXP, SEXP);
 extern SEXP _gRips_max_diff_on_emat_(SEXP, SEXP, SEXP);
-extern SEXP _gRips_mean_abs_diff_on_Elist_(SEXP, SEXP, SEXP, SEXP);
+extern SEXP _gRips_mean_abs_diff_on_elst_(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _gRips_mean_abs_diff_on_emat_(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _gRips_mnorm_maxabs_(SEXP);
 extern SEXP _gRips_mnorm_one_(SEXP);
@@ -75,21 +75,22 @@ static const R_CallMethodDef CallEntries[] = {
     {"_gRips_as_colvec",                    (DL_FUNC) &_gRips_as_colvec,                     1},
     {"_gRips_as_emat2amat_",                (DL_FUNC) &_gRips_as_emat2amat_,                 2},
     {"_gRips_as_emat_complement_",          (DL_FUNC) &_gRips_as_emat_complement_,           2},
-    {"_gRips_califa_",                      (DL_FUNC) &_gRips_califa_,                       3},
     {"_gRips_clone_",                       (DL_FUNC) &_gRips_clone_,                        1},
     {"_gRips_conips_ggm_",                  (DL_FUNC) &_gRips_conips_ggm_,                  10},
     {"_gRips_covips_ggm_",                  (DL_FUNC) &_gRips_covips_ggm_,                  10},
-    {"_gRips_covips_loop0_",                (DL_FUNC) &_gRips_covips_loop0_,                11},
+    {"_gRips_covips_loop0_",                (DL_FUNC) &_gRips_covips_loop0_,                10},
     {"_gRips_coxips_ggm_",                  (DL_FUNC) &_gRips_coxips_ggm_,                  10},
     {"_gRips_diff_fun_",                    (DL_FUNC) &_gRips_diff_fun_,                     3},
-    {"_gRips_diff_on_Elist_",               (DL_FUNC) &_gRips_diff_on_Elist_,                4},
+    {"_gRips_diff_on_elst_",                (DL_FUNC) &_gRips_diff_on_elst_,                 4},
     {"_gRips_diff_on_emat_",                (DL_FUNC) &_gRips_diff_on_emat_,                 4},
     {"_gRips_extract_elem",                 (DL_FUNC) &_gRips_extract_elem,                  3},
     {"_gRips_extract_rows",                 (DL_FUNC) &_gRips_extract_rows,                  3},
     {"_gRips_extract_uv_",                  (DL_FUNC) &_gRips_extract_uv_,                   4},
     {"_gRips_find_str_",                    (DL_FUNC) &_gRips_find_str_,                     2},
     {"_gRips_ggm_logL_",                    (DL_FUNC) &_gRips_ggm_logL_,                     3},
+    {"_gRips_has_full_rank_",               (DL_FUNC) &_gRips_has_full_rank_,                1},
     {"_gRips_inv_qr_",                      (DL_FUNC) &_gRips_inv_qr_,                       1},
+    {"_gRips_is_pos_def_",                  (DL_FUNC) &_gRips_is_pos_def_,                   1},
     {"_gRips_list2col_",                    (DL_FUNC) &_gRips_list2col_,                     2},
     {"_gRips_list2row_",                    (DL_FUNC) &_gRips_list2row_,                     2},
     {"_gRips_list_names_",                  (DL_FUNC) &_gRips_list_names_,                   1},
@@ -99,13 +100,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_gRips_max_abs_diag_",                (DL_FUNC) &_gRips_max_abs_diag_,                 1},
     {"_gRips_max_abs_diag_diff_",           (DL_FUNC) &_gRips_max_abs_diag_diff_,            2},
     {"_gRips_max_abs_diff_",                (DL_FUNC) &_gRips_max_abs_diff_,                 2},
-    {"_gRips_max_abs_diff_on_EK_",          (DL_FUNC) &_gRips_max_abs_diff_on_EK_,           4},
-    {"_gRips_max_abs_diff_on_Elist_",       (DL_FUNC) &_gRips_max_abs_diff_on_Elist_,        4},
+    {"_gRips_max_abs_diff_on_elst_",        (DL_FUNC) &_gRips_max_abs_diff_on_elst_,         4},
     {"_gRips_max_abs_diff_on_emat_",        (DL_FUNC) &_gRips_max_abs_diff_on_emat_,         4},
     {"_gRips_max_abs_diff_rel_",            (DL_FUNC) &_gRips_max_abs_diff_rel_,             2},
     {"_gRips_max_diag_diff_",               (DL_FUNC) &_gRips_max_diag_diff_,                2},
     {"_gRips_max_diff_on_emat_",            (DL_FUNC) &_gRips_max_diff_on_emat_,             3},
-    {"_gRips_mean_abs_diff_on_Elist_",      (DL_FUNC) &_gRips_mean_abs_diff_on_Elist_,       4},
+    {"_gRips_mean_abs_diff_on_elst_",       (DL_FUNC) &_gRips_mean_abs_diff_on_elst_,        4},
     {"_gRips_mean_abs_diff_on_emat_",       (DL_FUNC) &_gRips_mean_abs_diff_on_emat_,        4},
     {"_gRips_mnorm_maxabs_",                (DL_FUNC) &_gRips_mnorm_maxabs_,                 1},
     {"_gRips_mnorm_one_",                   (DL_FUNC) &_gRips_mnorm_one_,                    1},
