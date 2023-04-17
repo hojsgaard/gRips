@@ -12,12 +12,14 @@ typedef Rcpp::CharacterVector chr_vec;
 // *** gRips utilities ***
 // ---------------------------------------------------------------------
 
-bool has_full_rank(mat& Sigma){
+// [[Rcpp::export]]
+bool has_full_rank_(mat& Sigma){
   uword rank_Sigma = arma::rank(Sigma, sqrt(datum::eps) * Sigma.n_cols);
   return (rank_Sigma >= Sigma.n_cols); 	    
 }
 
-bool is_pos_def(mat& Sigma){
+// [[Rcpp::export]]
+bool is_pos_def_(mat& Sigma){
   uword rank_Sigma = arma::rank(Sigma, sqrt(datum::eps) * Sigma.n_cols);
   return (rank_Sigma >= Sigma.n_cols); 	    
 }
@@ -40,48 +42,21 @@ mat project_onto_G_(const mat& K, const umat& emc){
 }
 
 
-// mnormone(Delta) = max_v(\sum_u |Delta_{uv}|)
+// mnorm_one(Delta) = max_v(\sum_u |Delta_{uv}|)
 
 // [[Rcpp::export]]
-double mnormone_(mat& Delta){
+double mnorm_one_(mat& Delta){
   rowvec s = sum(abs(Delta));
   // s.print();
   return(max(s));
 }
 
-// // [[Rcpp::export]]
-// mat project_onto_G_diff_(const mat& K, const mat& K2, const umat& emc){
-//   mat Delta = K - K2;
-//   return project_onto_G_(Delta, emc);  
-// }
-
-// // [[Rcpp::export]]
-// double mnormone_diff_(mat& Delta, mat& Delta2){
-  
-//   rowvec s = sum(abs(Delta));
-//   // s.print();
-//   return(max(s));
-// }
-
-
-
-
-
-
-
-
-
-double get_conv_ref(const List& aux){
-  CharacterVector vn = list_names_(aux);
-  if (vn.length()){
-    if (find_str_("conv_ref", vn) < 0)
-      stop("'conv_ref' not found in 'aux'");
-  }
-  double out = as<double>(aux["conv_ref"]);
-  return out;
+// [[Rcpp::export]]
+double mnorm_maxabs_(mat& Delta){
+  rowvec s = max(abs(Delta));
+  // s.print();
+  return(max(s)*Delta.n_rows);
 }
-
-
 
 mat initSigma_(mat& S)
 {
@@ -102,18 +77,6 @@ mat initK_(mat& S)
 }
 
 
-int method2int_(CharacterVector method){
-  CharacterVector options =
-    CharacterVector::create("ips", "mtp2", "lasso", "hybrid");
-  
-  IntegerVector m =  match(method, options) - 1;
-  int v = (int) m[0];
-  return v;
-}
-
-
-
-
 // [[Rcpp::export]]
 double ggm_logL_(mat& S, mat& K, int nobs)
 {
@@ -126,5 +89,27 @@ double ggm_logL_(mat& S, mat& K, int nobs)
 
   return logL;
 }
+
+
+double get_conv_ref(const List& aux){
+  CharacterVector vn = list_names_(aux);
+  if (vn.length()){
+    if (find_str_("conv_ref", vn) < 0)
+      stop("'conv_ref' not found in 'aux'");
+  }
+  double out = as<double>(aux["conv_ref"]);
+  return out;
+}
+
+
+int method2int_(CharacterVector method){
+  CharacterVector options =
+    CharacterVector::create("ips", "mtp2", "lasso", "hybrid");
+  
+  IntegerVector m =  match(method, options) - 1;
+  int v = (int) m[0];
+  return v;
+}
+
 
 

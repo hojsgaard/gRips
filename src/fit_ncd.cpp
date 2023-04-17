@@ -219,7 +219,7 @@ List outerloop1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat,
     // mad = mean_abs_diff_non_edge_(Sigma, Sigma_prev, emat_c); // FIXME for testing
     // mad = max_abs_diff_non_edge_(Sigma, Sigma_prev, emat_c); // FIXME for testing
     mat Delta = Sigma - Sigma_prev;
-    mno = mnormone_(Delta);
+    mno = mnorm_one_(Delta);
     iter++;
     
     if (print >=3){
@@ -274,7 +274,7 @@ List outerloop2_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int no
     // conv_crit = dif2;
 
     mat Delta = K - project_onto_G_(K, emat_c);
-    mno = mnormone_(Delta);
+    mno = mnorm_one_(Delta);
     conv_crit = mno;
     iter++;
 
@@ -386,7 +386,7 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
     // Rprintf("version 1 - full\n");
     
     // Check that Sigma has full rank
-    if (!has_full_rank(Sigma)){
+    if (!has_full_rank_(Sigma)){
       // logL = NA; K=NA, dgap=NA
       // abort
       ;
@@ -401,7 +401,7 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
       
       K2 = project_onto_G_(K, emat_c);
       Delta = K - K2;
-      mno = mnormone_(Delta);
+      mno = mnorm_one_(Delta);
       if (print>=3)
 	Rprintf(">>> fulle mno : %14.10f\n", mno);
       conv_check = mno;
@@ -418,18 +418,18 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
       
   case 0:
     // Rprintf("version 0 - fast\n");
-    if (!has_full_rank(Sigma)){
+    if (!has_full_rank_(Sigma)){
       // logL = NA; K=NA, dgap=NA
       // abort
     } else {    
       K = inv(Sigma);
       K2 = project_onto_G_(K, emat_c);
       Delta = K - K2;
-      mno = mnormone_(Delta);
+      mno = mnorm_one_(Delta);
       if (print>=3)
 	Rprintf(">>> fast mno : %14.10f\n", mno);
       conv_check = mno;      
-      if (!is_pos_def(K2)){
+      if (!is_pos_def_(K2)){
 	REprintf("Algorithm may not have converged\n");
 	// K = NA; upper_limit_logL = formel (23)
       } else {

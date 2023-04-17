@@ -145,8 +145,8 @@ Scc_inv_list_ <- function(S, edges0) {
     .Call('_gRips_conips_ggm_', PACKAGE = 'gRips', S, elist, emat, nobs, K, maxiter, eps, convcrit, print, aux)
 }
 
-covips_loop0_ <- function(S, K, elist0, Sigma, Scc_list, Scci_list, maxiter, nupdates, smart = 0L, eps_smart = 0.0, print = 0L) {
-    .Call('_gRips_covips_loop0_', PACKAGE = 'gRips', S, K, elist0, Sigma, Scc_list, Scci_list, maxiter, nupdates, smart, eps_smart, print)
+covips_loop0_ <- function(S, K, elist0, Sigma, Scc_lst, Scci_lst, maxiter, nupdates, smart = 0L, eps_smart = 0.0, print = 0L) {
+    .Call('_gRips_covips_loop0_', PACKAGE = 'gRips', S, K, elist0, Sigma, Scc_lst, Scci_lst, maxiter, nupdates, smart, eps_smart, print)
 }
 
 .c_covips_ggm_ <- function(S, elist, emat, nobs, K, maxiter, eps, convcrit, print, aux) {
@@ -205,12 +205,24 @@ as_emat_complement_ <- function(emat, d) {
     .Call('_gRips_as_emat_complement_', PACKAGE = 'gRips', emat, d)
 }
 
+has_full_rank_ <- function(Sigma) {
+    .Call('_gRips_has_full_rank_', PACKAGE = 'gRips', Sigma)
+}
+
+is_pos_def_ <- function(Sigma) {
+    .Call('_gRips_is_pos_def_', PACKAGE = 'gRips', Sigma)
+}
+
 project_onto_G_ <- function(K, emc) {
     .Call('_gRips_project_onto_G_', PACKAGE = 'gRips', K, emc)
 }
 
-mnormone_ <- function(Delta) {
-    .Call('_gRips_mnormone_', PACKAGE = 'gRips', Delta)
+mnorm_one_ <- function(Delta) {
+    .Call('_gRips_mnorm_one_', PACKAGE = 'gRips', Delta)
+}
+
+mnorm_maxabs_ <- function(Delta) {
+    .Call('_gRips_mnorm_maxabs_', PACKAGE = 'gRips', Delta)
 }
 
 ggm_logL_ <- function(S, K, nobs) {

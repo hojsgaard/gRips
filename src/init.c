@@ -47,7 +47,8 @@ extern SEXP _gRips_max_diag_diff_(SEXP, SEXP);
 extern SEXP _gRips_max_diff_on_emat_(SEXP, SEXP, SEXP);
 extern SEXP _gRips_mean_abs_diff_on_Elist_(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _gRips_mean_abs_diff_on_emat_(SEXP, SEXP, SEXP, SEXP);
-extern SEXP _gRips_mnormone_(SEXP);
+extern SEXP _gRips_mnorm_maxabs_(SEXP);
+extern SEXP _gRips_mnorm_one_(SEXP);
 extern SEXP _gRips_ncd_ggm_(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _gRips_outerloop1_(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _gRips_project_onto_G_(SEXP, SEXP);
@@ -106,7 +107,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_gRips_max_diff_on_emat_",            (DL_FUNC) &_gRips_max_diff_on_emat_,             3},
     {"_gRips_mean_abs_diff_on_Elist_",      (DL_FUNC) &_gRips_mean_abs_diff_on_Elist_,       4},
     {"_gRips_mean_abs_diff_on_emat_",       (DL_FUNC) &_gRips_mean_abs_diff_on_emat_,        4},
-    {"_gRips_mnormone_",                    (DL_FUNC) &_gRips_mnormone_,                     1},
+    {"_gRips_mnorm_maxabs_",                (DL_FUNC) &_gRips_mnorm_maxabs_,                 1},
+    {"_gRips_mnorm_one_",                   (DL_FUNC) &_gRips_mnorm_one_,                    1},
     {"_gRips_ncd_ggm_",                     (DL_FUNC) &_gRips_ncd_ggm_,                     10},
     {"_gRips_outerloop1_",                  (DL_FUNC) &_gRips_outerloop1_,                   9},
     {"_gRips_project_onto_G_",              (DL_FUNC) &_gRips_project_onto_G_,               2},
