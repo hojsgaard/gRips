@@ -54,7 +54,7 @@ NULL
 #' @rdname fit_ggm
 #' @export
 fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxit=10000L, eps=1e-6, convcrit=1, aux=list(),
-                    algo="covips", version=1, print=0){
+                    algo="covips", ver=1, print=0){
 
     t0 <- .get.time()
     algo <- match.arg(tolower(algo),
@@ -71,7 +71,7 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxit=10000L, eps=1e-6, convcri
     }
 
     aux0 <- list(algo  = algo,
-                 version = version,                 
+                 version = ver,                 
                  engine  = "cpp")
     
     engine <- match.arg(tolower(aux0$engine), c("cpp", "r"))
@@ -100,6 +100,8 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxit=10000L, eps=1e-6, convcri
     
     out <- fitfun(S=S, elist=elist, emat=emat,
                   nobs=nobs, K=K, maxit=maxit, eps=eps, convcrit=convcrit, print=print, aux=aux0)
+
+## print(out)
     
     out <- c(out, list(edges=emat, nobs=nobs, eps=eps, max_coreness=max_coreness))
     out   <- .finalize_fit(out, S=S, t0=t0, algo=algo, engine=engine)
