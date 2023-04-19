@@ -113,7 +113,7 @@ innerloop1_update_Sigma2 <- function(parm, amat){
 }
 
 
-outerloop1 <- function(parm, emat, emat_c, amat, eps, maxiter=1000){
+outerloop1 <- function(parm, emat, emat_c, amat, eps, maxit=1000){
     ## cat("outerloop1 - start\n")
     not_converged <- TRUE
     it1 <- 0
@@ -134,14 +134,14 @@ outerloop1 <- function(parm, emat, emat_c, amat, eps, maxiter=1000){
         conv_crit  <- mad
 
         ## cat(sprintf("it1: %d mad: %f\n", it1, mad))
-        if ((it1 == maxiter) || (conv_crit < eps)) { break() }
+        if ((it1 == maxit) || (conv_crit < eps)) { break() }
     }
     ## cat("outerloop1 done\n")
     list(iter=it1, mad=mad) ## FIXME mad should be conv_crit		
     ## parm (with updated Sigma) is the result 
 }
 
-outerloop2 <- function(parm, emat, emat_c, amat, eps, maxiter=1000){
+outerloop2 <- function(parm, emat, emat_c, amat, eps, maxit=1000){
 
     smart_K <- TRUE
     
@@ -164,7 +164,7 @@ outerloop2 <- function(parm, emat, emat_c, amat, eps, maxiter=1000){
         it2  <- it2 + 1
         conv_crit <- dif2
         ## cat(sprintf("it2: %d dif2: %f\n", it2, dif2))
-        if ((it2 == maxiter) || (conv_crit < eps)) { break() }
+        if ((it2 == maxit) || (conv_crit < eps)) { break() }
     }
 
     ## cat("outerloop2 done\n")
@@ -173,7 +173,7 @@ outerloop2 <- function(parm, emat, emat_c, amat, eps, maxiter=1000){
     out
 }
 
-outerloop2_s <- function(parm, emat, emat_c, amat, eps, maxiter=1000){
+outerloop2_s <- function(parm, emat, emat_c, amat, eps, maxit=1000){
 
     is_invertible <- function(S){det(S) > 0}
     

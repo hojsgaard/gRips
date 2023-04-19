@@ -8,11 +8,11 @@
 #'     x p matrix of integers.
 #' @param nobs Number of observations
 #' @param K Initial value of concentration matrix.
-#' @param maxiter Maximum number of iterations.
+#' @param maxit Maximum number of iterations.
 #' @param eps Convergence criterion.
 #' @param convcrit Convergence criterions. See section `details`.
 #' @param aux A list of form name=value.
-#' @param method Either `"ips"` or `"fips"`.
+#' @param algo Either `"ips"` or `"fips"`.
 #' @param print Should output from fitting be printed?
 #' 
 #' @details
@@ -38,10 +38,10 @@
 #'
 #' EPS = 1e-2
 #'
-#' cg = fit_ggm(S, gl, nobs=nobs, eps=EPS, method="cov")
-#' ci = fit_ggm(S, gl, nobs=nobs, eps=EPS, method="con")
-#' rg = fit_ggm(S, gl, nobs=nobs, eps=EPS, method="cov", aux=list(engine="R"))
-#' ri = fit_ggm(S, gl, nobs=nobs, eps=EPS, method="con", aux=list(engine="R"))
+#' cg = fit_ggm(S, gl, nobs=nobs, eps=EPS, algo="cov")
+#' ci = fit_ggm(S, gl, nobs=nobs, eps=EPS, algo="con")
+#' rg = fit_ggm(S, gl, nobs=nobs, eps=EPS, algo="cov", aux=list(engine="R"))
+#' ri = fit_ggm(S, gl, nobs=nobs, eps=EPS, algo="con", aux=list(engine="R"))
 #'
 #' K <- solve(S)
 #' (ci$K - K)  %>% abs %>% max
@@ -51,19 +51,18 @@
 #'
 NULL
 
-
 #' @rdname fit_ggm
 #' @export
-fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxiter=10000L, eps=1e-6, convcrit=1, aux=list(),
-                    method="covips", print=0){
+fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxit=10000L, eps=1e-6, convcrit=1, aux=list(),
+                    algo="covips", version=1, print=0){
 
     t0 <- .get.time()
-    method <- match.arg(tolower(method),
-                        c("covips", "conips", "coxips", "ncd", "cal", "glasso"))
-
+    algo <- match.arg(tolower(algo),
+                        c("covips",   "conips",   "ncd"))
+    
     edges <- parse_edges(edges, nrow(S))
     elist <- .form2glist(edges)
-    emat <- as_elist2emat(elist)
+    emat  <- as_elist2emat(elist)
     
     ig <- as_emat2igraph(emat, nrow(S))
     max_coreness <- max(coreness(ig))
@@ -71,17 +70,15 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxiter=10000L, eps=1e-6, convc
         stop(glue("Max coreness ({max_coreness}) is larger than nobs ({nobs}); mle may not exist.\n"))
     }
 
-    aux0 <- list(version=1,
-                 smart      = 1,     ## FIXME Obsolete  
-                 eps_smart  = 1e-4,  ## FIXME Obsolete  
-                 engine     = "cpp"
-                 )
-
+    aux0 <- list(algo  = algo,
+                 version = version,                 
+                 engine  = "cpp")
+    
     engine <- match.arg(tolower(aux0$engine), c("cpp", "r"))
     aux0[names(aux)] <- aux    
     
     if (is.null(K)) {
-        if (identical(method, "ncd")){
+        if (identical(algo, "ncd")){
             K <- diag(1, nrow(S))
         } else {
             K <- diag(1/diag(S))
@@ -89,23 +86,23 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxiter=10000L, eps=1e-6, convc
     }
 
     t0 <- .get.time()
-    comb <- paste0(engine, "_", method)
+    comb <- paste0(engine, "_", algo)
     switch(comb,
            "cpp_covips"     = {fitfun <- .c_covips_ggm_ },
-           "r_covips"       = {fitfun <- .r_covips_ggm_ },           
            "cpp_conips"     = {fitfun <- .c_conips_ggm_ },
            "cpp_coxips"     = {fitfun <- .c_coxips_ggm_ },
-           "r_conips"       = {fitfun <- .r_conips_ggm_ },
            "cpp_ncd"        = {fitfun <- .c_ncd_ggm_ },
+           "r_covips"       = {fitfun <- .r_covips_ggm_ },           
+           "r_conips"       = {fitfun <- .r_conips_ggm_ },
            "r_ncd"          = {fitfun <- .r_ncd_ggm_ },
            ## "r_cal"       = {fitfun <- .r_cal_ggm_  },           
            )    
     
     out <- fitfun(S=S, elist=elist, emat=emat,
-                  nobs=nobs, K=K, maxiter=maxiter, eps=eps, convcrit=convcrit, print=print, aux=aux0)
+                  nobs=nobs, K=K, maxit=maxit, eps=eps, convcrit=convcrit, print=print, aux=aux0)
     
     out <- c(out, list(edges=emat, nobs=nobs, eps=eps, max_coreness=max_coreness))
-    out   <- .finalize_fit(out, S=S, t0=t0, method=method, engine=engine)
+    out   <- .finalize_fit(out, S=S, t0=t0, algo=algo, engine=engine)
     class(out) <- "gips_fit_class"
     out
 }
@@ -163,7 +160,7 @@ parse_edges <- function(edges, nvar){
         stop("Need list or matrix")
 }
 
-.finalize_fit <- function(out, S=S, t0=NULL, method, engine, ...){
+.finalize_fit <- function(out, S=S, t0=NULL, algo, engine, ...){
     ## cat(".finalize_fit\n")
 
     
@@ -178,8 +175,9 @@ parse_edges <- function(edges, nvar){
         out$time <- .get.diff.time(t0, units="millisecs")
     
     out$details <- list(
-        method =method,
-        engine = engine,
+        algo = algo,
+        ver    = out$ver,
+        eng    = engine,
         time   = unname(out$time),
         nobs   = out$nobs,
         iter   = out$iter,
@@ -190,7 +188,7 @@ parse_edges <- function(edges, nvar){
         logL   = out$logL,
         ## For cov / con the lines below give the same, but for glasso there is no conv_check variable.
         ## made   = mean_abs_diff_on_emat_(out$Sigma, S, out$edges, 1)
-        conv_check  = out$conv_check,
+        conv   = out$conv_check,
         dgap   = out$gap,
         ncore  = out$max_coreness
        

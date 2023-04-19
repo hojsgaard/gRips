@@ -202,7 +202,7 @@ void innerloop1_update_Sigma_(mat& Sigma, mat& amat, int nobs, int print=0){
 
 //[[Rcpp::export]]
 List outerloop1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat,
-		 int& nobs, double& eps, int maxiter, int print=0){
+		 int& nobs, double& eps, int maxit, int print=0){
 
   if (print >=2){
     Rprintf(">> Running outerloop1\n");
@@ -228,7 +228,7 @@ List outerloop1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat,
 
     Sigma_prev = Sigma;
     conv_crit = mno;
-    if ((iter == maxiter) || (conv_crit < eps)){
+    if ((iter == maxit) || (conv_crit < eps)){
       break;
     }
   }
@@ -253,7 +253,7 @@ void innerloop2_update_Sigma_K_(mat& Sigma, mat& K, mat& amat, int nobs,
   }
 }
 
-List outerloop2_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int nobs, double& eps, int& maxiter,
+List outerloop2_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int nobs, double& eps, int& maxit,
 		 int rank_Sigma,
 		 int smart=0, double eps_smart=0.0, int print=0){
 
@@ -281,7 +281,7 @@ List outerloop2_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int no
     if (print>=3)
       Rprintf(">>> outerloop2 iter: %4d eps: %14.10f mno: %14.10f\n", iter, eps, mno);
     
-    if ((iter == maxiter) || (conv_crit < eps)){
+    if ((iter == maxit) || (conv_crit < eps)){
       break;
     }
   }
@@ -355,11 +355,11 @@ void Sigma_to_K_(mat& Sigma, mat& K, mat& amat, int nobs, int print=0){
 //[[Rcpp::export(.c_ncd_ggm_)]]
 List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
 	      mat K,       
-	      int maxiter, double& eps, int& convcrit, int print, List& aux){
+	      int maxit, double& eps, int& convcrit, int print, List& aux){
   
   int version      = aux["version"];
-  int smart        = aux["smart"];
-  double eps_smart = aux["eps_smart"];
+  int smart        = 0; //aux["smart"];
+  double eps_smart = 1e-6; // aux["eps_smart"];
   
   umat emat_c = as_emat_complement_(emat-1, S.n_rows);
   mat amat    = as_emat2amat_(emat-1, S.n_rows);
@@ -373,7 +373,7 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
 
   // FIXME NOTICE SCALING OG EPS2
   res1 = outerloop1_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat,
-		     nobs=nobs, eps=eps2/100, maxiter=maxiter, print=print);
+		     nobs=nobs, eps=eps2/100, maxit=maxit, print=print);
   
   iter1 = res1["iter"];
   if (print>=2)
@@ -392,20 +392,20 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
       ;
     } else {    
       K = inv_qr_(Sigma);
-      res2 = outerloop2_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat, nobs=nobs, eps=eps2, maxiter=maxiter,
+      res2 = outerloop2_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat, nobs=nobs, eps=eps2, maxit=maxit,
 			 rank_Sigma=rank_Sigma,
 			 smart=smart, eps_smart=eps_smart, print=print);
       iter2 = res2["iter"];
       if (print>=2)
 	Rprintf(">> outerloop2 iterations : %d\n", iter2);
       
-      K2 = project_onto_G_(K, emat_c);
+      K2    = project_onto_G_(K, emat_c);
       Delta = K - K2;
-      mno = mnorm_one_(Delta);
+      mno   = mnorm_one_(Delta);
       if (print>=3)
 	Rprintf(">>> fulle mno : %14.10f\n", mno);
       conv_check = mno;
-      if (iter2 < maxiter){ // Then K is posdef	
+      if (iter2 < maxit){ // Then K is posdef	
       	logL = ggm_logL_(S, K2, nobs);
       	gap  = duality_gap_(Sigma, K2, nobs);
       } else {
@@ -422,10 +422,10 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
       // logL = NA; K=NA, dgap=NA
       // abort
     } else {    
-      K = inv(Sigma);
-      K2 = project_onto_G_(K, emat_c);
+      K     = inv(Sigma);
+      K2    = project_onto_G_(K, emat_c);
       Delta = K - K2;
-      mno = mnorm_one_(Delta);
+      mno   = mnorm_one_(Delta);
       if (print>=3)
 	Rprintf(">>> fast mno : %14.10f\n", mno);
       conv_check = mno;      

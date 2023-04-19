@@ -14,6 +14,7 @@ fit_ggm(
   convcrit = 1,
   aux = list(),
   method = "covips",
+  version = 1,
   print = 0
 )
 }

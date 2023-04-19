@@ -96,45 +96,43 @@ void conips_inner_(arma::mat& S, arma::mat& K,
 //[[Rcpp::export(.c_conips_ggm_)]]
 List conips_ggm_(arma::mat& S, List& elist, umat& emat, int& nobs,
 	      arma::mat K,
-	      int& maxiter, double& eps, int& convcrit, int& print, List& aux){
+	      int& maxit, double& eps, int& convcrit, int& print, List& aux){
 
+  int version      = aux["version"];  
   double logL, logLp, conv_check=9999, gap=-1.0;
   double conv_ref; // FIXME needed??
-  // char buffer[200];
   int itcount  = 0;
   double nparm = S.n_cols + emat.n_cols;  
   umat emat0   = emat - 1;
-
   umat emat_c  = as_emat_complement_(emat-1, S.n_rows);
-  // double eps2  = MIN(eps, 1.0/S.n_rows);  
-  mat dif, Delta;
   double mno, maxabs;
+  mat Sigma, dif, Delta;
 
-  // Variables for conips
-  mat Sigma;
   List elist0 = clone(elist);
-  List clist0 = make_clist_(S, elist);
-  
   for (int i=0; i<elist.length(); i++){
     elist0[i] = as<arma::uvec>(elist0[i]) - 1; // 0-based
-    clist0[i] = as<arma::uvec>(clist0[i]) - 1; // 0-based			     
   }
-  // END
+  
+  // Variables for CONIPS only
+  List clist0 = make_clist_(S, elist);  
+  for (int i=0; i<elist.length(); i++){
+    clist0[i] = as<arma::uvec>(clist0[i]) - 1; // 0-based			     
+  }  
+  // END - Variables for CONIPS only  
+
   
   INIT_CONVERGENCE_CHECK;
     
-  for (; itcount < maxiter; ){  
+  for (; itcount < maxit; ){  
     conips_inner_(S, K, elist0, clist0, print=print);
     ++itcount;          
 
     switch(convcrit){
     case 1: 
       Sigma = inv_qr_(K); // Needed for conips only
-      // mad   = mean_abs_diff_on_emat_(S, Sigma, emat0, 0);
-      // conv_check = mad;
-      dif = S - Sigma;
+      dif   = S - Sigma;
       Delta = project_onto_G_(dif, emat_c);
-      mno = mnorm_one_(Delta);
+      mno   = mnorm_one_(Delta);
       conv_check = mno;
       if (print>=3)
 	Rprintf(">>> conips iter: %4d eps: %14.10f, mno: %14.10f\n", itcount, eps, mno);
@@ -230,21 +228,21 @@ void covips_inner0_(mat& S, mat& K,
 List covips_loop0_(mat& S, mat& K, List& elist0, mat& Sigma,
 		   List& Scc_lst, List& Scci_lst,
 		   int& nobs, 
-		   int& maxiter,
+		   int& maxit,
 		   int nupdates, double eps=0.01, int print=0){
   int itcount = 0;
   double threshold = elist0.length() / 1000; 
   double logL;
   
-  for (; itcount < maxiter; ){  
+  for (; itcount < maxit; ){  
     covips_inner0_(S=S, K=K, elist0=elist0, Sigma=Sigma,
   		  Scc_lst=Scc_lst, Scci_lst=Scci_lst,
   		  nupdates=nupdates, eps=eps,
   		  print=print);
     if (print>=3){
       logL = ggm_logL_(S, K, nobs);  
-      Rprintf(">>> itcount: %3d maxiter: %d nupdates: %4d edges: %4d threshold: %f, logL: %14.10f\n",
-	      itcount, maxiter, nupdates, elist0.length(), threshold, logL);
+      Rprintf(">>> itcount: %3d maxit: %d nupdates: %4d edges: %4d threshold: %f, logL: %14.10f\n",
+	      itcount, maxit, nupdates, elist0.length(), threshold, logL);
     }
     ++itcount;
     if (nupdates <= threshold)
@@ -258,56 +256,53 @@ List covips_loop0_(mat& S, mat& K, List& elist0, mat& Sigma,
 //[[Rcpp::export(.c_covips_ggm_)]] 
 List covips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
 	       mat& K,       
-	       int& maxiter, double& eps, int& convcrit, int& print, List& aux){
+	       int& maxit, double& eps, int& convcrit, int& print, List& aux){
 
-  int version      = aux["version"];
-  int  smart       = aux["smart"];
-  double eps_smart = aux["eps_smart"];
   
+  int version      = aux["version"];
   double logL, logLp, conv_check=9999, gap=-1.0;
   double conv_ref; // FIXME needed??
   double nparm = S.n_cols + emat.n_cols;
   umat emat0   = emat - 1;  
   umat emat_c  = as_emat_complement_(emat-1, S.n_rows);
   double mno, maxabs;
-  mat Sigma = initSigma_(S), dif, Delta;  
+  mat Sigma, dif, Delta;  
   List res1, res2;
-  int iter1=0, iter2=0, itcount=0;
+  int iter1=0, iter2=0, itcount=0, nupdates=0;
 
-  
-  INIT_CONVERGENCE_CHECK;
-
-  // Compute Scc etc only once
   List elist0 = clone(elist);  
   for (int i=0; i < elist.length(); i++) {
     elist0[i] = as<arma::uvec>(elist0[i]) - 1; // 0-based
   }
-  
+    
+  // Variables for COVIPS only
+  Sigma = initSigma_(S);
+    
+  List Scc_lst  = Scc_list_(S, elist0);  
   List Scci_lst = Scc_inv_list_(S, elist0);
-  List Scc_lst  = Scc_list_(S, elist0);
-  int nupdates  = 0;
+  // END - Variables for COVIPS only  
+
+  INIT_CONVERGENCE_CHECK;
   
   if (version==0){
     res1 = covips_loop0_(S=S, K=K, elist0=elist0, Sigma=Sigma,
 			 Scc_lst=Scc_lst, Scci_lst=Scci_lst,
-			 nobs=nobs, maxiter=maxiter, nupdates=nupdates,
+			 nobs=nobs, maxit=maxit, nupdates=nupdates,
 			 eps=eps, print=print);
     iter1 = res1["iter"];
     if (print>=2)
       Rprintf(">> iterations for start: %d \n", iter1);
   }
 
-  for (; itcount < maxiter; ){  
+  for (; itcount < maxit; ){  
     res2 = covips_inner_(S=S, K=K, elist0=elist0, Sigma=Sigma,
 			 Scc_lst=Scc_lst, Scci_lst=Scci_lst,
 			 print=print);
     ++itcount;      
     switch(convcrit){
     case 1: 	
-      // mad = mean_abs_diff_on_emat_(S, Sigma, emat0, 0);
-      // conv_check = mad;
-      dif = S - Sigma;
-      Delta = project_onto_G_(dif, emat_c);
+      dif    = S - Sigma;
+      Delta  = project_onto_G_(dif, emat_c);
       maxabs = mnorm_maxabs_(Delta);
       conv_check = maxabs;
       if (print>=3){
@@ -323,102 +318,98 @@ List covips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
     }	
     if (conv_check < eps) break;
   }
-  
+
+  itcount = itcount + iter1;
   logL = ggm_logL_(S, K, nobs);  
   RETURN_VALUE;
 }
 
 
+// //[[Rcpp::export(.c_coxips_ggm_)]] 
+// List coxips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
+// 		 mat K,       
+// 		 int& maxit, double& eps, int& convcrit, int& print, List& aux){
 
-
-
-//[[Rcpp::export(.c_coxips_ggm_)]] 
-List coxips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
-		 mat K,       
-		 int& maxiter, double& eps, int& convcrit, int& print, List& aux){
-
-  Rprintf("coxips_ggm_\n");
+//   Rprintf("coxips_ggm_\n");
   
-  int version      = aux["version"];
-  int smart        = aux["smart"];
-  double eps_smart = aux["eps_smart"];
+//   int version      = aux["version"];
 
-  mat Sigma;
-  List elist0, clist0, Scci_lst, Scc_lst;
+//   mat Sigma;
+//   List elist0, clist0, Scci_lst, Scc_lst;
 
-  double logL, logLp, conv_check=9999, gap=-1.0;
-  // char buffer[200];
-  int itcount  = 0;
-  double nparm = S.n_cols + emat.n_cols;
-  umat emat0   = emat - 1;
+//   double logL, logLp, conv_check=9999, gap=-1.0;
+//   // char buffer[200];
+//   int itcount  = 0;
+//   double nparm = S.n_cols + emat.n_cols;
+//   umat emat0   = emat - 1;
   
-  umat emat_c  = as_emat_complement_(emat-1, S.n_rows);
-  mat dif, Delta;
-  double mno;
-  int nupdates=0;
+//   umat emat_c  = as_emat_complement_(emat-1, S.n_rows);
+//   mat dif, Delta;
+//   double mno;
+//   int nupdates=0;
   
-  // Initialization
-  switch(version){
-  case 1: // covips
-    Sigma    = initSigma_(S);  
-    elist0 = clone(elist);  
-    for (int i=0; i < elist.length(); i++) {
-      elist0[i] = as<arma::uvec>(elist0[i]) - 1; // 0-based
-    }
+//   // Initialization
+//   switch(version){
+//   case 1: // covips
+//     Sigma    = initSigma_(S);  
+//     elist0 = clone(elist);  
+//     for (int i=0; i < elist.length(); i++) {
+//       elist0[i] = as<arma::uvec>(elist0[i]) - 1; // 0-based
+//     }
     
-    Scci_lst = Scc_inv_list_(S, elist0);
-    Scc_lst  = Scc_list_(S, elist0);
-    break;
-  case 2: // conips
-    elist0 = clone(elist);
-    clist0 = make_clist_(S, elist);
+//     Scci_lst = Scc_inv_list_(S, elist0);
+//     Scc_lst  = Scc_list_(S, elist0);
+//     break;
+//   case 2: // conips
+//     elist0 = clone(elist);
+//     clist0 = make_clist_(S, elist);
   
-    for (int i=0; i<elist.length(); i++){
-      elist0[i] = as<arma::uvec>(elist0[i]) - 1; // 0-based
-      clist0[i] = as<arma::uvec>(clist0[i]) - 1; // 0-based			     
-    }
+//     for (int i=0; i<elist.length(); i++){
+//       elist0[i] = as<arma::uvec>(elist0[i]) - 1; // 0-based
+//       clist0[i] = as<arma::uvec>(clist0[i]) - 1; // 0-based			     
+//     }
 
-    break;
-  }
+//     break;
+//   }
 
-  // Iteration
-  for (; itcount < maxiter; ){  
-    switch(version){
-    case 1: // covips
-      covips_inner_(S=S, K=K, elist0=elist0, Sigma=Sigma,
-		    Scc_lst=Scc_lst, Scci_lst=Scci_lst,
-		    print=print);      
-      break;
-    case 2: // conips
-      conips_inner_(S, K, elist0, clist0, print=print);
-      break;
-    }
-    ++itcount;          
+//   // Iteration
+//   for (; itcount < maxit; ){  
+//     switch(version){
+//     case 1: // covips
+//       covips_inner_(S=S, K=K, elist0=elist0, Sigma=Sigma,
+// 		    Scc_lst=Scc_lst, Scci_lst=Scci_lst,
+// 		    print=print);      
+//       break;
+//     case 2: // conips
+//       conips_inner_(S, K, elist0, clist0, print=print);
+//       break;
+//     }
+//     ++itcount;          
 
-    switch(convcrit){
-    case 1: 	
-      Sigma = inv_qr_(K); // Needed for conips only
-      dif = S - Sigma;
-      Delta = project_onto_G_(dif, emat_c);
-      mno = mnorm_one_(Delta);
-      conv_check = mno;
-      if (print>=3)
-	Rprintf(">>> covips iter: %4d eps: %14.10f, mno: %14.10f\n", itcount, eps, mno);
-      break;
-    case 2:
-      CONV_CHECK_LOGL_DIFF;
-      break;
-    }	
+//     switch(convcrit){
+//     case 1: 	
+//       Sigma = inv_qr_(K); // Needed for conips only
+//       dif = S - Sigma;
+//       Delta = project_onto_G_(dif, emat_c);
+//       mno = mnorm_one_(Delta);
+//       conv_check = mno;
+//       if (print>=3)
+// 	Rprintf(">>> covips iter: %4d eps: %14.10f, mno: %14.10f\n", itcount, eps, mno);
+//       break;
+//     case 2:
+//       CONV_CHECK_LOGL_DIFF;
+//       break;
+//     }	
       
-    if (conv_check < eps) break;
-  }
+//     if (conv_check < eps) break;
+//   }
 
-  if (version == 2) // conips
-    Sigma = inv_qr_(K); // FOR CONIPS ONLY
+//   if (version == 2) // conips
+//     Sigma = inv_qr_(K); // FOR CONIPS ONLY
 
-  logL = ggm_logL_(S, K, nobs);  
-  RETURN_VALUE;  
-}
+//   logL = ggm_logL_(S, K, nobs);  
+//   RETURN_VALUE;  
+// }
 
 
 

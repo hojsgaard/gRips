@@ -30,14 +30,15 @@ double get_conv_ref(const List& aux);
 // -------------------------------------------------------------
 
 #define RETURN_VALUE					\
-  return List::create(					\
-  _["K"]     = K,					\
-  _["Sigma"] = Sigma,					\
-  _["logL"]  = logL,					\
-  _["iter"]  = itcount,					\
-  _["gap"]   = gap,					\
-  _["conv_check"] = conv_check);			\
-
+  return List::create(						\
+    _["K"]     = K,						\
+    _["Sigma"] = Sigma,						\
+    _["logL"]  = logL,						\
+    _["iter"]  = itcount,					\
+    _["gap"]   = gap,						\
+    _["version"] = version,					\
+    _["conv_check"] = conv_check);				\
+  
 
 #define INIT_CONVERGENCE_CHECK			\
   switch (convcrit){                            \
@@ -73,7 +74,10 @@ double get_conv_ref(const List& aux);
   logL  = ggm_logL_(S, K, nobs);		\
   conv_check = fabs(logL - logLp)  / nparm;	\
   logLp = logL;					\
-  
+
+// Rprintf("logL: %14.10f logLp: %14.10f diff: %14.10f conv_check: %14.10f\n", logL, logLp, logL-logLp, conv_check); 
+
+
 #define CONV_CHECK_LOGL_DIFF_REF			\
   logL  = ggm_logL_(S, K, nobs);			\
   conv_check = fabs(logL - conv_ref) / nparm;		\
