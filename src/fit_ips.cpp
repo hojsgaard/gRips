@@ -191,7 +191,8 @@ void covips_ggm_update_cc_parm0_(const mat& Scc, const uvec& cc0, mat& K, mat& S
   mat Kstar    = inv(Sigmacc);
   mat dd = Scc_inv - Kstar;
   double Knorm = mnorm_one_(dd);
-
+  // FIXME mnorm_maxabs_
+  
   mat Kcc, Kupd, Haux;
   
   if (Knorm > eps){

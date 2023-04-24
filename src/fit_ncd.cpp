@@ -365,15 +365,23 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
   mat amat    = as_emat2amat_(emat-1, S.n_rows);
   mat Sigma   = S, K2, Delta;
   List res1, res2;
-  double logL, gap, conv_check;
+  double logL, gap=-1.0, conv_check;
   int iter1, iter2, itcount;
 
-  double eps2 = MIN(eps, 1.0/Sigma.n_rows);  
+  double eps2;
   double mno;
 
   // FIXME NOTICE SCALING OG EPS2
-  res1 = outerloop1_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat,
-		     nobs=nobs, eps=eps2/100, maxit=maxit, print=print);
+  // FIXME: Divider kun eps2 med noget når det er version 1
+  if (version==1){
+    eps2 = MIN(eps, 1.0/Sigma.n_rows);  
+    res1 = outerloop1_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat,
+		       nobs=nobs, eps=eps2/100, maxit=maxit, print=print);
+  } else {
+    res1 = outerloop1_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat,
+		       nobs=nobs, eps=eps, maxit=maxit, print=print);
+    // NOTE: K does not have zeros in the right places
+  }
   
   iter1 = res1["iter"];
   if (print>=2)
