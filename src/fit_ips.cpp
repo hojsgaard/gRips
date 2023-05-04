@@ -132,10 +132,13 @@ List conips_ggm_(arma::mat& S, List& elist, umat& emat, int& nobs,
       Sigma = inv_qr_(K); // Needed for conips only
       dif   = S - Sigma;
       Delta = project_onto_G_(dif, emat_c);
-      mno   = mnorm_one_(Delta);
-      conv_check = mno;
-      if (print>=3)
-	Rprintf(">>> conips iter: %4d eps: %14.10f, mno: %14.10f\n", itcount, eps, mno);
+      maxabs = mnorm_maxabs_(Delta);
+      conv_check = maxabs;
+      if (print>=3){
+	mno   = mnorm_one_(Delta);
+	logL  = ggm_logL_(S, K, nobs);
+	Rprintf(">>> covips iter: %4d eps: %14.10f, mno: %14.10f maxabs: %14.10f logL: %14.10f\n", itcount, eps, mno, maxabs, logL);	
+      }
       // PRINT_CONV_CHECK1;
       break;
     case 2:
