@@ -248,7 +248,7 @@ List covips_loop0_(mat& S, mat& K, List& elist0, mat& Sigma,
   		  print=print);
     if (print>=3){
       logL = ggm_logL_(S, K, nobs);  
-      Rprintf(">>> itcount: %3d maxit: %d nupdates: %6d edges: %4d threshold: %f, logL: %16.8f\n",
+      Rprintf(">>> itcount: %3d maxit: %d nupdates: %6d edges: %4d threshold: %5.0f, logL: %16.8f\n",
 	      itcount, maxit, nupdates, elist0.length(), threshold, logL);
     }
     ++itcount;
@@ -277,7 +277,7 @@ List covips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
   List res1, res2;
   int iter1=0, iter2=0, itcount=0, nupdates=0;
 
-  logL = ggm_logL_(S, K, nobs);  Rprintf("logL %f\n", logL);
+  // logL = ggm_logL_(S, K, nobs);  Rprintf("logL %f\n", logL);
   
   List elist0 = clone(elist);  
   for (int i=0; i < elist.length(); i++) {
@@ -285,9 +285,7 @@ List covips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
   }
     
   // Variables for COVIPS only
-  // Sigma = initSigma_(S);
   Sigma = inv_qr_(K);
-
     
   List Scc_lst  = Scc_list_(S, elist0);  
   List Scci_lst = Scc_inv_list_(S, elist0);
@@ -295,46 +293,49 @@ List covips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
 
   INIT_CONVERGENCE_CHECK;
   
-  if (version==0){
-    res1 = covips_loop0_(S=S, K=K, elist0=elist0, Sigma=Sigma,
-			 Scc_lst=Scc_lst, Scci_lst=Scci_lst,
-			 nobs=nobs, maxit=maxit, nupdates=nupdates,
-			 eps=eps, print=print);
-    iter1 = res1["iter"];
-    if (print>=2)
-      Rprintf(">> iterations for start: %d \n", iter1);
+  res1 = covips_loop0_(S=S, K=K, elist0=elist0, Sigma=Sigma,
+		       Scc_lst=Scc_lst, Scci_lst=Scci_lst,
+		       nobs=nobs, maxit=maxit, nupdates=nupdates,
+		       eps=eps, print=print);
+  iter1 = res1["iter"];
+  if (print>=2)
+    Rprintf(">> iterations for start: %d \n", iter1);
+
+  dif    = S - Sigma;
+  Delta  = project_onto_G_(dif, emat_c);
+  maxabs = mnorm_maxabs_(Delta);
+  conv_check = maxabs;
+    
+  if (version==1){
+  
+    for (; itcount < maxit; ){  
+      res2 = covips_inner_(S=S, K=K, elist0=elist0, Sigma=Sigma,
+			   Scc_lst=Scc_lst, Scci_lst=Scci_lst,
+			   print=print);
+      ++itcount;
+      
+      switch(convcrit){
+      case 1: 	
+	dif    = S - Sigma;
+	Delta  = project_onto_G_(dif, emat_c);
+	maxabs = mnorm_maxabs_(Delta);
+	conv_check = maxabs;
+	if (print>=3){
+	  mno  = mnorm_one_(Delta);
+	  logL = ggm_logL_(S, K, nobs);  
+	  Rprintf(">>> covips iter: %4d eps: %14.10f, mno: %14.10f maxabs: %14.10f logL: %14.10f\n", itcount, eps, mno, maxabs, logL);
+	}
+	// PRINT_CONV_CHECK1;	
+	break;
+      case 2:
+	CONV_CHECK_LOGL_DIFF;
+	break;
+      }	
+      if (conv_check < eps) break;
+    }
   }
 
-  // logL = ggm_logL_(S, K, nobs);  Rprintf("logL %f\n", logL);
   
-  for (; itcount < maxit; ){  
-    res2 = covips_inner_(S=S, K=K, elist0=elist0, Sigma=Sigma,
-			 Scc_lst=Scc_lst, Scci_lst=Scci_lst,
-			 print=print);
-    ++itcount;
-  
-    switch(convcrit){
-    case 1: 	
-      dif    = S - Sigma;
-      // dif.print();
-      // K.print();
-      Delta  = project_onto_G_(dif, emat_c);
-      maxabs = mnorm_maxabs_(Delta);
-      conv_check = maxabs;
-      if (print>=3){
-	mno  = mnorm_one_(Delta);
-	logL = ggm_logL_(S, K, nobs);  
-	Rprintf(">>> covips iter: %4d eps: %14.10f, mno: %14.10f maxabs: %14.10f logL: %14.10f\n", itcount, eps, mno, maxabs, logL);
-      }
-      // PRINT_CONV_CHECK1;	
-      break;
-    case 2:
-      CONV_CHECK_LOGL_DIFF;
-      break;
-    }	
-    if (conv_check < eps) break;
-  }
-
   itcount = itcount + iter1;
   logL = ggm_logL_(S, K, nobs);  
   RETURN_VALUE;

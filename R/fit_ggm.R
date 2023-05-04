@@ -85,6 +85,8 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxit=10000L, eps=1e-6, convcri
         }
     }
 
+    Ks <- .c_clone(K)
+
     t0 <- .get.time()
     comb <- paste0(engine, "_", method)
     switch(comb,
@@ -97,10 +99,12 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxit=10000L, eps=1e-6, convcri
            "r_ncd"          = {fitfun <- .r_ncd_ggm_ },
            ## "r_cal"       = {fitfun <- .r_cal_ggm_  },           
            )    
-    
-    out <- fitfun(S=S, elist=elist, emat=emat,
-                  nobs=nobs, K=K, maxit=maxit, eps=eps, convcrit=convcrit, print=print, aux=aux0)
 
+    ## print(K)
+    out <- fitfun(S=S, elist=elist, emat=emat,
+                  nobs=nobs, K=Ks, maxit=maxit, eps=eps, convcrit=convcrit, print=print, aux=aux0)
+
+    ## print(out$K)
 ## print(out)
     
     out <- c(out, list(edges=emat, nobs=nobs, eps=eps, max_coreness=max_coreness))
