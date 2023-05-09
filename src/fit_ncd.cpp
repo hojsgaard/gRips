@@ -373,13 +373,13 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
 
   // FIXME NOTICE SCALING OG EPS2
   // FIXME: Divider kun eps2 med noget når det er version 1
+  eps2 = MIN(eps, 1.0/Sigma.n_rows);  
   if (version==1){
-    eps2 = MIN(eps, 1.0/Sigma.n_rows);  
     res1 = outerloop1_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat,
-		       nobs=nobs, eps=eps2/100, maxit=maxit, print=print);
+		       nobs=nobs, eps=eps2, maxit=maxit, print=print);
   } else {
     res1 = outerloop1_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat,
-		       nobs=nobs, eps=eps, maxit=maxit, print=print);
+		       nobs=nobs, eps=eps2, maxit=maxit, print=print);
     // NOTE: K does not have zeros in the right places
   }
   
@@ -416,6 +416,7 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
       if (iter2 < maxit){ // Then K is posdef	
       	logL = ggm_logL_(S, K2, nobs);
       	gap  = duality_gap_(Sigma, K2, nobs);
+	K = K2;
       } else {
       	REprintf("Algorithn may not have converged\n");
       	// K = NA; upper_limit_logL = formel (23)

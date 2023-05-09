@@ -196,8 +196,9 @@ void covips_ggm_update_cc_parm0_(const mat& Scc, const uvec& cc0, mat& K, mat& S
   mat Sigmacc  = Sigma.submat(cc0, cc0);
   mat Kstar    = inv(Sigmacc);
   mat dd = Scc_inv - Kstar;
-  double Knorm = mnorm_one_(dd);
-  // FIXME mnorm_maxabs_
+  // double Knorm = mnorm_one_(dd);
+
+  double Knorm = mnorm_maxabs_(dd);
   
   mat Kcc, Kupd, Haux, B;
   
@@ -255,7 +256,7 @@ List covips_loop0_(mat& S, mat& K, List& elist0, mat& Sigma,
 	      itcount, maxit, nupdates, elist0.length(), threshold, logL);
     }
     ++itcount;
-    if (nupdates <= threshold)
+    if (nupdates <= 0)  
       break;  
   }
   // Rprintf("itcount: %d\n", itcount);
