@@ -194,15 +194,18 @@ void covips_ggm_update_cc_parm0_(const mat& Scc, const uvec& cc0, mat& K, mat& S
 {
   
   mat Sigmacc  = Sigma.submat(cc0, cc0);
-  mat Kstar    = inv(Sigmacc);
-  mat dd = Scc_inv - Kstar;
-  // double Knorm = mnorm_one_(dd);
 
+  mat dd;
+
+  dd = Scc - Sigmacc;
+  //    mat Kstar    = inv(Sigmacc);
+  // dd = Scc_inv - Kstar;
   double Knorm = mnorm_maxabs_(dd);
   
   mat Kcc, Kupd, Haux, B;
   
   if (Knorm > eps){
+    mat Kstar    = inv(Sigmacc);
     Kcc      = K.submat(cc0, cc0);	
     Kupd     = Scc_inv + Kcc - Kstar;
     Haux     = Kstar - Kstar * Scc * Kstar;  // Was Saux
