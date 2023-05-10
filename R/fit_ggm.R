@@ -54,11 +54,13 @@ NULL
 #' @rdname fit_ggm
 #' @export
 fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxit=10000L, eps=1e-6, convcrit=1, aux=list(),
-                    method="covips", ver=1, print=0){
+                    method="covips", print=0){
 
     t0 <- .get.time()
     method <- match.arg(tolower(method),
-                        c("covips",   "conips",   "ncd"))
+                        c("covips", "conips", "ncd", "sncd"))
+
+    method_str <- method
     
     edges <- parse_edges(edges, nrow(S))
     elist <- .form2glist(edges)
@@ -70,6 +72,13 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxit=10000L, eps=1e-6, convcri
         stop(glue("Max coreness ({max_coreness}) is larger than nobs ({nobs}); mle may not exist.\n"))
     }
 
+    switch(method,
+           "sncd" = {method="ncd"; ver=0},
+           "ncd"  = {ver=1},
+           "covips"={ver=0}
+           )
+
+    
     aux0 <- list(method  = method,
                  version = ver,                 
                  engine  = "cpp")
@@ -86,13 +95,11 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxit=10000L, eps=1e-6, convcri
     }
 
     Ks <- .c_clone(K)
-
     t0 <- .get.time()
     comb <- paste0(engine, "_", method)
     switch(comb,
            "cpp_covips"     = {fitfun <- .c_covips_ggm_ },
            "cpp_conips"     = {fitfun <- .c_conips_ggm_ },
-           "cpp_coxips"     = {fitfun <- .c_coxips_ggm_ },
            "cpp_ncd"        = {fitfun <- .c_ncd_ggm_ },
            "r_covips"       = {fitfun <- .r_covips_ggm_ },           
            "r_conips"       = {fitfun <- .r_conips_ggm_ },
@@ -100,15 +107,11 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxit=10000L, eps=1e-6, convcri
            ## "r_cal"       = {fitfun <- .r_cal_ggm_  },           
            )    
 
-    ## print(K)
     out <- fitfun(S=S, elist=elist, emat=emat,
                   nobs=nobs, K=Ks, maxit=maxit, eps=eps, convcrit=convcrit, print=print, aux=aux0)
-
-    ## print(out$K)
-## print(out)
     
     out <- c(out, list(edges=emat, nobs=nobs, eps=eps, max_coreness=max_coreness))
-    out   <- .finalize_fit(out, S=S, t0=t0, method=method, engine=engine)
+    out <- .finalize_fit(out, S=S, t0=t0, method=method_str, engine=engine)
     class(out) <- "gips_fit_class"
     out
 }
@@ -182,7 +185,7 @@ parse_edges <- function(edges, nvar){
     
     out$details <- list(
         method = method,
-        ver    = out$ver,
+        ## ver    = out$ver,
         eng    = engine,
         time   = unname(out$time),
         nobs   = out$nobs,

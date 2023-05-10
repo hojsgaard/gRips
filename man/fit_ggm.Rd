@@ -9,12 +9,11 @@ fit_ggm(
   edges = NULL,
   nobs,
   K = NULL,
-  maxiter = 10000L,
+  maxit = 10000L,
   eps = 1e-06,
   convcrit = 1,
   aux = list(),
   method = "covips",
-  version = 1,
   print = 0
 )
 }
@@ -28,7 +27,7 @@ x p matrix of integers.}
 
 \item{K}{Initial value of concentration matrix.}
 
-\item{maxiter}{Maximum number of iterations.}
+\item{maxit}{Maximum number of iterations.}
 
 \item{eps}{Convergence criterion.}
 
