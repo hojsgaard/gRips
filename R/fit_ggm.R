@@ -72,10 +72,12 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxit=10000L, eps=1e-6, convcri
         stop(glue("Max coreness ({max_coreness}) is larger than nobs ({nobs}); mle may not exist.\n"))
     }
 
+
     switch(method,
-           "sncd" = {method="ncd"; ver=0},
+           "sncd" = {ver=0; method="ncd"},
            "ncd"  = {ver=1},
-           "covips"={ver=0}
+           "covips"={ver=0},
+           "conips"={ver=0}
            )
 
     
