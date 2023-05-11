@@ -18,6 +18,7 @@ bool has_full_rank_(mat& Delta){
   return (rank_Delta >= Delta.n_cols); 	    
 }
 
+// FIXME Tjek at mindste egenværdi er >0
 // [[Rcpp::export]]
 bool is_pos_def_(mat& Delta){
   uword rank_Delta = arma::rank(Delta, sqrt(datum::eps) * Delta.n_cols);
