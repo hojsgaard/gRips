@@ -68,7 +68,7 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxit=10000L, eps=1e-6, convcri
     
     ig <- as_emat2igraph(emat, nrow(S))
     max_coreness <- max(coreness(ig))
-    if (max_coreness > (nobs-1)){
+    if (max_coreness > (nobs - 1)){  ## FIXME: evt nobs-2 (for det er antal frihedsgrader -1)
         stop(glue("Max coreness ({max_coreness}) is larger than nobs ({nobs}); mle may not exist.\n"))
     }
 
@@ -184,6 +184,18 @@ parse_edges <- function(edges, nvar){
     
     if (!is.null(t0))
         out$time <- .get.diff.time(t0, units="millisecs")
+
+    ## A HACK; converged is defined for NCD only
+    if (is.null(out$converged))
+        out$converged = TRUE
+    
+    trKS <- if (out$converged){
+                sum(out$K * S)                
+            } else {
+                -1
+            }
+
+    
     
     out$details <- list(
         method = method,
@@ -195,17 +207,17 @@ parse_edges <- function(edges, nvar){
         eps    = out$eps,
         dim    = nparm,
         idim   = nrow(out$K),
-        trKS   = sum(out$K * S),
+        trKS   = trKS,
         logL   = out$logL,
         ## For cov / con the lines below give the same, but for glasso there is no conv_check variable.
         ## made   = mean_abs_diff_on_emat_(out$Sigma, S, out$edges, 1)
         conv   = out$conv_check,
-        dgap   = out$gap,
-        ncore  = out$max_coreness
-       
+        dgap   = out$gap       
     )
     out$time <- out$iter <- out$eps <- NULL
     out$dim  <- out$diff <- NULL
+    out$logL <- out$gap <- out$conv_check <- NULL
+    
     out <- c(out, dots)
     class(out) <- "gips_fit_class"
     out    

@@ -245,7 +245,7 @@ List covips_loop0_(mat& S, mat& K, List& elist0, mat& Sigma,
 		   int& maxit,
 		   int nupdates, double eps=0.01, int print=0){
   int itcount = 0;
-  double threshold = elist0.length() / 500; 
+  // double threshold = elist0.length() / 500; 
   double logL;
   
   for (; itcount < maxit; ){  
@@ -255,8 +255,8 @@ List covips_loop0_(mat& S, mat& K, List& elist0, mat& Sigma,
   		  print=print);
     if (print>=3){
       logL = ggm_logL_(S, K, nobs);  
-      Rprintf(">>> itcount: %3d maxit: %d nupdates: %6d edges: %4d threshold: %5.0f, logL: %16.8f\n",
-	      itcount, maxit, nupdates, elist0.length(), threshold, logL);
+      Rprintf(">>> itcount: %3d maxit: %d nupdates: %6d edges: %4d logL: %16.8f\n",
+	      itcount, maxit, nupdates, elist0.length(), logL);
     }
     ++itcount;
     if (nupdates <= 0)  

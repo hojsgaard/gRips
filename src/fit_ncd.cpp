@@ -16,10 +16,8 @@ typedef Rcpp::NumericVector   num_vec;
 typedef Rcpp::IntegerVector   int_vec;
 typedef Rcpp::CharacterVector chr_vec;
 
-
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #define MIN(a,b) (((a)>(b))?(b):(a))
-
 
 // ### ###################################################
 // ### UTILITY FUNCTIONS FOR NCD
@@ -119,7 +117,7 @@ void update_Sigma_row_(int u, mat& Sigma, const mat& amat, int nobs, int print=0
 // *** Used by outerloop2
 
 void update_K_row_(int u, mat& Sigma, mat& K, const mat& amat, int smart=0, double eps_smart=0.0, int print=0){
-  
+
   if (smart==3){
     K = inv_qr_(Sigma);    
   } else {
@@ -155,30 +153,15 @@ void update_K_row_(int u, mat& Sigma, mat& K, const mat& amat, int smart=0, doub
       
     RR2 = K2_ucu * (trans(K2_ucu) / as_scalar(k2_uu));
     RR  = K_ucu  * (trans(K_ucu)  / as_scalar(k_uu));
+
     K2_ucuc  = K_ucuc + RR2 - RR;
     K.submat(uc_, uc_) = K2_ucuc;
 
+    // K.submat(uc_, uc_) = K_ucuc + RR2 - RR;
 
-    // mat K_ubu      = K.submat(ub_, u_);
-    // mat K_ubub     = K.submat(ub_, ub_);
-    // mat Sigma_ubu  = Sigma.submat(ub_, u_);
-    // mat CC3        = K_ubub - K_ubu * (trans(K_ubu) / k_uu);
-    // mat DD3        = CC3 * Sigma_ubu;
-    // mat k3_uu      = 1 / (sigma_uu - trans(Sigma_ubu) * DD3);
-    // mat K3_ubu     = as_scalar(k3_uu) * DD3;
-
-    // mat AA3, AA, K3_ubub;
-
-    // K(u, u)           = as_scalar(k3_uu);
-    // K.submat(ub_, u_) = -K3_ubu;
-    // K.submat(u_, ub_) = trans(-K3_ubu);
-
-    // AA3 = K3_ubu * (trans(K3_ubu) / as_scalar(k3_uu));
-    // AA  = K_ubu  * (trans(K_ubu)  / as_scalar(k_uu));  
-    // K3_ubub  = K_ubub + AA3 - AA;
-    // K.submat(ub_, ub_) = K3_ubub;        
-
-  } 
+    // double mno = mnorm_one_(Delta);
+    // Rprintf("mno: %14.10f\n", mno);
+  }
 }
 
 
@@ -213,11 +196,8 @@ List outerloop1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat,
   mat Sigma_prev = diagmat(Sigma.diag());
   int iter = 0;
 
-  // Rcout << "eps :" << eps << " n_rows : " << Sigma.n_rows << " eps2 : " << eps2 <<"\n" ;
   while (!converged){
     innerloop1_update_Sigma_(Sigma=Sigma, amat=amat, nobs=nobs, print=print);
-    // mad = mean_abs_diff_non_edge_(Sigma, Sigma_prev, emat_c); // FIXME for testing
-    // mad = max_abs_diff_non_edge_(Sigma, Sigma_prev, emat_c); // FIXME for testing
     mat Delta = Sigma - Sigma_prev;
     mno = mnorm_one_(Delta);
     iter++;
@@ -259,8 +239,6 @@ List outerloop2_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int no
 
   if (print >=2){
     Rprintf(">> Running outerloop2\n");
-    // if (smart==3) Rprintf(">> Running outerloop2 - brute force update of K\n");
-    // else          Rprintf(">> Running outerloop2 - smart update of K, smart=%d, eps_smart=%f\n", smart, eps_smart);
   }
 
   double dif2, mno, conv_crit;
@@ -269,9 +247,6 @@ List outerloop2_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int no
   while (!converged){
     innerloop2_update_Sigma_K_(Sigma=Sigma, K=K, amat=amat, nobs=nobs,
 			       smart=smart, eps_smart=eps_smart, print=print);
-    
-    // dif2 = diff_fun_(Sigma, K, emat_c); // FIXME for testing
-    // conv_crit = dif2;
 
     mat Delta = K - project_onto_G_(K, emat_c);
     mno = mnorm_one_(Delta);
@@ -360,45 +335,62 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
   int version      = aux["version"];
   int smart        = 0; //aux["smart"];
   double eps_smart = 1e-6; // aux["eps_smart"];
+  bool converged=true;
   
   umat emat_c = as_emat_complement_(emat-1, S.n_rows);
   mat amat    = as_emat2amat_(emat-1, S.n_rows);
   mat Sigma   = S, K2, Delta;
   List res1, res2;
-  double logL, gap=-1.0, conv_check;
-  int iter1, iter2, itcount;
+  double logL, gap=-1.0, conv_check, eps2, mno;
+  int iter1, iter2, itcount, rank_Sigma, n_edges=emat.n_cols;
 
-  double eps2;
-  double mno;
-
+  double scaling = sqrt(emat.n_cols + S.n_cols);
+  
   // FIXME NOTICE SCALING OG EPS2
   // FIXME: Divider kun eps2 med noget når det er version 1
-  eps2 = MIN(eps, 1.0/Sigma.n_rows);  
+
   if (version==1){
+    eps2 = MIN(eps, 1.0/Sigma.n_rows);  
     res1 = outerloop1_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat,
-		       nobs=nobs, eps=eps2, maxit=maxit, print=print);
+		       nobs=nobs, eps=eps2 / scaling, maxit=maxit, print=print);
   } else {
     res1 = outerloop1_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat,
 		       nobs=nobs, eps=eps, maxit=maxit, print=print);
-    // NOTE: K does not have zeros in the right places
   }
   
   iter1 = res1["iter"];
   if (print>=2)
     Rprintf(">> outerloop1 iterations : %d\n", iter1);
+
+
+  if (has_full_rank_(Sigma)){
+    converged=true;
+    K = inv_qr_(Sigma);
+  } else {
+    converged=false;
+    rank_Sigma = rank(Sigma); 
+    REprintf("NCD not converged: Rank of Sigma = %d nobs = %d\n", rank_Sigma, nobs);	
+  }									
   
-  CHECK_K;
-  
-  switch (version){    
-  case 1: // FULL VERSION
-    // Rprintf("version 1 - full\n");
-    
-    // Check that Sigma has full rank
-    if (!has_full_rank_(Sigma)){
-      // logL = NA; K=NA, dgap=NA
-      // abort
-      ;
-    } else {    
+  if (converged){
+    switch (version){      
+    case 0:     
+      K     = inv_qr_(Sigma);
+      K2    = project_onto_G_(K, emat_c);
+      Delta = K - K2;
+      mno   = mnorm_one_(Delta);
+      
+      if (print>=3)
+	Rprintf(">>> fast mno : %14.10f\n", mno);
+      conv_check = mno;      
+      
+      logL = ggm_logL_(S, K, nobs);
+      gap  = -1; 
+      // K    = K2;  // NOTE K2 is not returned...      
+      itcount = iter1 + 1;
+      break;
+      
+    case 1: // FULL VERSION
       K = inv_qr_(Sigma);
       res2 = outerloop2_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat, nobs=nobs, eps=eps2, maxit=maxit,
 			 rank_Sigma=rank_Sigma,
@@ -414,48 +406,34 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
 	Rprintf(">>> fulle mno : %14.10f\n", mno);
       conv_check = mno;
       if (iter2 < maxit){ // Then K is posdef	
-      	logL = ggm_logL_(S, K2, nobs);
-      	gap  = duality_gap_(Sigma, K2, nobs);
+	logL = ggm_logL_(S, K2, nobs);
+	gap  = duality_gap_(Sigma, K2, nobs);
 	K    = K2;
       } else {
-      	REprintf("Algorithn may not have converged\n");
-      	// K = NA; upper_limit_logL = formel (23)
+	REprintf("Algorithn may not have converged\n");
+	// K = NA; upper_limit_logL = formel (23)
       }
-      itcount = iter1 + iter2;
-    }
-    break;
+      itcount = iter1 + iter2;  
+      break;
       
-  case 0: // SIMPLE AND FAST VERSION
-    // Rprintf("version 0 - fast\n");
-    if (!has_full_rank_(Sigma)){
-      // logL = NA; K=NA, dgap=NA
-      // abort
-    } else {    
-      K     = inv_qr_(Sigma);
-      K2    = project_onto_G_(K, emat_c);
-      Delta = K - K2;
-      mno   = mnorm_one_(Delta);
-      if (print>=3)
-	Rprintf(">>> fast mno : %14.10f\n", mno);
-      conv_check = mno;      
-      if (!is_pos_def_(K2)){
-      	REprintf("Algorithm may not have converged\n");
-      	// upper_limit_logL = formel (23)
-      } else {
-      	logL = ggm_logL_(S, K2, nobs);
-      	gap  = duality_gap_(Sigma, K2, nobs);
-	K    = K2;
-      }
-      
-      itcount = iter1 + 1;
-    }
-    break;
-    
-  default:
-    Rprintf("'version' must be 0, 1\n");
+    default:
+      Rprintf("'version' must be 0, 1\n");
+    }    
+  } else {
+    logL = -1;
+    conv_check = -1;
   }
-
-  RETURN_VALUE;
+  
+  return List::create(						
+    _["K"]     = K,						
+    _["Sigma"] = Sigma,						
+    _["logL"]  = logL,						
+    _["iter"]  = itcount,					
+    _["gap"]   = gap,						
+    _["version"] = version,
+    _["converged"] = converged, 
+    _["conv_check"] = conv_check);				
+  
 }
 
 
@@ -463,9 +441,39 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
 
 
 
+     
+      // if (!is_pos_def_(K2)){
+      // 	REprintf("Algorithm may not have converged\n");
+      // 	// upper_limit_logL = formel (23)
+      // } else {
+      // 	logL = ggm_logL_(S, K2, nobs);
+      // 	gap  = duality_gap_(Sigma, K2, nobs);
+      // 	K    = K2;
+      // }
 
 
 
 
 
+
+
+
+    // mat K_ubu      = K.submat(ub_, u_);
+    // mat K_ubub     = K.submat(ub_, ub_);
+    // mat Sigma_ubu  = Sigma.submat(ub_, u_);
+    // mat CC3        = K_ubub - K_ubu * (trans(K_ubu) / k_uu);
+    // mat DD3        = CC3 * Sigma_ubu;
+    // mat k3_uu      = 1 / (sigma_uu - trans(Sigma_ubu) * DD3);
+    // mat K3_ubu     = as_scalar(k3_uu) * DD3;
+
+    // mat AA3, AA, K3_ubub;
+
+    // K(u, u)           = as_scalar(k3_uu);
+    // K.submat(ub_, u_) = -K3_ubu;
+    // K.submat(u_, ub_) = trans(-K3_ubu);
+
+    // AA3 = K3_ubu * (trans(K3_ubu) / as_scalar(k3_uu));
+    // AA  = K_ubu  * (trans(K_ubu)  / as_scalar(k_uu));  
+    // K3_ubub  = K_ubub + AA3 - AA;
+    // K.submat(ub_, ub_) = K3_ubub;        
 
