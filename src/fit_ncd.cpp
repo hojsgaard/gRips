@@ -379,7 +379,7 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
 		       nobs=nobs, eps=eps2, maxit=maxit, print=print);
   } else {
     res1 = outerloop1_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat,
-		       nobs=nobs, eps=eps2, maxit=maxit, print=print);
+		       nobs=nobs, eps=eps, maxit=maxit, print=print);
     // NOTE: K does not have zeros in the right places
   }
   
@@ -390,7 +390,7 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
   CHECK_K;
   
   switch (version){    
-  case 1: 
+  case 1: // FULL VERSION
     // Rprintf("version 1 - full\n");
     
     // Check that Sigma has full rank
@@ -416,7 +416,7 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
       if (iter2 < maxit){ // Then K is posdef	
       	logL = ggm_logL_(S, K2, nobs);
       	gap  = duality_gap_(Sigma, K2, nobs);
-	K = K2;
+	K    = K2;
       } else {
       	REprintf("Algorithn may not have converged\n");
       	// K = NA; upper_limit_logL = formel (23)
@@ -425,13 +425,13 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
     }
     break;
       
-  case 0:
+  case 0: // SIMPLE AND FAST VERSION
     // Rprintf("version 0 - fast\n");
     if (!has_full_rank_(Sigma)){
       // logL = NA; K=NA, dgap=NA
       // abort
     } else {    
-      K     = inv(Sigma);
+      K     = inv_qr_(Sigma);
       K2    = project_onto_G_(K, emat_c);
       Delta = K - K2;
       mno   = mnorm_one_(Delta);
@@ -439,12 +439,14 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
 	Rprintf(">>> fast mno : %14.10f\n", mno);
       conv_check = mno;      
       if (!is_pos_def_(K2)){
-	REprintf("Algorithm may not have converged\n");
-	// K = NA; upper_limit_logL = formel (23)
+      	REprintf("Algorithm may not have converged\n");
+      	// upper_limit_logL = formel (23)
       } else {
-	logL = ggm_logL_(S, K2, nobs);
-	gap  = duality_gap_(Sigma, K2, nobs);	
+      	logL = ggm_logL_(S, K2, nobs);
+      	gap  = duality_gap_(Sigma, K2, nobs);
+	K    = K2;
       }
+      
       itcount = iter1 + 1;
     }
     break;
