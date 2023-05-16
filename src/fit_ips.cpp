@@ -160,7 +160,7 @@ List conips_ggm_(arma::mat& S, List& elist, umat& emat, int& nobs,
 // ------ COVIPS - Fast iterative proportional scaling          -------
 // ------------------------------------------------------------------
 
-void covips_ggm_update_cc_parm_(const mat& Scc, const uvec& cc0, mat& K, mat& Sigma,
+void covips_update_cc_parm_(const mat& Scc, const uvec& cc0, mat& K, mat& Sigma,
 				const mat& Scc_inv, int print=0)
 {  
   mat Kcc      = K.submat(cc0, cc0);	
@@ -182,30 +182,24 @@ List covips_inner_(const mat& S, mat& K,
 {
   for (int i=0; i < elist0.length(); ++i){
     uvec cc0 = elist0[i];
-    covips_ggm_update_cc_parm_(Scc_lst[i], cc0, K, Sigma, Scci_lst[i],
+    covips_update_cc_parm_(Scc_lst[i], cc0, K, Sigma, Scci_lst[i],
 			       print=print);
   }
   return List::create(_["iter"] = 1);
 }
 
-void covips_ggm_update_cc_parm0_(const mat& Scc, const uvec& cc0, mat& K, mat& Sigma,
+void covips_update_cc_parm0_(const mat& Scc, const uvec& cc0, mat& K, mat& Sigma,
 				 const mat& Scc_inv,
 				 int& nupdates, double eps=0.01, int print=0)
 {
   
   mat Sigmacc  = Sigma.submat(cc0, cc0);
-
-  mat dd;
-
+  mat Kcc, Kupd, Haux, B, dd;
   dd = Scc - Sigmacc;
-  //    mat Kstar    = inv(Sigmacc);
-  // dd = Scc_inv - Kstar;
   double Knorm = mnorm_maxabs_(dd);
   
-  mat Kcc, Kupd, Haux, B;
-  
   if (Knorm > eps){
-    mat Kstar    = inv(Sigmacc);
+    mat Kstar = inv(Sigmacc);
     Kcc      = K.submat(cc0, cc0);	
     Kupd     = Scc_inv + Kcc - Kstar;
     Haux     = Kstar - Kstar * Scc * Kstar;  // Was Saux
@@ -215,7 +209,7 @@ void covips_ggm_update_cc_parm0_(const mat& Scc, const uvec& cc0, mat& K, mat& S
     K.submat(cc0, cc0) = Kupd;
     // Sigma -= Sigma.cols(cc0) * Haux * Sigma.rows(cc0);
     mat B = Sigma.cols(cc0);
-    Sigma              -= B * Haux * B.t();
+    Sigma -= B * Haux * B.t();
 
     nupdates++;
   } else {
@@ -233,7 +227,7 @@ void covips_inner0_(mat& S, mat& K,
   nupdates = 0;
   for (int i=0; i < elist0.length(); ++i){
     uvec cc0 = elist0[i];
-    covips_ggm_update_cc_parm0_(Scc_lst[i], cc0, K, Sigma, Scci_lst[i],
+    covips_update_cc_parm0_(Scc_lst[i], cc0, K, Sigma, Scci_lst[i],
 				nupdates=nupdates, eps=eps, print=print);
   }
 }
@@ -245,14 +239,12 @@ List covips_loop0_(mat& S, mat& K, List& elist0, mat& Sigma,
 		   int& maxit,
 		   int nupdates, double eps=0.01, int print=0){
   int itcount = 0;
-  // double threshold = elist0.length() / 500; 
   double logL;
   
   for (; itcount < maxit; ){  
     covips_inner0_(S=S, K=K, elist0=elist0, Sigma=Sigma,
   		  Scc_lst=Scc_lst, Scci_lst=Scci_lst,
-  		  nupdates=nupdates, eps=eps,
-  		  print=print);
+  		  nupdates=nupdates, eps=eps, print=print);
     if (print>=3){
       logL = ggm_logL_(S, K, nobs);  
       Rprintf(">>> itcount: %3d maxit: %d nupdates: %6d edges: %4d logL: %16.8f\n",
@@ -272,19 +264,14 @@ List covips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
 	       mat& K,       
 	       int& maxit, double& eps, int& convcrit, int& print, List& aux){
 
-  
   int version      = aux["version"];
-  double logL, logLp, conv_check=9999, gap=-1.0;
-  double conv_ref; // FIXME needed??
-  double nparm = S.n_cols + emat.n_cols;
+  double logL, logLp, conv_check=9999, gap=-1.0, mno, maxabs;
+  double nparm = S.n_cols + emat.n_cols, conv_ref;
   umat emat0   = emat - 1;  
   umat emat_c  = as_emat_complement_(emat-1, S.n_rows);
-  double mno, maxabs;
   mat Sigma, dif, Delta;  
   List res1, res2;
   int iter1=0, iter2=0, itcount=0, nupdates=0;
-
-  // logL = ggm_logL_(S, K, nobs);  Rprintf("logL %f\n", logL);
   
   List elist0 = clone(elist);  
   for (int i=0; i < elist.length(); i++) {
@@ -332,7 +319,6 @@ List covips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
 	  logL = ggm_logL_(S, K, nobs);  
 	  Rprintf(">>> covips iter: %4d eps: %14.10f, mno: %14.10f maxabs: %14.10f logL: %14.10f\n", itcount, eps, mno, maxabs, logL);
 	}
-	// PRINT_CONV_CHECK1;	
 	break;
       case 2:
 	CONV_CHECK_LOGL_DIFF;
@@ -341,10 +327,9 @@ List covips_ggm_(mat& S, List& elist, umat& emat, int& nobs,
       if (conv_check < eps) break;
     }
   }
-
   
   itcount = itcount + iter1;
-  logL = ggm_logL_(S, K, nobs);  
+  logL    = ggm_logL_(S, K, nobs);  
   RETURN_VALUE;
 }
 

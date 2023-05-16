@@ -34,38 +34,6 @@ double duality_gap_(mat& S, mat& K, int nobs){
   return out;
 }
 
-double mean_abs_diff_non_edge_(mat& Sigma1, mat& Sigma2, umat& emc){
-  double out = accu(abs(Sigma1 - Sigma2)) / (2 * emc.n_cols);
-  return out;
-}
-
-double max_abs_diff_non_edge_(mat& Sigma1, mat& Sigma2, umat& emc){
-  double out = max(max(abs(Sigma1 - Sigma2)));
-  return out;
-}
-
-// [[Rcpp::export]]
-double diff_fun_(mat& Sigma, mat& K, umat emc){
-  uvec ind = sub2ind(size(Sigma), emc);
-  vec  Kuv = K(ind);
-  vec  diagS = Sigma.diag();
-  uvec r0 = {0}, r1 = {1};
-  mat  emc2 = conv_to<mat>::from(emc);
-  uvec s0 = conv_to<uvec>::from(emc2.rows(r0));
-  uvec s1 = conv_to<uvec>::from(emc2.rows(r1));
-  // Rprintf("s0\n");  s0.print();
-  // Rprintf("s1\n");  s1.print();
-  vec Suu = diagS.elem(s0);
-  vec Svv = diagS.elem(s1);
-  // Rprintf("Suu\n");  Suu.print();
-  // Rprintf("Svv\n");  Svv.print();
-  // int d = Sigma.n_rows * (Sigma.n_rows + 1) / 2;
-  // double out = sum(abs(abs(Kuv) % sqrt(Suu % Svv))) / d;
-  double out = max(max(abs(Kuv) % sqrt(Suu % Svv)));  
-  return out;
-}
-
-
 
 // ### ###################################################
 // ### NCD FUNCTIONS
@@ -476,4 +444,36 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
     // AA  = K_ubu  * (trans(K_ubu)  / as_scalar(k_uu));  
     // K3_ubub  = K_ubub + AA3 - AA;
     // K.submat(ub_, ub_) = K3_ubub;        
+
+
+// double mean_abs_diff_non_edge_(mat& Sigma1, mat& Sigma2, umat& emc){
+//   double out = accu(abs(Sigma1 - Sigma2)) / (2 * emc.n_cols);
+//   return out;
+// }
+
+// double max_abs_diff_non_edge_(mat& Sigma1, mat& Sigma2, umat& emc){
+//   double out = max(max(abs(Sigma1 - Sigma2)));
+//   return out;
+// }
+
+// // [[Rcpp::export]]
+// double diff_fun_(mat& Sigma, mat& K, umat emc){
+//   uvec ind = sub2ind(size(Sigma), emc);
+//   vec  Kuv = K(ind);
+//   vec  diagS = Sigma.diag();
+//   uvec r0 = {0}, r1 = {1};
+//   mat  emc2 = conv_to<mat>::from(emc);
+//   uvec s0 = conv_to<uvec>::from(emc2.rows(r0));
+//   uvec s1 = conv_to<uvec>::from(emc2.rows(r1));
+//   // Rprintf("s0\n");  s0.print();
+//   // Rprintf("s1\n");  s1.print();
+//   vec Suu = diagS.elem(s0);
+//   vec Svv = diagS.elem(s1);
+//   // Rprintf("Suu\n");  Suu.print();
+//   // Rprintf("Svv\n");  Svv.print();
+//   // int d = Sigma.n_rows * (Sigma.n_rows + 1) / 2;
+//   // double out = sum(abs(abs(Kuv) % sqrt(Suu % Svv))) / d;
+//   double out = max(max(abs(Kuv) % sqrt(Suu % Svv)));  
+//   return out;
+// }
 
