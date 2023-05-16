@@ -804,19 +804,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// diff_fun_
-double diff_fun_(mat& Sigma, mat& K, umat emc);
-RcppExport SEXP _gRips_diff_fun_(SEXP SigmaSEXP, SEXP KSEXP, SEXP emcSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< mat& >::type Sigma(SigmaSEXP);
-    Rcpp::traits::input_parameter< mat& >::type K(KSEXP);
-    Rcpp::traits::input_parameter< umat >::type emc(emcSEXP);
-    rcpp_result_gen = Rcpp::wrap(diff_fun_(Sigma, K, emc));
-    return rcpp_result_gen;
-END_RCPP
-}
 // outerloop1_
 List outerloop1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int& nobs, double& eps, int maxit, int print);
 RcppExport SEXP _gRips_outerloop1_(SEXP SigmaSEXP, SEXP KSEXP, SEXP ematSEXP, SEXP emat_cSEXP, SEXP amatSEXP, SEXP nobsSEXP, SEXP epsSEXP, SEXP maxitSEXP, SEXP printSEXP) {
@@ -834,20 +821,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type print(printSEXP);
     rcpp_result_gen = Rcpp::wrap(outerloop1_(Sigma, K, emat, emat_c, amat, nobs, eps, maxit, print));
     return rcpp_result_gen;
-END_RCPP
-}
-// Sigma_to_K_
-void Sigma_to_K_(mat& Sigma, mat& K, mat& amat, int nobs, int print);
-RcppExport SEXP _gRips_Sigma_to_K_(SEXP SigmaSEXP, SEXP KSEXP, SEXP amatSEXP, SEXP nobsSEXP, SEXP printSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< mat& >::type Sigma(SigmaSEXP);
-    Rcpp::traits::input_parameter< mat& >::type K(KSEXP);
-    Rcpp::traits::input_parameter< mat& >::type amat(amatSEXP);
-    Rcpp::traits::input_parameter< int >::type nobs(nobsSEXP);
-    Rcpp::traits::input_parameter< int >::type print(printSEXP);
-    Sigma_to_K_(Sigma, K, amat, nobs, print);
-    return R_NilValue;
 END_RCPP
 }
 // ncd_ggm_
