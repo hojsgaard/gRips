@@ -283,7 +283,6 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
   if (print>=2)
     Rprintf(">> outerloop1 iterations : %d\n", iter1);
 
-
   if (has_full_rank_(Sigma)){
     converged=true;
     K = inv_qr_(Sigma);
