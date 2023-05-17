@@ -83,15 +83,15 @@ double ggm_logL_(mat& S, mat& K, int nobs)
 
 // FIXME: Bruges i en macro, men det er meget gammelt
 
-double get_conv_ref(const List& aux){
-  CharacterVector vn = list_names_(aux);
-  if (vn.length()){
-    if (find_str_("conv_ref", vn) < 0)
-      stop("'conv_ref' not found in 'aux'");
-  }
-  double out = as<double>(aux["conv_ref"]);
-  return out;
-}
+// double get_conv_ref(const List& aux){
+//   CharacterVector vn = list_names_(aux);
+//   if (vn.length()){
+//     if (find_str_("conv_ref", vn) < 0)
+//       stop("'conv_ref' not found in 'aux'");
+//   }
+//   double out = as<double>(aux["conv_ref"]);
+//   return out;
+// }
 
 
 // int method2int_(CharacterVector method){

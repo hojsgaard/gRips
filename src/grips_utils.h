@@ -20,7 +20,7 @@ double mnorm_maxabs_(mat& Delta);
 double ggm_logL_(mat& S, mat& K, int nobs);
 mat initSigma_(mat& S);
 mat initK_(mat& S);
-double get_conv_ref(const List& aux);
+// double get_conv_ref(const List& aux);
 
 
 
@@ -46,9 +46,6 @@ double get_conv_ref(const List& aux);
   case 2:					\
     logLp = ggm_logL_(S, K, nobs);		\
     break;					\
-  case 3:					\
-    conv_ref = get_conv_ref(aux);		\
-    break;                                      \
   case 4:                                       \
     break;                                      \
   }                                             \

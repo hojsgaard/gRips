@@ -140,6 +140,7 @@ void update_K_row_(int u, mat& Sigma, mat& K, const mat& amat, int print=0){
 // ### ###################################################
 
 
+// Update all nodes once
 void innerloop1_update_Sigma_(mat& Sigma, mat& amat, int nobs, int print=0){
 
   if (print >= 4){
@@ -151,6 +152,7 @@ void innerloop1_update_Sigma_(mat& Sigma, mat& amat, int nobs, int print=0){
   }
 }
 
+
 //[[Rcpp::export]]
 List outerloop1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat,
 		 int& nobs, double& eps, int maxit, int print=0){
@@ -159,8 +161,7 @@ List outerloop1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat,
     Rprintf(">> Running outerloop1\n");
   }
   
-  bool converged = false;    
-  double mad, conv_crit, mno;
+  double conv_check, mno;
   mat Sigma_prev = diagmat(Sigma.diag());
   int iter = 0;
 
@@ -175,11 +176,8 @@ List outerloop1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat,
     }
 
     Sigma_prev = Sigma;
-    conv_crit = mno;
-    if ((iter == maxit) || (conv_crit < eps))
-      {
-	break;
-      }
+    conv_check = mno;
+    if ((iter == maxit) || (conv_check < eps)) break;
   }
 
   return List::create(_["iter"]  = iter, _["mad"]=mno); //FIXME mad should be conv_crit		
@@ -191,14 +189,14 @@ List outerloop1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat,
 // ### ###################################################
 
 void innerloop2_update_Sigma_K_(mat& Sigma, mat& K, mat& amat, int nobs,
-				int &nupdates, double eps=0.01, int print=0){
+				int &nupd, double eps=0.01, int print=0){
   if (print >= 4){
     Rprintf(">>>> Running innerloop2_update_Sigma_K\n");
    }
 
   for (size_t u=0; u<amat.n_rows; u++){
     if (shall_update(u=u, K=K, amat=amat, eps=eps)){
-      nupdates++;
+      nupd++;
       update_Sigma_row_(u=u, Sigma=Sigma,      amat=amat, nobs=nobs, print=print);    
       update_K_row_    (u=u, Sigma=Sigma, K=K, amat=amat, print=print);
     }   
@@ -207,18 +205,18 @@ void innerloop2_update_Sigma_K_(mat& Sigma, mat& K, mat& amat, int nobs,
 
 List outerloop2_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int nobs, double& eps, int& maxit,
 		 int rank_Sigma,
-		 int& nupdates, int print=0){
+		 int& nupd, int print=0){
 
   if (print >=2){
     Rprintf(">> Running outerloop2\n");
   }
 
-  double dif2, mno, conv_crit;
+  double mno, conv_crit;
   int iter = 0;
   while (true){
-    nupdates = 0;
+    nupd = 0;
     innerloop2_update_Sigma_K_(Sigma=Sigma, K=K, amat=amat, nobs=nobs,
-			       nupdates=nupdates, eps=eps, print=print);
+			       nupd=nupd, eps=eps, print=print);
 
     mat Delta = K - project_onto_G_(K, emat_c);
     mno = mnorm_one_(Delta);
@@ -226,7 +224,7 @@ List outerloop2_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int no
     iter++;
 
     if (print>=3)
-      Rprintf(">>> outerloop2 iter: %4d eps: %2.6f mno: %12.6f nupdates: %5d\n", iter, eps, mno, nupdates);
+      Rprintf(">>> outerloop2 iter: %4d eps: %2.6f mno: %12.6f nupd: %5d\n", iter, eps, mno, nupd);
     
     if ((iter == maxit) || (conv_crit < eps)){
       break;
@@ -250,13 +248,11 @@ List outerloop2_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int no
   }									\
 
 //[[Rcpp::export(.c_ncd_ggm_)]]
-List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
+List ncd_ggm_(mat& S, List& elst, umat& emat, int& nobs,
 	      mat K,       
 	      int maxit, double& eps, int& convcrit, int print, List& aux){
   
   int version      = aux["version"];
-  int smart        = 0; //aux["smart"];
-  double eps_smart = 1e-6; // aux["eps_smart"];
   bool converged;
   
   umat emat_c = as_emat_complement_(emat-1, S.n_rows);
@@ -264,7 +260,7 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
   mat Sigma   = S, K2, Delta;
   List res1, res2;
   double logL, gap=-1.0, conv_check, eps2, mno;
-  int iter1, iter2, itcount, rank_Sigma, n_edges=emat.n_cols, nupdates=0;
+  int iter1, iter2, itcount, rank_Sigma, nupd=0;
 
   eps2 = MIN(eps, 1.0/Sigma.n_rows);  
   
@@ -315,7 +311,7 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
       K = inv_qr_(Sigma);
       res2 = outerloop2_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat, nobs=nobs, eps=eps2, maxit=maxit,
 			 rank_Sigma=rank_Sigma,
-			 nupdates=nupdates, print=print);
+			 nupd=nupd, print=print);
       iter2 = res2["iter"];
       if (print>=2)
 	Rprintf(">> outerloop2 iterations : %d\n", iter2);

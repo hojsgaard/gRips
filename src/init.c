@@ -17,7 +17,7 @@ extern SEXP _gRips_as_emat_complement_(void *, void *);
 extern SEXP _gRips_clone_(void *);
 extern SEXP _gRips_conips_ggm_(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern SEXP _gRips_covips_ggm_(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
-extern SEXP _gRips_covips_loop0_(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
+extern SEXP _gRips_covips_outer0_(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern SEXP _gRips_diff_on_elst_(void *, void *, void *, void *);
 extern SEXP _gRips_diff_on_emat_(void *, void *, void *, void *);
 extern SEXP _gRips_extract_elem(void *, void *, void *);
@@ -73,7 +73,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_gRips_clone_",                       (DL_FUNC) &_gRips_clone_,                        1},
     {"_gRips_conips_ggm_",                  (DL_FUNC) &_gRips_conips_ggm_,                  10},
     {"_gRips_covips_ggm_",                  (DL_FUNC) &_gRips_covips_ggm_,                  10},
-    {"_gRips_covips_loop0_",                (DL_FUNC) &_gRips_covips_loop0_,                11},
+    {"_gRips_covips_outer0_",               (DL_FUNC) &_gRips_covips_outer0_,               11},
     {"_gRips_diff_on_elst_",                (DL_FUNC) &_gRips_diff_on_elst_,                 4},
     {"_gRips_diff_on_emat_",                (DL_FUNC) &_gRips_diff_on_emat_,                 4},
     {"_gRips_extract_elem",                 (DL_FUNC) &_gRips_extract_elem,                  3},
