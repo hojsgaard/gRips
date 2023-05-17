@@ -946,17 +946,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// is_pos_def_
-bool is_pos_def_(mat& Delta);
-RcppExport SEXP _gRips_is_pos_def_(SEXP DeltaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< mat& >::type Delta(DeltaSEXP);
-    rcpp_result_gen = Rcpp::wrap(is_pos_def_(Delta));
-    return rcpp_result_gen;
-END_RCPP
-}
 // project_onto_G_
 mat project_onto_G_(const mat& Delta, const umat& emc);
 RcppExport SEXP _gRips_project_onto_G_(SEXP DeltaSEXP, SEXP emcSEXP) {

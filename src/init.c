@@ -27,7 +27,6 @@ extern SEXP _gRips_find_str_(void *, void *);
 extern SEXP _gRips_ggm_logL_(void *, void *, void *);
 extern SEXP _gRips_has_full_rank_(void *);
 extern SEXP _gRips_inv_qr_(void *);
-extern SEXP _gRips_is_pos_def_(void *);
 extern SEXP _gRips_list2col_(void *, void *);
 extern SEXP _gRips_list2row_(void *, void *);
 extern SEXP _gRips_list_names_(void *);
@@ -84,7 +83,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_gRips_ggm_logL_",                    (DL_FUNC) &_gRips_ggm_logL_,                     3},
     {"_gRips_has_full_rank_",               (DL_FUNC) &_gRips_has_full_rank_,                1},
     {"_gRips_inv_qr_",                      (DL_FUNC) &_gRips_inv_qr_,                       1},
-    {"_gRips_is_pos_def_",                  (DL_FUNC) &_gRips_is_pos_def_,                   1},
     {"_gRips_list2col_",                    (DL_FUNC) &_gRips_list2col_,                     2},
     {"_gRips_list2row_",                    (DL_FUNC) &_gRips_list2row_,                     2},
     {"_gRips_list_names_",                  (DL_FUNC) &_gRips_list_names_,                   1},

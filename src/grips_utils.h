@@ -11,8 +11,7 @@ const int erp=0; // ERROR PRINTING
 #define as_num(cc) NumericVector(cc.begin(), cc.end())
 
 bool has_full_rank_(mat& Delta);
-bool is_pos_def_(mat& Deltaxs);
-  
+ 
 mat project_onto_G_(const mat& Delta, const umat& emc);
 double mnorm_one_(mat& Delta);
 double mnorm_maxabs_(mat& Delta);

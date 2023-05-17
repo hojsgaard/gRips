@@ -164,21 +164,22 @@ List outerloop1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat,
   mat Sigma_prev = diagmat(Sigma.diag());
   int iter = 0;
 
-  while (!converged){
+  while (true) {
     innerloop1_update_Sigma_(Sigma=Sigma, amat=amat, nobs=nobs, print=print);
     mat Delta = Sigma - Sigma_prev;
     mno = mnorm_one_(Delta);
     iter++;
     
     if (print >=3){
-      Rprintf(">>> outerloop1 iter: %4d eps: %14.10f mno: %14.10f\n", iter, eps, mno);
+      Rprintf(">>> outerloop1 iter: %4d eps: %2.6f mno: %12.6f\n", iter, eps, mno);
     }
 
     Sigma_prev = Sigma;
     conv_crit = mno;
-    if ((iter == maxit) || (conv_crit < eps)){
-      break;
-    }
+    if ((iter == maxit) || (conv_crit < eps))
+      {
+	break;
+      }
   }
 
   return List::create(_["iter"]  = iter, _["mad"]=mno); //FIXME mad should be conv_crit		
@@ -197,7 +198,7 @@ void innerloop2_update_Sigma_K_(mat& Sigma, mat& K, mat& amat, int nobs,
 
   for (size_t u=0; u<amat.n_rows; u++){
     if (shall_update(u=u, K=K, amat=amat, eps=eps)){
-      nupdates ++;
+      nupdates++;
       update_Sigma_row_(u=u, Sigma=Sigma,      amat=amat, nobs=nobs, print=print);    
       update_K_row_    (u=u, Sigma=Sigma, K=K, amat=amat, print=print);
     }   
@@ -213,9 +214,8 @@ List outerloop2_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int no
   }
 
   double dif2, mno, conv_crit;
-  bool converged = false;
   int iter = 0;
-  while (!converged){
+  while (true){
     nupdates = 0;
     innerloop2_update_Sigma_K_(Sigma=Sigma, K=K, amat=amat, nobs=nobs,
 			       nupdates=nupdates, eps=eps, print=print);
@@ -226,7 +226,7 @@ List outerloop2_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int no
     iter++;
 
     if (print>=3)
-      Rprintf(">>> outerloop2 iter: %4d eps: %14.10f mno: %14.10f nupdates: %5d\n", iter, eps, mno, nupdates);
+      Rprintf(">>> outerloop2 iter: %4d eps: %2.6f mno: %12.6f nupdates: %5d\n", iter, eps, mno, nupdates);
     
     if ((iter == maxit) || (conv_crit < eps)){
       break;
@@ -279,6 +279,7 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
   }
   
   iter1 = res1["iter"];
+  
   if (print>=2)
     Rprintf(">> outerloop1 iterations : %d\n", iter1);
 
@@ -289,7 +290,7 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
   } else {
     converged=false;
     rank_Sigma = rank(Sigma); 
-    REprintf("NCD not converged: Rank of Sigma = %d nobs = %d\n", rank_Sigma, nobs);	
+    REprintf("NCD not converged: Rank of Sigma = %d nvar = %d\n", rank_Sigma, Sigma.n_rows);	
   }									
   
   if (converged){
@@ -301,10 +302,11 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
       mno   = mnorm_one_(Delta);
       
       if (print>=3)
-	Rprintf(">>> fast mno : %14.10f\n", mno);
+	Rprintf(">>> sncd mno : %14.10f\n", mno);
+
+      logL       = ggm_logL_(S, K, nobs);
       conv_check = mno;      
-      logL = ggm_logL_(S, K, nobs);
-      gap  = -1; 
+      gap        = -1; 
       // K    = K2;  // NOTE K2 is not returned...      
       itcount = iter1 + 1;
       break;
@@ -322,7 +324,7 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
       Delta = K - K2;
       mno   = mnorm_one_(Delta);
       if (print>=3)
-	Rprintf(">>> fulle mno : %14.10f\n", mno);
+	Rprintf(">>> ncd mno : %14.10f\n", mno);
       conv_check = mno;
       if (iter2 < maxit){ // Then K is posdef	
 	logL = ggm_logL_(S, K2, nobs);
@@ -339,7 +341,7 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
       Rprintf("'version' must be 0, 1\n");
     }    
   } else {
-    logL = -1;
+    logL       = -1;
     conv_check = -1;
   }
   
