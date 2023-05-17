@@ -266,13 +266,14 @@ List ncd_ggm_(mat& S, List& elist, umat& emat, int& nobs,
   double logL, gap=-1.0, conv_check, eps2, mno;
   int iter1, iter2, itcount, rank_Sigma, n_edges=emat.n_cols, nupdates=0;
 
+  eps2 = MIN(eps, 1.0/Sigma.n_rows);  
+  
   switch (version){
   case 0:
     res1 = outerloop1_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat,
 		       nobs=nobs, eps=eps, maxit=maxit, print=print);
     break;
   case 1:
-    eps2 = MIN(eps, 1.0/Sigma.n_rows);  
     res1 = outerloop1_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat,
 		       nobs=nobs, eps=eps2, maxit=maxit, print=print);
     break;
