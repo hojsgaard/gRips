@@ -145,16 +145,8 @@ covips_loop0_ <- function(S, K, elist0, Sigma, Scc_lst, Scci_lst, nobs, maxit, n
     .Call('_gRips_covips_ggm_', PACKAGE = 'gRips', S, elist, emat, nobs, K, maxit, eps, convcrit, print, aux)
 }
 
-diff_fun_ <- function(Sigma, K, emc) {
-    .Call('_gRips_diff_fun_', PACKAGE = 'gRips', Sigma, K, emc)
-}
-
 outerloop1_ <- function(Sigma, K, emat, emat_c, amat, nobs, eps, maxit, print = 0L) {
     .Call('_gRips_outerloop1_', PACKAGE = 'gRips', Sigma, K, emat, emat_c, amat, nobs, eps, maxit, print)
-}
-
-Sigma_to_K_ <- function(Sigma, K, amat, nobs, print = 0L) {
-    invisible(.Call('_gRips_Sigma_to_K_', PACKAGE = 'gRips', Sigma, K, amat, nobs, print))
 }
 
 .c_ncd_ggm_ <- function(S, elist, emat, nobs, K, maxit, eps, convcrit, print, aux) {
@@ -195,10 +187,6 @@ as_emat_complement_ <- function(emat, d) {
 
 has_full_rank_ <- function(Delta) {
     .Call('_gRips_has_full_rank_', PACKAGE = 'gRips', Delta)
-}
-
-is_pos_def_ <- function(Delta) {
-    .Call('_gRips_is_pos_def_', PACKAGE = 'gRips', Delta)
 }
 
 project_onto_G_ <- function(Delta, emc) {
