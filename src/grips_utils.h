@@ -10,8 +10,9 @@ const int erp=0; // ERROR PRINTING
 
 #define as_num(cc) NumericVector(cc.begin(), cc.end())
 
-bool has_full_rank_(mat& Delta);
- 
+bool has_full_rank_(mat& Delta, double eps); // FIXME
+double get_mev(mat& Delta);
+  
 mat project_onto_G_(const mat& Delta, const umat& emc);
 double mnorm_one_(mat& Delta);
 double mnorm_maxabs_(mat& Delta);

@@ -17,7 +17,7 @@ extern SEXP _gRips_as_emat_complement_(void *, void *);
 extern SEXP _gRips_clone_(void *);
 extern SEXP _gRips_conips_ggm_(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern SEXP _gRips_covips_ggm_(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
-extern SEXP _gRips_covips_outer0_(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
+extern SEXP _gRips_covips_outer0_(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern SEXP _gRips_diff_on_elst_(void *, void *, void *, void *);
 extern SEXP _gRips_diff_on_emat_(void *, void *, void *, void *);
 extern SEXP _gRips_extract_elem(void *, void *, void *);
@@ -25,7 +25,7 @@ extern SEXP _gRips_extract_rows(void *, void *, void *);
 extern SEXP _gRips_extract_uv_(void *, void *, void *, void *);
 extern SEXP _gRips_find_str_(void *, void *);
 extern SEXP _gRips_ggm_logL_(void *, void *, void *);
-extern SEXP _gRips_has_full_rank_(void *);
+extern SEXP _gRips_has_full_rank_(void *, void *);
 extern SEXP _gRips_inv_qr_(void *);
 extern SEXP _gRips_list2col_(void *, void *);
 extern SEXP _gRips_list2row_(void *, void *);
@@ -46,7 +46,7 @@ extern SEXP _gRips_mean_abs_diff_on_emat_(void *, void *, void *, void *);
 extern SEXP _gRips_mnorm_maxabs_(void *);
 extern SEXP _gRips_mnorm_one_(void *);
 extern SEXP _gRips_ncd_ggm_(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
-extern SEXP _gRips_outerloop1_(void *, void *, void *, void *, void *, void *, void *, void *, void *);
+extern SEXP _gRips_outerloop1_(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern SEXP _gRips_project_onto_G_(void *, void *);
 extern SEXP _gRips_remove_elem(void *, void *, void *);
 extern SEXP _gRips_remove_rows(void *, void *, void *);
@@ -73,7 +73,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_gRips_clone_",                       (DL_FUNC) &_gRips_clone_,                        1},
     {"_gRips_conips_ggm_",                  (DL_FUNC) &_gRips_conips_ggm_,                  10},
     {"_gRips_covips_ggm_",                  (DL_FUNC) &_gRips_covips_ggm_,                  10},
-    {"_gRips_covips_outer0_",               (DL_FUNC) &_gRips_covips_outer0_,               11},
+    {"_gRips_covips_outer0_",               (DL_FUNC) &_gRips_covips_outer0_,               12},
     {"_gRips_diff_on_elst_",                (DL_FUNC) &_gRips_diff_on_elst_,                 4},
     {"_gRips_diff_on_emat_",                (DL_FUNC) &_gRips_diff_on_emat_,                 4},
     {"_gRips_extract_elem",                 (DL_FUNC) &_gRips_extract_elem,                  3},
@@ -81,7 +81,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_gRips_extract_uv_",                  (DL_FUNC) &_gRips_extract_uv_,                   4},
     {"_gRips_find_str_",                    (DL_FUNC) &_gRips_find_str_,                     2},
     {"_gRips_ggm_logL_",                    (DL_FUNC) &_gRips_ggm_logL_,                     3},
-    {"_gRips_has_full_rank_",               (DL_FUNC) &_gRips_has_full_rank_,                1},
+    {"_gRips_has_full_rank_",               (DL_FUNC) &_gRips_has_full_rank_,                2},
     {"_gRips_inv_qr_",                      (DL_FUNC) &_gRips_inv_qr_,                       1},
     {"_gRips_list2col_",                    (DL_FUNC) &_gRips_list2col_,                     2},
     {"_gRips_list2row_",                    (DL_FUNC) &_gRips_list2row_,                     2},
@@ -102,7 +102,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_gRips_mnorm_maxabs_",                (DL_FUNC) &_gRips_mnorm_maxabs_,                 1},
     {"_gRips_mnorm_one_",                   (DL_FUNC) &_gRips_mnorm_one_,                    1},
     {"_gRips_ncd_ggm_",                     (DL_FUNC) &_gRips_ncd_ggm_,                     10},
-    {"_gRips_outerloop1_",                  (DL_FUNC) &_gRips_outerloop1_,                   9},
+    {"_gRips_outerloop1_",                  (DL_FUNC) &_gRips_outerloop1_,                  10},
     {"_gRips_project_onto_G_",              (DL_FUNC) &_gRips_project_onto_G_,               2},
     {"_gRips_remove_elem",                  (DL_FUNC) &_gRips_remove_elem,                   3},
     {"_gRips_remove_rows",                  (DL_FUNC) &_gRips_remove_rows,                   3},

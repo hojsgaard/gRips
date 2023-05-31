@@ -13,9 +13,28 @@ typedef Rcpp::CharacterVector chr_vec;
 // ---------------------------------------------------------------------
 
 // [[Rcpp::export]]
-bool has_full_rank_(mat& Delta){
-  uword rank_Delta = arma::rank(Delta); //, sqrt(datum::eps) * Delta.n_cols);
-  return (rank_Delta >= Delta.n_cols); 	    
+bool has_full_rank_(mat& Delta, double eps){ // FIXME
+    vec eigval;
+    mat eigvec;
+    
+    eig_sym(eigval, eigvec, Delta);
+    double mev = min(eigval);
+    return (mev > eps);
+    // Rprintf("val %f sign %f mev %f\n", val, sign, mev);
+
+
+// uword rank_Delta = arma::rank(Delta); //, sqrt(datum::eps) * Delta.n_cols);
+  // return (rank_Delta >= Delta.n_cols); 	    
+}
+
+
+double get_mev(mat& Delta){
+    vec eigval;
+    mat eigvec;
+    
+    eig_sym(eigval, eigvec, Delta);
+    double mev = min(eigval);
+    return (mev);
 }
 
 

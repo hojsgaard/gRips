@@ -133,24 +133,24 @@ Scc_inv_list_ <- function(S, edges0) {
     .Call('_gRips_Scc_inv_list_', PACKAGE = 'gRips', S, edges0)
 }
 
-.c_conips_ggm_ <- function(S, elist, emat, nobs, K, maxit, eps, convcrit, print, aux) {
-    .Call('_gRips_conips_ggm_', PACKAGE = 'gRips', S, elist, emat, nobs, K, maxit, eps, convcrit, print, aux)
+.c_conips_ggm_ <- function(S, elst, emat, nobs, K, maxit, eps, convcrit, print, aux) {
+    .Call('_gRips_conips_ggm_', PACKAGE = 'gRips', S, elst, emat, nobs, K, maxit, eps, convcrit, print, aux)
 }
 
-covips_loop0_ <- function(S, K, elist0, Sigma, Scc_lst, Scci_lst, nobs, maxit, nupdates, eps = 0.01, print = 0L) {
-    .Call('_gRips_covips_loop0_', PACKAGE = 'gRips', S, K, elist0, Sigma, Scc_lst, Scci_lst, nobs, maxit, nupdates, eps, print)
+covips_outer0_ <- function(S, K, elst0, Sigma, Scc_lst, Scci_lst, nobs, maxit, n_upd, max_visits, eps = 0.01, print = 0L) {
+    .Call('_gRips_covips_outer0_', PACKAGE = 'gRips', S, K, elst0, Sigma, Scc_lst, Scci_lst, nobs, maxit, n_upd, max_visits, eps, print)
 }
 
-.c_covips_ggm_ <- function(S, elist, emat, nobs, K, maxit, eps, convcrit, print, aux) {
-    .Call('_gRips_covips_ggm_', PACKAGE = 'gRips', S, elist, emat, nobs, K, maxit, eps, convcrit, print, aux)
+.c_covips_ggm_ <- function(S, elst, emat, nobs, K, maxit, eps, convcrit, print, aux) {
+    .Call('_gRips_covips_ggm_', PACKAGE = 'gRips', S, elst, emat, nobs, K, maxit, eps, convcrit, print, aux)
 }
 
-outerloop1_ <- function(Sigma, K, emat, emat_c, amat, nobs, eps, maxit, print = 0L) {
-    .Call('_gRips_outerloop1_', PACKAGE = 'gRips', Sigma, K, emat, emat_c, amat, nobs, eps, maxit, print)
+outerloop1_ <- function(Sigma, K, emat, emat_c, amat, nobs, eps, max_visits, n_visits, print = 0L) {
+    .Call('_gRips_outerloop1_', PACKAGE = 'gRips', Sigma, K, emat, emat_c, amat, nobs, eps, max_visits, n_visits, print)
 }
 
-.c_ncd_ggm_ <- function(S, elist, emat, nobs, K, maxit, eps, convcrit, print, aux) {
-    .Call('_gRips_ncd_ggm_', PACKAGE = 'gRips', S, elist, emat, nobs, K, maxit, eps, convcrit, print, aux)
+.c_ncd_ggm_ <- function(S, elst, emat, nobs, K, maxit, eps, convcrit, print, aux) {
+    .Call('_gRips_ncd_ggm_', PACKAGE = 'gRips', S, elst, emat, nobs, K, maxit, eps, convcrit, print, aux)
 }
 
 unique_rows <- function(m) {
@@ -185,8 +185,8 @@ as_emat_complement_ <- function(emat, d) {
     .Call('_gRips_as_emat_complement_', PACKAGE = 'gRips', emat, d)
 }
 
-has_full_rank_ <- function(Delta) {
-    .Call('_gRips_has_full_rank_', PACKAGE = 'gRips', Delta)
+has_full_rank_ <- function(Delta, eps) {
+    .Call('_gRips_has_full_rank_', PACKAGE = 'gRips', Delta, eps)
 }
 
 project_onto_G_ <- function(Delta, emc) {

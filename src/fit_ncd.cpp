@@ -88,7 +88,7 @@ bool shall_update(int u, mat& K, mat& amat, double eps=0.01){
   uvec locate_u = find(ur_ == u);
   ur_.shed_rows(locate_u);
 
-  mat K_uru      = K.submat(ur_, u_);  // Column vector
+  mat K_uru      = K.submat(ur_, u_);    // Column vector
   double mno = mnorm_one_(K_uru);  
   return (mno > eps);
 }
@@ -155,7 +155,7 @@ void innerloop1_update_Sigma_(mat& Sigma, mat& amat, int nobs, int print=0){
 
 //[[Rcpp::export]]
 List outerloop1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat,
-		 int& nobs, double& eps, int maxit, int print=0){
+		 int& nobs, double& eps, int max_visits, int& n_visits, int print=0){
 
   if (print >=2){
     Rprintf(">> Running outerloop1\n");
@@ -163,24 +163,26 @@ List outerloop1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat,
   
   double conv_check, mno;
   mat Sigma_prev = diagmat(Sigma.diag());
-  int iter = 0;
-
+  int n_vars = Sigma.n_rows, count=0;
+  int n_upd = n_vars;
+  
   while (true) {
     innerloop1_update_Sigma_(Sigma=Sigma, amat=amat, nobs=nobs, print=print);
     mat Delta = Sigma - Sigma_prev;
     mno = mnorm_one_(Delta);
-    iter++;
-    
-    if (print >=3){
-      Rprintf(">>> outerloop1 iter: %4d eps: %2.6f mno: %12.6f\n", iter, eps, mno);
-    }
+    n_visits += n_upd;
+    count++;
 
+    if (print >=3){
+      Rprintf(">>> outerloop1 count: %5d max_visits: %7d n_visits: %7d n_upd: %5d mno: %10.6f eps: %10.6f\n",
+	      count, max_visits, n_visits, n_upd, mno, eps);
+    }
+    
     Sigma_prev = Sigma;
     conv_check = mno;
-    if ((iter == maxit) || (conv_check < eps)) break;
+    if ((n_visits == max_visits) || (conv_check < eps)) break;
   }
-
-  return List::create(_["iter"]  = iter, _["mad"]=mno); //FIXME mad should be conv_crit		
+  return List::create(_["iter"]  = n_visits, _["mad"]=mno); //FIXME mad should be conv_crit		
 }
 
 
@@ -189,48 +191,61 @@ List outerloop1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat,
 // ### ###################################################
 
 void innerloop2_update_Sigma_K_(mat& Sigma, mat& K, mat& amat, int nobs,
-				int &nupd, double eps=0.01, int print=0){
+				int &n_upd, double eps=0.01, int print=0){
   if (print >= 4){
     Rprintf(">>>> Running innerloop2_update_Sigma_K\n");
    }
 
   for (size_t u=0; u<amat.n_rows; u++){
     if (shall_update(u=u, K=K, amat=amat, eps=eps)){
-      nupd++;
+      n_upd++;
       update_Sigma_row_(u=u, Sigma=Sigma,      amat=amat, nobs=nobs, print=print);    
       update_K_row_    (u=u, Sigma=Sigma, K=K, amat=amat, print=print);
     }   
   }
 }
 
-List outerloop2_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int nobs, double& eps, int& maxit,
-		 int rank_Sigma,
-		 int& nupd, int print=0){
+List outerloop2_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int nobs, double& eps, 
+		 int max_visits, int& n_visits, 
+		 int& n_upd, int print=0){
 
   if (print >=2){
     Rprintf(">> Running outerloop2\n");
   }
 
+  int count=0;
   double mno, conv_crit;
-  int iter = 0;
   while (true){
-    nupd = 0;
+    n_upd = 0;
     innerloop2_update_Sigma_K_(Sigma=Sigma, K=K, amat=amat, nobs=nobs,
-			       nupd=nupd, eps=eps, print=print);
+			       n_upd=n_upd, eps=eps, print=print);
 
+    n_visits += n_upd;
     mat Delta = K - project_onto_G_(K, emat_c);
     mno = mnorm_one_(Delta);
     conv_crit = mno;
-    iter++;
 
-    if (print>=3)
-      Rprintf(">>> outerloop2 iter: %4d eps: %2.6f mno: %12.6f nupd: %5d\n", iter, eps, mno, nupd);
+    double val, sign;
+    log_det(val, sign, Sigma);
+
+    vec eigval;
+    mat eigvec;
     
-    if ((iter == maxit) || (conv_crit < eps)){
-      break;
+    eig_sym(eigval, eigvec, Sigma);
+    double mev = min(eigval);
+    Rprintf("val %f sign %f mev %f\n", val, sign, mev);
+
+	
+    count++;
+    
+    if (print >=3){
+      Rprintf(">>> outerloop2 count: %5d max_visits: %7d n_visits: %7d n_upd: %5d mno: %10.6f val: %10.6f eps: %10.6f\n",
+	      count, max_visits, n_visits, n_upd, mno, val, eps);
     }
+    
+    if ((n_visits == max_visits) || (conv_crit < eps)) break;    
   }
-  return List::create(_["iter"] = iter, _["conv_crit"] = conv_crit);		
+  return List::create(_["iter"] = n_visits, _["conv_crit"] = conv_crit);		
 }
 
 
@@ -254,39 +269,44 @@ List ncd_ggm_(mat& S, List& elst, umat& emat, int& nobs,
   
   int version      = aux["version"];
   bool converged;
+  int n_edges  = emat.n_cols, n_vars = S.n_cols;
+  int max_visits = n_vars * maxit, n_visits = 0;
   
-  umat emat_c = as_emat_complement_(emat-1, S.n_rows);
-  mat amat    = as_emat2amat_(emat-1, S.n_rows);
+  umat emat_c = as_emat_complement_(emat-1, n_vars);
+  mat amat    = as_emat2amat_(emat-1, n_vars);
   mat Sigma   = S, K2, Delta;
   List res1, res2;
   double logL, gap=-1.0, conv_check, eps2, mno;
-  int iter1, iter2, itcount, rank_Sigma, nupd=0;
+  int iter1, iter2, itcount, n_upd=0;
 
-  eps2 = MIN(eps, 1.0/Sigma.n_rows);  
+  double eps1 = 2 * eps / nobs;
+  eps2 = MIN(eps1, 1.0/Sigma.n_rows);  
   
   switch (version){
   case 0:
+    Rprintf("version=0\n");
     res1 = outerloop1_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat,
-		       nobs=nobs, eps=eps, maxit=maxit, print=print);
+		       nobs=nobs, eps=eps1, max_visits=max_visits, n_visits=n_visits, print=print);
     break;
   case 1:
+    Rprintf("version=1\n");    
     res1 = outerloop1_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat,
-		       nobs=nobs, eps=eps2, maxit=maxit, print=print);
+		       nobs=nobs, eps=eps2, max_visits=max_visits, n_visits=n_visits, print=print);
     break;
   }
   
   iter1 = res1["iter"];
   
   if (print>=2)
-    Rprintf(">> outerloop1 iterations : %d\n", iter1);
+    Rprintf(">> outerloop1 visits : %d\n", iter1);
 
-  if (has_full_rank_(Sigma)){
+  double mev = get_mev(Sigma);
+  if (mev > eps2){
     converged=true;
     K = inv_qr_(Sigma);
   } else {
-    converged=false;
-    rank_Sigma = rank(Sigma); 
-    REprintf("NCD not converged: Rank of Sigma = %d nvar = %d\n", rank_Sigma, Sigma.n_rows);	
+    converged = false;
+    REprintf("NCD not converged: Smallest eigenvalue = %9.6f\n", mev);	
   }									
   
   if (converged){
@@ -309,12 +329,12 @@ List ncd_ggm_(mat& S, List& elst, umat& emat, int& nobs,
       
     case 1: // FULL VERSION
       K = inv_qr_(Sigma);
-      res2 = outerloop2_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat, nobs=nobs, eps=eps2, maxit=maxit,
-			 rank_Sigma=rank_Sigma,
-			 nupd=nupd, print=print);
+      res2 = outerloop2_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat, nobs=nobs, eps=eps2,
+			 max_visits=max_visits, n_visits=n_visits, 
+			 n_upd=n_upd, print=print);
       iter2 = res2["iter"];
       if (print>=2)
-	Rprintf(">> outerloop2 iterations : %d\n", iter2);
+	Rprintf(">> outerloop2 visits : %d\n", iter2);
       
       K2    = project_onto_G_(K, emat_c);
       Delta = K - K2;
@@ -322,12 +342,12 @@ List ncd_ggm_(mat& S, List& elst, umat& emat, int& nobs,
       if (print>=3)
 	Rprintf(">>> ncd mno : %14.10f\n", mno);
       conv_check = mno;
-      if (iter2 < maxit){ // Then K is posdef	
+      if (iter2 < max_visits){ // Then K is posdef	
 	logL = ggm_logL_(S, K2, nobs);
 	gap  = duality_gap_(Sigma, K2, nobs);
 	K    = K2;
       } else {
-	REprintf("Algorithn may not have converged\n");
+	REprintf("Algorithm may not have converged\n");
 	// K = NA; upper_limit_logL = formel (23)
       }
       itcount = iter1 + iter2;  

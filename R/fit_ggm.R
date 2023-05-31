@@ -63,8 +63,8 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxit=10000L, eps=1e-6, convcri
     method_str <- method
     
     edges <- parse_edges(edges, nrow(S))
-    elist <- .form2glist(edges)
-    emat  <- as_elist2emat(elist)
+    elst <- .form2glist(edges)
+    emat  <- as_elist2emat(elst)
     
     ig <- as_emat2igraph(emat, nrow(S))
     max_coreness <- max(coreness(ig))
@@ -109,7 +109,7 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxit=10000L, eps=1e-6, convcri
            ## "r_cal"       = {fitfun <- .r_cal_ggm_  },           
            )    
 
-    out <- fitfun(S=S, elist=elist, emat=emat,
+    out <- fitfun(S=S, elst=elst, emat=emat,
                   nobs=nobs, K=Ks, maxit=maxit, eps=eps, convcrit=convcrit, print=print, aux=aux0)
     
     out <- c(out, list(edges=emat, nobs=nobs, eps=eps, max_coreness=max_coreness))

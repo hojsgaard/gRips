@@ -764,8 +764,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // covips_outer0_
-List covips_outer0_(mat& S, mat& K, List& elst0, mat& Sigma, List& Scc_lst, List& Scci_lst, int& nobs, int& maxit, int& nupd, double eps, int print);
-RcppExport SEXP _gRips_covips_outer0_(SEXP SSEXP, SEXP KSEXP, SEXP elst0SEXP, SEXP SigmaSEXP, SEXP Scc_lstSEXP, SEXP Scci_lstSEXP, SEXP nobsSEXP, SEXP maxitSEXP, SEXP nupdSEXP, SEXP epsSEXP, SEXP printSEXP) {
+List covips_outer0_(mat& S, mat& K, List& elst0, mat& Sigma, List& Scc_lst, List& Scci_lst, int& nobs, int& maxit, int& n_upd, int& max_visits, double eps, int print);
+RcppExport SEXP _gRips_covips_outer0_(SEXP SSEXP, SEXP KSEXP, SEXP elst0SEXP, SEXP SigmaSEXP, SEXP Scc_lstSEXP, SEXP Scci_lstSEXP, SEXP nobsSEXP, SEXP maxitSEXP, SEXP n_updSEXP, SEXP max_visitsSEXP, SEXP epsSEXP, SEXP printSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -777,10 +777,11 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< List& >::type Scci_lst(Scci_lstSEXP);
     Rcpp::traits::input_parameter< int& >::type nobs(nobsSEXP);
     Rcpp::traits::input_parameter< int& >::type maxit(maxitSEXP);
-    Rcpp::traits::input_parameter< int& >::type nupd(nupdSEXP);
+    Rcpp::traits::input_parameter< int& >::type n_upd(n_updSEXP);
+    Rcpp::traits::input_parameter< int& >::type max_visits(max_visitsSEXP);
     Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
     Rcpp::traits::input_parameter< int >::type print(printSEXP);
-    rcpp_result_gen = Rcpp::wrap(covips_outer0_(S, K, elst0, Sigma, Scc_lst, Scci_lst, nobs, maxit, nupd, eps, print));
+    rcpp_result_gen = Rcpp::wrap(covips_outer0_(S, K, elst0, Sigma, Scc_lst, Scci_lst, nobs, maxit, n_upd, max_visits, eps, print));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -805,8 +806,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // outerloop1_
-List outerloop1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int& nobs, double& eps, int maxit, int print);
-RcppExport SEXP _gRips_outerloop1_(SEXP SigmaSEXP, SEXP KSEXP, SEXP ematSEXP, SEXP emat_cSEXP, SEXP amatSEXP, SEXP nobsSEXP, SEXP epsSEXP, SEXP maxitSEXP, SEXP printSEXP) {
+List outerloop1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int& nobs, double& eps, int max_visits, int& n_visits, int print);
+RcppExport SEXP _gRips_outerloop1_(SEXP SigmaSEXP, SEXP KSEXP, SEXP ematSEXP, SEXP emat_cSEXP, SEXP amatSEXP, SEXP nobsSEXP, SEXP epsSEXP, SEXP max_visitsSEXP, SEXP n_visitsSEXP, SEXP printSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -817,9 +818,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< mat& >::type amat(amatSEXP);
     Rcpp::traits::input_parameter< int& >::type nobs(nobsSEXP);
     Rcpp::traits::input_parameter< double& >::type eps(epsSEXP);
-    Rcpp::traits::input_parameter< int >::type maxit(maxitSEXP);
+    Rcpp::traits::input_parameter< int >::type max_visits(max_visitsSEXP);
+    Rcpp::traits::input_parameter< int& >::type n_visits(n_visitsSEXP);
     Rcpp::traits::input_parameter< int >::type print(printSEXP);
-    rcpp_result_gen = Rcpp::wrap(outerloop1_(Sigma, K, emat, emat_c, amat, nobs, eps, maxit, print));
+    rcpp_result_gen = Rcpp::wrap(outerloop1_(Sigma, K, emat, emat_c, amat, nobs, eps, max_visits, n_visits, print));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -936,13 +938,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // has_full_rank_
-bool has_full_rank_(mat& Delta);
-RcppExport SEXP _gRips_has_full_rank_(SEXP DeltaSEXP) {
+bool has_full_rank_(mat& Delta, double eps);
+RcppExport SEXP _gRips_has_full_rank_(SEXP DeltaSEXP, SEXP epsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< mat& >::type Delta(DeltaSEXP);
-    rcpp_result_gen = Rcpp::wrap(has_full_rank_(Delta));
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    rcpp_result_gen = Rcpp::wrap(has_full_rank_(Delta, eps));
     return rcpp_result_gen;
 END_RCPP
 }

@@ -108,6 +108,7 @@ List conips_ggm_(arma::mat& S, List& elst, umat& emat, int& nobs,
   double mno, maxabs;
   mat Sigma, dif, Delta;
 
+  double eps1 = 2 * eps / nobs; 
   List elst0 = clone(elst);
   for (int i=0; i<elst.length(); i++){
     elst0[i] = as<arma::uvec>(elst0[i]) - 1; // 0-based
@@ -145,7 +146,7 @@ List conips_ggm_(arma::mat& S, List& elst, umat& emat, int& nobs,
       CONV_CHECK_LOGL_DIFF;
       break;
     }    
-    if (conv_check < eps) break;
+    if (conv_check < eps1) break;
   }
 
   Sigma = inv_qr_(K); // FOR CONIPS ONLY
@@ -159,37 +160,6 @@ List conips_ggm_(arma::mat& S, List& elst, umat& emat, int& nobs,
 // ------------------------------------------------------------------
 // ------ COVIPS - Fast iterative proportional scaling          -------
 // ------------------------------------------------------------------
-
-
-
-void covips_update_parm0_(const uvec& cc0, const mat& Scc, mat& K, mat& Sigma,
-			  const mat& Scc_inv,
-			  int& nupd, double eps=0.01, int print=0)
-{
-  
-  mat Sigmacc  = Sigma.submat(cc0, cc0);
-  mat Kcc, Kupd, Haux, B, dd;
-
-  dd = Scc - Sigmacc;
-  double Knorm = mnorm_maxabs_(dd);
-  
-  if (Knorm > eps){
-    if (print>=4)
-      Rprintf(">>>> K norm %f - yes do update \n", Knorm);
-    mat Kstar = inv(Sigmacc);
-    Kcc      = K.submat(cc0, cc0);	
-    Kupd     = Scc_inv + Kcc - Kstar;
-    Haux     = Kstar - Kstar * Scc * Kstar;  
-
-    K.submat(cc0, cc0) = Kupd;
-    mat B  = Sigma.cols(cc0);
-    Sigma -= B * Haux * B.t();
-    nupd++;
-  } else {
-    if (print>=4)    
-      Rprintf(">>>> K norm %f - no do not update \n", Knorm);
-  }
-}
 
 
 void covips_update_parm_(const uvec& cc0, const mat& Scc, mat& K, mat& Sigma,
@@ -208,24 +178,9 @@ void covips_update_parm_(const uvec& cc0, const mat& Scc, mat& K, mat& Sigma,
   Sigma -= B * Haux * B.t();  
 }
 
-
-// Update some edges once
-void covips_inner0_(mat& S, mat& K, List& elst0,
-		    mat& Sigma, List& Scc_lst, List& Scci_lst,
-		    int& nupd, double eps=0.01, int print=0)
-{
-  nupd = 0;
-  for (int i=0; i < elst0.length(); ++i){
-    uvec cc0 = elst0[i];
-    covips_update_parm0_(cc0, Scc_lst[i], K, Sigma, Scci_lst[i],
-			 nupd=nupd, eps=eps, print=print);
-  }
-}
-
 // Update all edges once
 List covips_inner_(const mat& S, mat& K, const List& elst0,
-		   mat& Sigma, List& Scc_lst, List& Scci_lst,
-		   int print=0)
+		   mat& Sigma, List& Scc_lst, List& Scci_lst, int print=0)
 {
   for (int i=0; i < elst0.length(); ++i){
     uvec cc0 = elst0[i];
@@ -237,31 +192,76 @@ List covips_inner_(const mat& S, mat& K, const List& elst0,
 
 
 
+
+void covips_update_parm0_(const uvec& cc0, const mat& Scc, mat& K, mat& Sigma,
+			  const mat& Scc_inv,
+			  int& n_upd, double eps=0.01, int print=0)
+{
+  
+  mat Sigmacc  = Sigma.submat(cc0, cc0);
+  mat Kcc, Kupd, Haux, B, dd;
+
+  dd = Scc - Sigmacc;
+  double Knorm = mnorm_maxabs_(dd);
+  
+  if (Knorm > eps){
+    if (print>=4)
+      Rprintf(">>>> K norm %f - yes do update \n", Knorm);
+    mat Kstar = inv(Sigmacc);
+    Kcc      = K.submat(cc0, cc0);	
+    Kupd     = Scc_inv + Kcc - Kstar;
+    Haux     = Kstar - Kstar * Scc * Kstar;  
+    K.submat(cc0, cc0) = Kupd;
+    mat B  = Sigma.cols(cc0);
+    Sigma -= B * Haux * B.t();
+    n_upd++;
+  } else {
+    if (print>=4)    
+      Rprintf(">>>> K norm %f - no do not update \n", Knorm);
+  }
+}
+
+// Update only some edges
+void covips_inner0_(mat& S, mat& K, List& elst0,
+		    mat& Sigma, List& Scc_lst, List& Scci_lst,
+		    int& n_upd, double eps=0.01, int print=0)
+{
+  n_upd = 0;
+  for (int i=0; i < elst0.length(); ++i){
+    uvec cc0 = elst0[i];
+    covips_update_parm0_(cc0, Scc_lst[i], K, Sigma, Scci_lst[i],
+			 n_upd=n_upd, eps=eps, print=print);
+  }
+}
+
 //[[Rcpp::export]]  
 List covips_outer0_(mat& S, mat& K, List& elst0, mat& Sigma,
-		   List& Scc_lst, List& Scci_lst,
-		   int& nobs, int& maxit,
-		   int& nupd, double eps=0.01, int print=0){
+		    List& Scc_lst, List& Scci_lst,
+		    int& nobs, int& maxit,
+		    int& n_upd, int& max_visits, double eps=0.01, int print=0){
 
-  int itcount = 0;
+  int iter = 0, n_edges = elst0.length();
   double logL;
   
-  for (; itcount < maxit; ){  
+  while(true){
     covips_inner0_(S=S, K=K, elst0=elst0, Sigma=Sigma,
   		  Scc_lst=Scc_lst, Scci_lst=Scci_lst,
-  		  nupd=nupd, eps=eps, print=print);
+  		  n_upd=n_upd, eps=eps, print=print);
+    max_visits -= n_upd; // FIXME like this?
+    
     if (print>=3){
       logL = ggm_logL_(S, K, nobs);  
-      Rprintf(">>> itcount: %3d maxit: %d nupd: %6d edges: %4d logL: %16.8f\n",
-	      itcount, maxit, nupd, elst0.length(), logL);
+      Rprintf(">>> iter: %3d maxit: %d edges: %4d n_upd: %6d max_visits: %6d logL: %16.8f\n",
+	      iter, maxit, n_edges, n_upd, max_visits, logL);
     }
-    ++itcount;
-    if (nupd <= 0){
-      break;        
-    }  
+    ++iter;
+    if ((iter == maxit) || (n_upd <= 0)) break;
   }
-  return List::create(_["iter"] = itcount);
+  return List::create(_["iter"] = iter);
 }
+
+
+
 
 //[[Rcpp::export(.c_covips_ggm_)]] 
 List covips_ggm_(mat& S, List& elst, umat& emat, int& nobs,
@@ -270,12 +270,17 @@ List covips_ggm_(mat& S, List& elst, umat& emat, int& nobs,
 
   int version      = aux["version"];
   double logL, logLp, conv_check=9999, gap=-1.0, mno, maxabs;
-  double nparm = S.n_cols + emat.n_cols;
+  int n_edges  = emat.n_cols, n_vars = S.n_cols;
+  int max_visits = n_edges * maxit;
+
+  int iter1=0, iter2=0, itcount=0, n_upd=0;
+  
+  double nparm = n_vars + n_edges;
   umat emat0   = emat - 1;  
-  umat emat_c  = as_emat_complement_(emat-1, S.n_rows);
+  umat emat_c  = as_emat_complement_(emat-1, n_vars);
   mat Sigma, dif, Delta;  
   List res1, res2;
-  int iter1=0, iter2=0, itcount=0, nupd=0;
+
   
   List elst0 = clone(elst);  
   for (int i=0; i < elst.length(); i++) {
@@ -283,18 +288,19 @@ List covips_ggm_(mat& S, List& elst, umat& emat, int& nobs,
   }
     
   // Variables for COVIPS only
-  Sigma = inv_qr_(K);
-    
+  Sigma = inv_qr_(K);    
   List Scc_lst  = Scc_list_(S, elst0);  
   List Scci_lst = Scc_inv_list_(S, elst0);
   // END - Variables for COVIPS only  
 
   INIT_CONVERGENCE_CHECK;
-  
+
+  double eps1 = 2 * eps / nobs; 
   res1 = covips_outer0_(S=S, K=K, elst0=elst0, Sigma=Sigma,
 			Scc_lst=Scc_lst, Scci_lst=Scci_lst,
-			nobs=nobs, maxit=maxit, nupd=nupd,
-			eps=eps, print=print);
+			nobs=nobs, maxit=maxit, n_upd=n_upd,
+			max_visits=max_visits,
+			eps=eps1, print=print);
   iter1 = res1["iter"];
 
   dif    = S - Sigma;
@@ -304,9 +310,12 @@ List covips_ggm_(mat& S, List& elst, umat& emat, int& nobs,
 
   if (print>=2)
     Rprintf(">> iterations for start: %d maxabs: %14.10f\n", iter1, maxabs);
+  // version=1;
+  // Rprintf("version: %4d\n", version);
 
-   version=1;
+
   if (version==1){
+
     while (true){
       res2 = covips_inner_(S=S, K=K, elst0=elst0, Sigma=Sigma,
 			   Scc_lst=Scc_lst, Scci_lst=Scci_lst,
