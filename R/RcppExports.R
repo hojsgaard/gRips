@@ -137,8 +137,8 @@ Scc_inv_list_ <- function(S, edges0) {
     .Call('_gRips_conips_ggm_', PACKAGE = 'gRips', S, elst, emat, nobs, K, maxit, eps, convcrit, print, aux)
 }
 
-covips_outer0_ <- function(S, K, elst0, Sigma, Scc_lst, Scci_lst, nobs, maxit, n_upd, max_visits, eps = 0.01, print = 0L) {
-    .Call('_gRips_covips_outer0_', PACKAGE = 'gRips', S, K, elst0, Sigma, Scc_lst, Scci_lst, nobs, maxit, n_upd, max_visits, eps, print)
+covips_outer0_ <- function(S, K, elst0, Sigma, Scc_lst, Scci_lst, nobs, emat_c, n_upd, max_visits, n_visits, eps = 0.01, print = 0L) {
+    .Call('_gRips_covips_outer0_', PACKAGE = 'gRips', S, K, elst0, Sigma, Scc_lst, Scci_lst, nobs, emat_c, n_upd, max_visits, n_visits, eps, print)
 }
 
 .c_covips_ggm_ <- function(S, elst, emat, nobs, K, maxit, eps, convcrit, print, aux) {

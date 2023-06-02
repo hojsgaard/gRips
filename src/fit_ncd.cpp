@@ -225,20 +225,21 @@ List outerloop2_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat, int no
     mno = mnorm_one_(Delta);
     conv_crit = mno;
 
-    double val, sign;
-    log_det(val, sign, Sigma);
 
-    vec eigval;
-    mat eigvec;
+    // vec eigval;
+    // mat eigvec;
     
-    eig_sym(eigval, eigvec, Sigma);
-    double mev = min(eigval);
-    Rprintf("val %f sign %f mev %f\n", val, sign, mev);
+    // eig_sym(eigval, eigvec, Sigma);
+    // double mev = min(eigval);
+    // Rprintf("val %f sign %f mev %f\n", val, sign, mev);
 
 	
     count++;
     
     if (print >=3){
+      double val, sign;
+      log_det(val, sign, Sigma);
+      
       Rprintf(">>> outerloop2 count: %5d max_visits: %7d n_visits: %7d n_upd: %5d mno: %10.6f val: %10.6f eps: %10.6f\n",
 	      count, max_visits, n_visits, n_upd, mno, val, eps);
     }
@@ -284,12 +285,12 @@ List ncd_ggm_(mat& S, List& elst, umat& emat, int& nobs,
   
   switch (version){
   case 0:
-    Rprintf("version=0\n");
+    // Rprintf("version=0\n");
     res1 = outerloop1_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat,
 		       nobs=nobs, eps=eps1, max_visits=max_visits, n_visits=n_visits, print=print);
     break;
   case 1:
-    Rprintf("version=1\n");    
+    // Rprintf("version=1\n");    
     res1 = outerloop1_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat,
 		       nobs=nobs, eps=eps2, max_visits=max_visits, n_visits=n_visits, print=print);
     break;
@@ -307,6 +308,7 @@ List ncd_ggm_(mat& S, List& elst, umat& emat, int& nobs,
   } else {
     converged = false;
     REprintf("NCD not converged: Smallest eigenvalue = %9.6f\n", mev);	
+    itcount = iter1;
   }									
   
   if (converged){
@@ -329,6 +331,7 @@ List ncd_ggm_(mat& S, List& elst, umat& emat, int& nobs,
       
     case 1: // FULL VERSION
       K = inv_qr_(Sigma);
+      n_visits = 0;
       res2 = outerloop2_(Sigma=Sigma, K=K, emat=emat, emat_c=emat_c, amat=amat, nobs=nobs, eps=eps2,
 			 max_visits=max_visits, n_visits=n_visits, 
 			 n_upd=n_upd, print=print);
@@ -360,6 +363,9 @@ List ncd_ggm_(mat& S, List& elst, umat& emat, int& nobs,
     logL       = -1;
     conv_check = -1;
   }
+
+
+  itcount = itcount / n_vars;
   
   return List::create(						
     _["K"]     = K,						

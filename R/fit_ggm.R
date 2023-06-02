@@ -68,8 +68,8 @@ fit_ggm <- function(S, edges=NULL, nobs, K=NULL, maxit=10000L, eps=1e-6, convcri
     
     ig <- as_emat2igraph(emat, nrow(S))
     max_coreness <- max(coreness(ig))
-    if (max_coreness > (nobs - 1)){  ## FIXME: evt nobs-2 (for det er antal frihedsgrader -1)
-        stop(glue("Max coreness ({max_coreness}) is larger than nobs ({nobs}); mle may not exist.\n"))
+    if (max_coreness >= (nobs - 1)){  ## FIXME: evt nobs-2 (for det er antal frihedsgrader -1)
+        stop(glue("Max coreness ({max_coreness}) is larger or equal nobs ({nobs}) minus one; mle may not exist.\n"))
     }
 
 
@@ -183,18 +183,29 @@ parse_edges <- function(edges, nvar){
     nparm <- ncol(out$edges) + nrow(out$K)
     
     if (!is.null(t0))
-        out$time <- .get.diff.time(t0, units="millisecs")
+        out$time <- round(.get.diff.time(t0, units="secs"), 2)
+            ## out$time <- .get.diff.time(t0, units="millisecs")
 
     ## A HACK; converged is defined for NCD only
     if (is.null(out$converged))
         out$converged = TRUE
     
-    trKS <- if (out$converged){
-                sum(out$K * S)                
-            } else {
-                -1
-            }
+    ## trKS <- if (out$converged){
+    ##             sum(out$K * S)                
+    ##         } else {
+    ##             NA
+    ##         }
 
+
+    if (out$converged){
+        trKS = sum(out$K * S)
+        logL = out$logL
+        conv = out$conv_check
+        dgap = out$gap
+    } else {
+        trKS <- logL <- conv <- dgap <- NA
+    }
+    
     
     
     out$details <- list(
@@ -208,11 +219,11 @@ parse_edges <- function(edges, nvar){
         dim    = nparm,
         idim   = nrow(out$K),
         trKS   = trKS,
-        logL   = out$logL,
+        logL   = logL,
         ## For cov / con the lines below give the same, but for glasso there is no conv_check variable.
         ## made   = mean_abs_diff_on_emat_(out$Sigma, S, out$edges, 1)
-        conv   = out$conv_check,
-        dgap   = out$gap       
+        conv   = conv,
+        dgap   = dgap       
     )
     out$time <- out$iter <- out$eps <- NULL
     out$dim  <- out$diff <- NULL
