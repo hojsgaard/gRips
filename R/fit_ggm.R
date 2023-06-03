@@ -206,7 +206,8 @@ parse_edges <- function(edges, nvar){
         trKS <- logL <- conv <- dgap <- NA
     }
     
-    
+    if (!identical(method, "ncd"))
+        dgap <- NA
     
     out$details <- list(
         method = method,

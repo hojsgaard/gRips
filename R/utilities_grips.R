@@ -474,8 +474,8 @@ print.gips_fit_class <- function(x, ...){
 summary.gips_fit_class <- function(object, ...){
     xx <- as.data.frame(object$details)
     xx$ncore <- NULL
-    xx$tpi <- with(xx, time / iter)
-    xx$tpe <- with(xx, time / (dim-idim))
+    ## xx$tpi <- with(xx, time / iter)
+    ## xx$tpe <- with(xx, time / (dim-idim))
     xx
 }
 

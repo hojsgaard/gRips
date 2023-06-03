@@ -145,8 +145,8 @@ covips_outer0_ <- function(S, K, elst0, Sigma, Scc_lst, Scci_lst, nobs, emat_c, 
     .Call('_gRips_covips_ggm_', PACKAGE = 'gRips', S, elst, emat, nobs, K, maxit, eps, convcrit, print, aux)
 }
 
-outerloop1_ <- function(Sigma, K, emat, emat_c, amat, nobs, eps, max_visits, n_visits, print = 0L) {
-    .Call('_gRips_outerloop1_', PACKAGE = 'gRips', Sigma, K, emat, emat_c, amat, nobs, eps, max_visits, n_visits, print)
+ncd_outer1_ <- function(Sigma, K, emat, emat_c, amat, nobs, eps, max_visits, n_visits, print = 0L) {
+    .Call('_gRips_ncd_outer1_', PACKAGE = 'gRips', Sigma, K, emat, emat_c, amat, nobs, eps, max_visits, n_visits, print)
 }
 
 .c_ncd_ggm_ <- function(S, elst, emat, nobs, K, maxit, eps, convcrit, print, aux) {
