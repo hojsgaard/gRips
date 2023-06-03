@@ -146,7 +146,7 @@ List conips_ggm_(arma::mat& S, List& elst, umat& emat, int& nobs,
       if (print>=3){
 	// mno   = mnorm_one_(Delta);
 	logL  = ggm_logL_(S, K, nobs);
-	Rprintf(">>> conips count: %5d max_visits: %7d n_visits: %7d n_upd: %5d maxabs: %10.6f eps: %10.6f, logL: %10.6f\n",
+	Rprintf(">>> conips count: %4d max_visits: %7d n_visits: %7d n_upd: %5d maxabs: %10.6f eps: %8.6f, logL: %10.6f\n",
 		count, max_visits, n_visits, n_upd, maxabs, eps1, logL);
 	
       }
@@ -275,7 +275,7 @@ List covips_outer0_(mat& S, mat& K, List& elst0, mat& Sigma,
       mat Delta = project_onto_G_(dif, emat_c);
       double maxabs = mnorm_maxabs_(Delta);
       // double mno   = mnorm_one_(Delta);
-      Rprintf(">>> covips count: %5d max_visits: %7d n_visits: %7d n_upd: %5d maxabs: %10.6f eps: %10.6f, logL: %10.6f\n",
+      Rprintf(">>> covips count: %4d max_visits: %7d n_visits: %7d n_upd: %5d maxabs: %10.6f eps: %8.6f, logL: %10.6f\n",
 	      count, max_visits, n_visits, n_upd, maxabs, eps, logL);
 
     }
