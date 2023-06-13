@@ -176,18 +176,15 @@ impose_zero <- function(emat, K){
 #' @export
 #' @rdname utilities
 as_emat2cq <- function(emat, nvar=NULL){
-    ## if (ncol(emat) == 0) return(as.list(1:nvar))
+
     if (ncol(emat) == 0) return(list())
     if (is.null(nvar)){
         nvar <- max(emat)
     }
-    am <- matrix(0, nrow=nvar, ncol=nvar)
-    
+    am <- matrix(0, nrow=nvar, ncol=nvar)    
     am[t(emat)] <- 1  
-    am <- am + t(am)
+    am <- am + t.default(am)
 
-    ## print(am)
-    ## am <<- am
     cq <- as(am, "graphNEL")  %>% as("dgCMatrix")  %>% gRbase::maxCliqueMAT() 
     cq <- lapply(cq$maxCliques, "as.numeric")
     cq
@@ -209,7 +206,6 @@ as_emat_complement <- function(emat, nvar){ # Those edges NOT in emat
 #' @rdname utilities
 as_emat2amat <-function(emat, d){
     vn <- sort(unique(c(emat)))
-    ##print(vn)
     M <- matrix(0, nrow=d, ncol=d)
     for (j in 1:ncol(emat)){
         e <- emat[,j]
@@ -230,22 +226,28 @@ as_emat2elist <- function(emat){
 #' @export
 #' @rdname utilities
 as_elist2emat <- function(elist){
-
+    find_unique_rows <- function(ed){
+        d <- max(ed)
+        ii <- ed[,1] * 10^(nchar(d)+1) + ed[,2]
+        ed[!duplicated(ii),]
+    }
+    
     idx <- sapply(elist, length) > 1
     elist <- elist[idx]
-
+    
     if (length(elist) > 0){
-        . <- NULL 
-        ed <- lapply(elist, combn_prim, 2)  %>% do.call(cbind, .)  %>% t
-        ## ed <- lapply(elist, combn_prim, 2)  %>% {function(zz) {do.call(cbind, zz)}}  %>% t
+        ed <- lapply(elist, combn_prim, 2)
+        ed <- ed |> do.call(cbind, args=_)
+        ed <- t.default(ed)
         b <- ed[, 1] > ed[, 2]
         ed[b,] <- ed[b, 2:1]
-        ed <- ed[!duplicated.matrix(ed),,drop=FALSE]
+        ed <- find_unique_rows(ed)
         emat <- t.default(ed)
     } else
         emat <- matrix(NA, ncol=0, nrow=2)
     emat
 }
+
 
 #' @export
 #' @rdname utilities
@@ -490,4 +492,22 @@ glance.gips_fit_class <- function(x, ...){
 
 
 
+
+## as_elist2emat <- function(elist){
+
+##     idx <- sapply(elist, length) > 1
+##     elist <- elist[idx]
+
+##     if (length(elist) > 0){
+##         . <- NULL 
+##         ed <- lapply(elist, combn_prim, 2)  %>% do.call(cbind, .)  %>% t
+##         ## ed <- lapply(elist, combn_prim, 2)  %>% {function(zz) {do.call(cbind, zz)}}  %>% t
+##         b <- ed[, 1] > ed[, 2]
+##         ed[b,] <- ed[b, 2:1]
+##         ed <- ed[!duplicated.matrix(ed),,drop=FALSE]
+##         emat <- t.default(ed)
+##     } else
+##         emat <- matrix(NA, ncol=0, nrow=2)
+##     emat
+## }
 
