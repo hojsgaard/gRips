@@ -109,7 +109,8 @@ List conips_ggm_(arma::mat& S, List& elst, umat& emat, int& nobs,
   mat Sigma, dif, Delta;
 
   int n_edges  = emat.n_cols, n_vars = S.n_cols, n_gen=elst.length();
-  int n_upd = n_edges;
+
+  int n_upd = n_gen;
 
   int max_visits = n_gen * maxit;
 
@@ -156,7 +157,7 @@ List conips_ggm_(arma::mat& S, List& elst, umat& emat, int& nobs,
       CONV_CHECK_LOGL_DIFF;
       break;
     }
-    if ((n_visits == max_visits) || (conv_check < eps1)) break;    
+    if ((n_visits >= max_visits) || (conv_check < eps1)) break;    
   }
 
   Sigma = inv_qr_(K); // FOR CONIPS ONLY
@@ -280,7 +281,7 @@ List covips_outer0_(mat& S, mat& K, List& elst0, mat& Sigma,
 
     }
 
-    if ((n_visits == max_visits) || (n_upd <= 0)) break;
+    if ((n_visits >= max_visits) || (n_upd <= 0)) break;
   }
   return List::create(_["iter"] = n_visits);
 }
@@ -306,7 +307,6 @@ List covips_ggm_(mat& S, List& elst, umat& emat, int& nobs,
   mat Sigma, dif, Delta;  
   List res1, res2;
 
-  
   List elst0 = clone(elst);  
   for (int i=0; i < elst.length(); i++) {
     elst0[i] = as<arma::uvec>(elst0[i]) - 1; // 0-based
@@ -333,41 +333,54 @@ List covips_ggm_(mat& S, List& elst, umat& emat, int& nobs,
   maxabs = mnorm_maxabs_(Delta);
   conv_check = maxabs;
 
-  // if (print>=2)
-    // Rprintf(">> iterations for start: %d maxabs: %14.10f\n", iter1, maxabs);
-  if (version==1){
-
-    while (true){
-      res2 = covips_inner_(S=S, K=K, elst0=elst0, Sigma=Sigma,
-			   Scc_lst=Scc_lst, Scci_lst=Scci_lst,
-			   print=print);
-      ++iter2;
-      
-      switch(convcrit){
-      case 1: 	
-	dif    = S - Sigma;
-	Delta  = project_onto_G_(dif, emat_c);
-	maxabs = mnorm_maxabs_(Delta);
-	conv_check = maxabs;
-	if (print >= 3){
-	  mno  = mnorm_one_(Delta);
-	  logL = ggm_logL_(S, K, nobs);  
-	  Rprintf(">>> covips iter: %4d eps: %14.10f, mno: %14.10f maxabs: %14.10f logL: %14.10f\n",
-		  iter2, eps, mno, maxabs, logL);
-	}
-	break;
-      case 2:
-	CONV_CHECK_LOGL_DIFF;
-	break;
-      }
-      if ((iter2 == maxit) || (conv_check < eps)) break;
-    }
-  }
-  
-  itcount = iter2 + iter1;
+  itcount = iter1;
   itcount = itcount / n_gen;
     
   logL    = ggm_logL_(S, K, nobs);  
   RETURN_VALUE;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+  // if (print>=2)
+    // Rprintf(">> iterations for start: %d maxabs: %14.10f\n", iter1, maxabs);
+  // if (version==1){
+
+  //   while (true){
+  //     res2 = covips_inner_(S=S, K=K, elst0=elst0, Sigma=Sigma,
+  // 			   Scc_lst=Scc_lst, Scci_lst=Scci_lst,
+  // 			   print=print);
+  //     ++iter2;
+      
+  //     switch(convcrit){
+  //     case 1: 	
+  // 	dif    = S - Sigma;
+  // 	Delta  = project_onto_G_(dif, emat_c);
+  // 	maxabs = mnorm_maxabs_(Delta);
+  // 	conv_check = maxabs;
+  // 	if (print >= 3){
+  // 	  mno  = mnorm_one_(Delta);
+  // 	  logL = ggm_logL_(S, K, nobs);  
+  // 	  Rprintf(">>> covips iter: %4d eps: %14.10f, mno: %14.10f maxabs: %14.10f logL: %14.10f\n",
+  // 		  iter2, eps, mno, maxabs, logL);
+  // 	}
+  // 	break;
+  //     case 2:
+  // 	CONV_CHECK_LOGL_DIFF;
+  // 	break;
+  //     }
+  //     if ((iter2 == maxit) || (conv_check < eps)) break;
+  //   }
+  // }
+  
+  // itcount = iter2 + iter1;

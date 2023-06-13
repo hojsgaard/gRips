@@ -279,7 +279,7 @@ List ncd_ggm_(mat& S, List& elst, umat& emat, int& nobs,
 
   double mev = get_mev(Sigma);
   if (mev > eps2){
-    converged=true;
+    converged = true;
     K = inv_qr_(Sigma);
   } else {
     converged = false;
@@ -321,13 +321,14 @@ List ncd_ggm_(mat& S, List& elst, umat& emat, int& nobs,
       if (print>=3)
 	Rprintf(">>> ncd mno : %14.10f\n", mno);
       conv_check = mno;
-      if (iter2 < max_visits){ // Then K is posdef	
+
+      if (iter2 <= max_visits){ // Then K is posdef	
 	logL = ggm_logL_(S, K2, nobs);
 	gap  = duality_gap_(Sigma, K2, nobs);
 	K    = K2;
       } else {
 	REprintf("Algorithm may not have converged\n");
-	// K = NA; upper_limit_logL = formel (23)
+	// K = NA; upper_limit_logL = formel (23)// FIXME
       }
       itcount = iter1 + iter2;  
       break;
