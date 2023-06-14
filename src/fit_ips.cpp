@@ -112,8 +112,8 @@ List conips_ggm_(arma::mat& S, List& elst, umat& emat, int& nobs,
 
   int n_upd = n_gen;
 
-  int max_visits = n_gen * maxit;
-
+  double max_visits = n_gen * (double) maxit, n_visits=0;
+  
   double eps1 = 2 * eps / nobs; 
 
   List elst0 = clone(elst);
@@ -128,7 +128,6 @@ List conips_ggm_(arma::mat& S, List& elst, umat& emat, int& nobs,
   }  
   // END - Variables for CONIPS only  
 
-  int n_visits = 0;
   INIT_CONVERGENCE_CHECK;
     
   while(true){  
@@ -147,7 +146,7 @@ List conips_ggm_(arma::mat& S, List& elst, umat& emat, int& nobs,
       if (print>=3){
 	// mno   = mnorm_one_(Delta);
 	logL  = ggm_logL_(S, K, nobs);
-	Rprintf(">>> conips count: %4d max_visits: %7d n_visits: %7d n_upd: %5d maxabs: %10.6f eps: %8.6f, logL: %10.6f\n",
+	Rprintf(">>> conips count: %4d max_visits: %7.0f n_visits: %7.0f n_upd: %5d maxabs: %10.6f eps: %8.6f, logL: %10.6f\n",
 		count, max_visits, n_visits, n_upd, maxabs, eps1, logL);
 	
       }
@@ -174,12 +173,9 @@ List conips_ggm_(arma::mat& S, List& elst, umat& emat, int& nobs,
     _["conv_check"] = conv_check);				
 }
 
-  
-
 // ------------------------------------------------------------------
 // ------ COVIPS - Fast iterative proportional scaling          -------
 // ------------------------------------------------------------------
-
 
 void covips_update_parm_(const uvec& cc0, const mat& Scc, mat& K, mat& Sigma,
 			 const mat& Scc_inv, int print=0)
@@ -208,8 +204,6 @@ List covips_inner_(const mat& S, mat& K, const List& elst0,
   }
   return List::create(_["iter"] = 1);
 }
-
-
 
 
 void covips_update_parm0_(const uvec& cc0, const mat& Scc, mat& K, mat& Sigma,
@@ -257,7 +251,7 @@ void covips_inner0_(mat& S, mat& K, List& elst0,
 List covips_outer0_(mat& S, mat& K, List& elst0, mat& Sigma,
 		    List& Scc_lst, List& Scci_lst,
 		    int& nobs, umat& emat_c,
-		    int& n_upd, int& max_visits, int& n_visits, double eps=0.01, int print=0){
+		    int& n_upd, double& max_visits, double& n_visits, double eps=0.01, int print=0){
 
   int count = 0, n_edges = elst0.length();
   double logL;
@@ -266,19 +260,16 @@ List covips_outer0_(mat& S, mat& K, List& elst0, mat& Sigma,
     covips_inner0_(S=S, K=K, elst0=elst0, Sigma=Sigma,
   		  Scc_lst=Scc_lst, Scci_lst=Scci_lst,
   		  n_upd=n_upd, eps=eps, print=print);
-    n_visits += n_upd; // FIXME like this?
+    n_visits += n_upd; 
     ++count;    
     if (print>=3){
       logL = ggm_logL_(S, K, nobs);  
-
-      Sigma = inv_qr_(K); // Needed for conips only
+      Sigma = inv_qr_(K); 
       mat dif   = S - Sigma;
       mat Delta = project_onto_G_(dif, emat_c);
       double maxabs = mnorm_maxabs_(Delta);
-      // double mno   = mnorm_one_(Delta);
-      Rprintf(">>> covips count: %4d max_visits: %7d n_visits: %7d n_upd: %5d maxabs: %10.6f eps: %8.6f, logL: %10.6f\n",
+      Rprintf(">>> covips count: %4d max_visits: %7.0f n_visits: %7.0f n_upd: %6d maxabs: %10.6f eps: %8.6f, logL: %10.6f\n",
 	      count, max_visits, n_visits, n_upd, maxabs, eps, logL);
-
     }
 
     if ((n_visits >= max_visits) || (n_upd <= 0)) break;
@@ -297,8 +288,12 @@ List covips_ggm_(mat& S, List& elst, umat& emat, int& nobs,
   int version      = aux["version"];
   double logL, logLp, conv_check=9999, gap=-1.0, mno, maxabs;
   int n_edges  = emat.n_cols, n_vars = S.n_cols, n_gen =elst.length();
-  int max_visits = n_gen * maxit, n_visits=0;
 
+  double max_visits = n_gen * (double) maxit, n_visits=0;
+
+
+  Rprintf("max_visits: %f n_gen: %d\n maxit: %d\n", max_visits, n_gen, maxit);
+  
   int iter1=0, iter2=0, itcount=0, n_upd=0;
   
   double nparm = n_vars + n_edges;
@@ -339,17 +334,6 @@ List covips_ggm_(mat& S, List& elst, umat& emat, int& nobs,
   logL    = ggm_logL_(S, K, nobs);  
   RETURN_VALUE;
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
   // if (print>=2)
