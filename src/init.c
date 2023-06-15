@@ -32,6 +32,7 @@ extern SEXP _gRips_list2row_(void *, void *);
 extern SEXP _gRips_list_names_(void *);
 extern SEXP _gRips_list_to_emat(void *, void *);
 extern SEXP _gRips_make_clist_(void *, void *);
+extern SEXP _gRips_makec(void *, void *);
 extern SEXP _gRips_max_abs_(void *);
 extern SEXP _gRips_max_abs_diag_(void *);
 extern SEXP _gRips_max_abs_diag_diff_(void *, void *);
@@ -88,6 +89,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_gRips_list_names_",                  (DL_FUNC) &_gRips_list_names_,                   1},
     {"_gRips_list_to_emat",                 (DL_FUNC) &_gRips_list_to_emat,                  2},
     {"_gRips_make_clist_",                  (DL_FUNC) &_gRips_make_clist_,                   2},
+    {"_gRips_makec",                        (DL_FUNC) &_gRips_makec,                         2},
     {"_gRips_max_abs_",                     (DL_FUNC) &_gRips_max_abs_,                      1},
     {"_gRips_max_abs_diag_",                (DL_FUNC) &_gRips_max_abs_diag_,                 1},
     {"_gRips_max_abs_diag_diff_",           (DL_FUNC) &_gRips_max_abs_diag_diff_,            2},

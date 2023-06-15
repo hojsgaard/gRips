@@ -125,6 +125,10 @@ make_clist_ <- function(S, edges) {
     .Call('_gRips_make_clist_', PACKAGE = 'gRips', S, edges)
 }
 
+makec <- function(cc, d) {
+    .Call('_gRips_makec', PACKAGE = 'gRips', cc, d)
+}
+
 Scc_list_ <- function(S, edges0) {
     .Call('_gRips_Scc_list_', PACKAGE = 'gRips', S, edges0)
 }

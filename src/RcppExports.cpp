@@ -719,6 +719,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// makec
+int_vec makec(int_vec cc, int d);
+RcppExport SEXP _gRips_makec(SEXP ccSEXP, SEXP dSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int_vec >::type cc(ccSEXP);
+    Rcpp::traits::input_parameter< int >::type d(dSEXP);
+    rcpp_result_gen = Rcpp::wrap(makec(cc, d));
+    return rcpp_result_gen;
+END_RCPP
+}
 // Scc_list_
 List Scc_list_(const mat& S, const List& edges0);
 RcppExport SEXP _gRips_Scc_list_(SEXP SSEXP, SEXP edges0SEXP) {

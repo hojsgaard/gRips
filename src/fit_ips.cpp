@@ -44,6 +44,19 @@ List make_clist_(arma::mat& S, List& edges){
   return clist;
 }
 
+// [[Rcpp::export]]
+int_vec makec(int_vec cc, int d){
+  uvec cc_   = as<uvec>(cc);
+  uvec uc_   = arma::linspace<arma::uvec>(0, d - 1, d);
+  uc_.shed_rows(cc_);
+  int_vec out = as<int_vec>(uc_);
+  // irowvec out = conv_to<irowvec>::from(uc_);
+  // int_vec out = wrap(uc_);
+  return out;
+}
+
+
+
 //[[Rcpp::export]]
 List Scc_list_(const mat& S, const List& edges0){
   List out(edges0.length());
@@ -100,20 +113,17 @@ List conips_ggm_(arma::mat& S, List& elst, umat& emat, int& nobs,
 
   int version      = aux["version"];  
   double logL, logLp, conv_check=9999, gap=-1.0;
-//  double conv_ref; // FIXME needed??
   int count  = 0;
   double nparm = S.n_cols + emat.n_cols;  
   umat emat0   = emat - 1;
   umat emat_c  = as_emat_complement_(emat-1, S.n_rows);
-  double mno, maxabs;
+  double maxabs;
   mat Sigma, dif, Delta;
 
-  int n_edges  = emat.n_cols, n_vars = S.n_cols, n_gen=elst.length();
-
+  int n_gen=elst.length();
   int n_upd = n_gen;
 
-  double max_visits = n_gen * (double) maxit, n_visits=0;
-  
+  double max_visits = n_gen * (double) maxit, n_visits=0;  
   double eps1 = 2 * eps / nobs; 
 
   List elst0 = clone(elst);
@@ -136,21 +146,18 @@ List conips_ggm_(arma::mat& S, List& elst, umat& emat, int& nobs,
 
     switch(convcrit){
     case 1: 
-      Sigma = inv_qr_(K); // Needed for conips only
-      dif   = S - Sigma;
-      Delta = project_onto_G_(dif, emat_c);
+      Sigma  = inv_qr_(K); // Needed for conips only
+      dif    = S - Sigma;
+      Delta  = project_onto_G_(dif, emat_c);
       maxabs = mnorm_maxabs_(Delta);
       conv_check = maxabs;
-      n_visits += n_upd;
+      n_visits  += n_upd;
 
       if (print>=3){
-	// mno   = mnorm_one_(Delta);
 	logL  = ggm_logL_(S, K, nobs);
 	Rprintf(">>> conips count: %4d max_visits: %7.0f n_visits: %7.0f n_upd: %5d maxabs: %10.6f eps: %8.6f, logL: %10.6f\n",
-		count, max_visits, n_visits, n_upd, maxabs, eps1, logL);
-	
+		count, max_visits, n_visits, n_upd, maxabs, eps1, logL);	
       }
-      // PRINT_CONV_CHECK1;
       break;
     case 2:
       CONV_CHECK_LOGL_DIFF;
@@ -181,16 +188,15 @@ void covips_update_parm_(const uvec& cc0, const mat& Scc, mat& K, mat& Sigma,
 			 const mat& Scc_inv, int print=0)
 {  
   mat Sigmacc  = Sigma.submat(cc0, cc0);
-  mat Kcc, Kupd, Haux;
+  mat Kcc, Kupd, Haux, B;
   mat Kstar    = inv(Sigmacc);
   
   Kcc      = K.submat(cc0, cc0);	
   Kupd     = Scc_inv + Kcc - Kstar;
-  Haux     = Kstar - Kstar * Scc * Kstar;  
-
   K.submat(cc0, cc0)  = Kupd;
-  mat B = Sigma.cols(cc0);
-  Sigma -= B * Haux * B.t();  
+  Haux     = Kstar - Kstar * Scc * Kstar;  
+  B        = Sigma.cols(cc0);
+  Sigma   -= B * Haux * B.t();  
 }
 
 // Update all edges once
@@ -223,10 +229,10 @@ void covips_update_parm0_(const uvec& cc0, const mat& Scc, mat& K, mat& Sigma,
     mat Kstar = inv(Sigmacc);
     Kcc      = K.submat(cc0, cc0);	
     Kupd     = Scc_inv + Kcc - Kstar;
-    Haux     = Kstar - Kstar * Scc * Kstar;  
     K.submat(cc0, cc0) = Kupd;
-    mat B  = Sigma.cols(cc0);
-    Sigma -= B * Haux * B.t();
+    Haux     = Kstar - Kstar * Scc * Kstar;  
+    B        = Sigma.cols(cc0);
+    Sigma   -= B * Haux * B.t();
     n_upd++;
   } else {
     if (print>=4)    
@@ -253,20 +259,19 @@ List covips_outer0_(mat& S, mat& K, List& elst0, mat& Sigma,
 		    int& nobs, umat& emat_c,
 		    int& n_upd, double& max_visits, double& n_visits, double eps=0.01, int print=0){
 
-  int count = 0, n_edges = elst0.length();
-  double logL;
+  int count = 0;
   
   while(true){
     covips_inner0_(S=S, K=K, elst0=elst0, Sigma=Sigma,
-  		  Scc_lst=Scc_lst, Scci_lst=Scci_lst,
-  		  n_upd=n_upd, eps=eps, print=print);
+		   Scc_lst=Scc_lst, Scci_lst=Scci_lst,
+		   n_upd=n_upd, eps=eps, print=print);
     n_visits += n_upd; 
     ++count;    
     if (print>=3){
-      logL = ggm_logL_(S, K, nobs);  
-      Sigma = inv_qr_(K); 
-      mat dif   = S - Sigma;
-      mat Delta = project_onto_G_(dif, emat_c);
+      Sigma        = inv_qr_(K);
+      double logL  = ggm_logL_(S, K, nobs);  
+      mat dif      = S - Sigma;
+      mat Delta    = project_onto_G_(dif, emat_c);
       double maxabs = mnorm_maxabs_(Delta);
       Rprintf(">>> covips count: %4d max_visits: %7.0f n_visits: %7.0f n_upd: %6d maxabs: %10.6f eps: %8.6f, logL: %10.6f\n",
 	      count, max_visits, n_visits, n_upd, maxabs, eps, logL);
@@ -285,18 +290,13 @@ List covips_ggm_(mat& S, List& elst, umat& emat, int& nobs,
 	       mat& K,       
 	       int& maxit, double& eps, int& convcrit, int& print, List& aux){
 
+  
   int version      = aux["version"];
-  double logL, logLp, conv_check=9999, gap=-1.0, mno, maxabs;
-  int n_edges  = emat.n_cols, n_vars = S.n_cols, n_gen =elst.length();
-
+  double logL, logLp, conv_check=9999, gap=-1.0, maxabs;
+  int n_vars = S.n_cols, n_gen =elst.length();
+  int iter1=0, itcount=0, n_upd=0;
   double max_visits = n_gen * (double) maxit, n_visits=0;
-
-
-  Rprintf("max_visits: %f n_gen: %d\n maxit: %d\n", max_visits, n_gen, maxit);
   
-  int iter1=0, iter2=0, itcount=0, n_upd=0;
-  
-  double nparm = n_vars + n_edges;
   umat emat0   = emat - 1;  
   umat emat_c  = as_emat_complement_(emat-1, n_vars);
   mat Sigma, dif, Delta;  
@@ -334,6 +334,42 @@ List covips_ggm_(mat& S, List& elst, umat& emat, int& nobs,
   logL    = ggm_logL_(S, K, nobs);  
   RETURN_VALUE;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   // if (print>=2)

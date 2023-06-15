@@ -98,8 +98,8 @@ void update_K_row_(int u, mat& Sigma, mat& K, const mat& amat, int print=0){
     uvec u_    = {(unsigned int) u};    
     uvec ub_   = find(amat.rows(u_) > 0); // Returns column vector      
     uvec uc_   = arma::linspace<arma::uvec>(0, K.n_cols - 1, K.n_cols);
-    int  deg_u = accu(amat.rows(u_));
     uc_.shed_rows(u_);
+    int  deg_u = accu(amat.rows(u_));
     if (print >= 4){
       Rprintf(">>>> Updating K for u=%i with degree %i\n", u, deg_u);
       Rprintf(">>>> ub_: ");  ub_.t().print();
@@ -160,13 +160,12 @@ List ncd_outer1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat,
   
   double conv_check, mno;
   mat Sigma_prev = diagmat(Sigma.diag());
-  int n_vars = Sigma.n_rows, count=0;
-  int n_upd = n_vars;
+  int n_vars = Sigma.n_rows, count=0, n_upd = n_vars;
   
   while (true) {
     ncd_inner1_update_Sigma_(Sigma=Sigma, amat=amat, nobs=nobs, print=print);
     mat Delta = Sigma - Sigma_prev;
-    mno = mnorm_one_(Delta);
+    mno       = mnorm_one_(Delta);
     n_visits += n_upd;
     count++;
 
