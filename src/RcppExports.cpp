@@ -719,15 +719,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// makec
-int_vec makec(int_vec cc, int d);
-RcppExport SEXP _gRips_makec(SEXP ccSEXP, SEXP dSEXP) {
+// make_complement_
+int_vec make_complement_(int_vec cc, int d, int shift);
+RcppExport SEXP _gRips_make_complement_(SEXP ccSEXP, SEXP dSEXP, SEXP shiftSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< int_vec >::type cc(ccSEXP);
     Rcpp::traits::input_parameter< int >::type d(dSEXP);
-    rcpp_result_gen = Rcpp::wrap(makec(cc, d));
+    Rcpp::traits::input_parameter< int >::type shift(shiftSEXP);
+    rcpp_result_gen = Rcpp::wrap(make_complement_(cc, d, shift));
+    return rcpp_result_gen;
+END_RCPP
+}
+// make_complement_list_
+List make_complement_list_(List gen_lst, int d, int shift);
+RcppExport SEXP _gRips_make_complement_list_(SEXP gen_lstSEXP, SEXP dSEXP, SEXP shiftSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< List >::type gen_lst(gen_lstSEXP);
+    Rcpp::traits::input_parameter< int >::type d(dSEXP);
+    Rcpp::traits::input_parameter< int >::type shift(shiftSEXP);
+    rcpp_result_gen = Rcpp::wrap(make_complement_list_(gen_lst, d, shift));
     return rcpp_result_gen;
 END_RCPP
 }

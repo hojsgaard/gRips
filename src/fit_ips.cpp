@@ -45,16 +45,24 @@ List make_clist_(arma::mat& S, List& edges){
 }
 
 // [[Rcpp::export]]
-int_vec makec(int_vec cc, int d){
+int_vec make_complement_(int_vec cc, int d, int shift=0){
+  uvec uc_   = arma::linspace<arma::uvec>(1, d, d);
   uvec cc_   = as<uvec>(cc);
-  uvec uc_   = arma::linspace<arma::uvec>(0, d - 1, d);
-  uc_.shed_rows(cc_);
-  int_vec out = as<int_vec>(uc_);
-  // irowvec out = conv_to<irowvec>::from(uc_);
-  // int_vec out = wrap(uc_);
+  uc_.shed_rows(cc_-1);
+  int_vec out = IntegerVector(uc_.begin(), uc_.end());
   return out;
 }
 
+// [[Rcpp::export]]
+List make_complement_list_(List gen_lst, int d, int shift=0){
+  List out = List(gen_lst.length());
+  for (int i=0; i<gen_lst.length(); i++){
+    int_vec cc = gen_lst[i];
+    int_vec comp = make_complement_(cc, d, shift);
+    out[i] = comp;
+  }
+  return out;
+}
 
 
 //[[Rcpp::export]]
@@ -132,7 +140,8 @@ List conips_ggm_(arma::mat& S, List& elst, umat& emat, int& nobs,
   }
   
   // Variables for CONIPS only
-  List clist0 = make_clist_(S, elst);  
+  // List clist0 = make_clist_(S, elst);  
+  List clist0 = make_complement_list_(elst, S.n_rows);  
   for (int i=0; i<elst.length(); i++){
     clist0[i] = as<arma::uvec>(clist0[i]) - 1; // 0-based			     
   }  
