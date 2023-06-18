@@ -21,14 +21,15 @@ Sig <- solve(KK)
 EE <- structure(c(1L, 2L, 2L, 3L, 1L, 4L, 3L, 4L), .Dim = c(2L, 4L),
                 .Dimnames = list(NULL, NULL))
 
-test_that("convergence", {
-    expect_equal(max_abs           (SS),                 max_abs_           (SS))
-    expect_equal(max_abs_diag      (SS),                 max_abs_diag_      (SS))
-    expect_equal(max_abs_diag_diff (SS, Sig),            max_abs_diag_diff_ (SS, Sig))
-    expect_equal(max_diag_diff     (SS, Sig),            max_diag_diff_     (SS, Sig))
-    expect_equal(max_abs_diff_on_emat (Sig, SS, EE),     max_abs_diff_on_emat_ (SS, Sig, EE))
-    expect_equal(max_diff_on_emat     (Sig, SS, EE),     max_diff_on_emat_     (SS, Sig, EE))
-    expect_equal(max_abs_diff_on_EK(Sig, SS, EE, KK),    max_abs_diff_on_EK_(SS, Sig, EE, KK))    
-})
+## test_that("convergence", {
+##     expect_equal(max_abs           (SS),                 max_abs_           (SS))
+##     expect_equal(max_abs_diag      (SS),                 max_abs_diag_      (SS))
+##     expect_equal(max_abs_diag_diff (SS, Sig),            max_abs_diag_diff_ (SS, Sig))
+##     expect_equal(max_diag_diff     (SS, Sig),            max_diag_diff_     (SS, Sig))
+##     expect_equal(max_abs_diff_on_emat (Sig, SS, EE),     max_abs_diff_on_emat_ (SS, Sig, EE))
+##     expect_equal(max_diff_on_emat     (Sig, SS, EE),     max_diff_on_emat_     (SS, Sig, EE))
+##     expect_equal(max_abs_diff_on_EK(Sig, SS, EE, KK),    max_abs_diff_on_EK_(SS, Sig, EE, KK))    
+## }
+##)
 
 

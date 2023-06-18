@@ -7,8 +7,23 @@ typedef Rcpp::IntegerVector   int_vec;
 typedef Rcpp::CharacterVector chr_vec;
 
 const int erp=0; // ERROR PRINTING
-
 #define as_num(cc) NumericVector(cc.begin(), cc.end())
+
+// ------------------------------------------------------------------
+// General utilities - not directly related to but used by gRips.
+// ------------------------------------------------------------------
+
+SEXP clone_(SEXP& x);
+chr_vec list_names_(List lst);
+mat as_emat2amat_(umat emat, int d);
+umat as_emat_complement_(umat emat, int d);
+
+
+// ---------------------------------------------------------------------
+// *** gRips utilities ***
+// ---------------------------------------------------------------------
+
+
 
 bool has_full_rank_(mat& Delta, double eps); // FIXME
 double get_mev(mat& Delta);

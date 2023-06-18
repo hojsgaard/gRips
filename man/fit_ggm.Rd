@@ -6,11 +6,11 @@
 \usage{
 fit_ggm(
   S,
-  edges = NULL,
+  formula = NULL,
   nobs,
   K = NULL,
   maxit = 10000L,
-  eps = 1e-06,
+  eps = 0.01,
   convcrit = 1,
   aux = list(),
   method = "covips",
@@ -20,7 +20,7 @@ fit_ggm(
 \arguments{
 \item{S}{Sample covariance matrix.}
 
-\item{edges}{Generators of model; a list of integer vectors or a 2
+\item{formula}{Generators of model; a list of integer vectors or a 2
 x p matrix of integers.}
 
 \item{nobs}{Number of observations}
@@ -64,16 +64,14 @@ em <- matrix(c(1,2, 2,3, 1,3, 3,4, 3,5, 4,5), nrow=2)
 
 EPS = 1e-2
 
-cg = fit_ggm(S, gl, nobs=nobs, eps=EPS, method="cov")
-ci = fit_ggm(S, gl, nobs=nobs, eps=EPS, method="con")
-rg = fit_ggm(S, gl, nobs=nobs, eps=EPS, method="cov", aux=list(engine="R"))
-ri = fit_ggm(S, gl, nobs=nobs, eps=EPS, method="con", aux=list(engine="R"))
+fit_cov = fit_ggm(S, gl, nobs=nobs, eps=EPS, method="cov")
+fit_con = fit_ggm(S, gl, nobs=nobs, eps=EPS, method="con")
+fit_ncd = fit_ggm(S, gl, nobs=nobs, eps=EPS, method="ncd")
 
 K <- solve(S)
-(ci$K - K)  \%>\% abs \%>\% max
-(cg$K - K)  \%>\% abs \%>\% max
-(ri$K - K)  \%>\% abs \%>\% max
-(rg$K - K)  \%>\% abs \%>\% max
+(fit_con$K - K)  |> abs() |> max()
+(fit_cov$K - K)  |> abs() |> max()
+(fit_ncd$K - K)  |> abs() |> max()
 
 }
 \author{

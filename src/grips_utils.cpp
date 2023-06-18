@@ -1,5 +1,5 @@
 #include "RcppArmadillo.h"
-#include "general_utils.h"
+// #include "general_utils.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -7,6 +7,49 @@ using namespace arma;
 typedef Rcpp::NumericVector   num_vec;
 typedef Rcpp::IntegerVector   int_vec;
 typedef Rcpp::CharacterVector chr_vec;
+
+// ------------------------------------------------------------------
+// General utilities - not directly related to but used by gRips.
+// ------------------------------------------------------------------
+
+
+//[[Rcpp::export(.c_clone)]]
+SEXP clone_(SEXP& x)
+{
+  SEXP x2 = clone(x);
+  return(x2);
+}
+
+//[[Rcpp::export]]
+chr_vec list_names_(List lst){
+  chr_vec out(0);
+  if (lst.length() > 0)
+    out = as<chr_vec>(lst.names());
+  return out;
+}
+
+//[[Rcpp::export]]
+mat as_emat2amat_(umat emat, int d){
+  mat amat = zeros(d, d);
+  uvec eids = sub2ind(size(amat), emat);
+  vec vals = ones(emat.n_cols, 1);
+  amat(eids) = vals;  
+  amat = amat + amat.t();
+  return amat;
+}
+
+//[[Rcpp::export]]
+umat as_emat_complement_(umat emat, int d){
+
+  mat amat = as_emat2amat_(emat, d);
+  amat = amat - 1;
+  amat = trimatl(amat);
+  amat.diag().zeros();
+  uvec indices = find(amat < 0);
+  umat ematc   = ind2sub(size(amat), indices);
+  return ematc;  
+}
+
 
 // ---------------------------------------------------------------------
 // *** gRips utilities ***
@@ -100,27 +143,7 @@ double ggm_logL_(mat& S, mat& K, int nobs)
   return logL;
 }
 
-// FIXME: Bruges i en macro, men det er meget gammelt
 
-// double get_conv_ref(const List& aux){
-//   CharacterVector vn = list_names_(aux);
-//   if (vn.length()){
-//     if (find_str_("conv_ref", vn) < 0)
-//       stop("'conv_ref' not found in 'aux'");
-//   }
-//   double out = as<double>(aux["conv_ref"]);
-//   return out;
-// }
-
-
-// int method2int_(CharacterVector method){
-//   CharacterVector options =
-//     CharacterVector::create("ips", "mtp2", "lasso", "hybrid");
-  
-//   IntegerVector m =  match(method, options) - 1;
-//   int v = (int) m[0];
-//   return v;
-// }
 
 
 

@@ -1,8 +1,8 @@
 #include "RcppArmadillo.h"
 #include "grips_utils.h"
-#include "general_utils.h"
+// #include "general_utils.h"
 #include "arma_utils.h"
-#include "convergence.h"
+// #include "convergence.h"
 #include "precision.h"
 #include <iostream>
 #include <vector>
@@ -29,20 +29,20 @@ typedef Rcpp::CharacterVector chr_vec;
 // ------ IPS - Classical iterative proportional scaling -------
 // -------------------------------------------------------------
 
-// Create list with complements to components in edges.
-// [[Rcpp::export]]
-List make_clist_(arma::mat& S, List& edges){
-  int_vec idx = seq(1, S.n_rows);
-  // Rcout << idx << std::endl;
-  List clist = List(edges.length());
-  for (int i=0; i<edges.length(); i++){
-    int_vec cc = edges[i];
-    int_vec aa = setdiff(idx, cc);
-    clist[i] = aa;
-  }
-  // Rf_PrintValue(wrap(edges));   Rf_PrintValue(wrap(clist));
-  return clist;
-}
+// // Create list with complements to components in edges.
+// // [[Rcpp::export]]
+// List make_clist_(arma::mat& S, List& edges){
+//   int_vec idx = seq(1, S.n_rows);
+//   // Rcout << idx << std::endl;
+//   List clist = List(edges.length());
+//   for (int i=0; i<edges.length(); i++){
+//     int_vec cc = edges[i];
+//     int_vec aa = setdiff(idx, cc);
+//     clist[i] = aa;
+//   }
+//   // Rf_PrintValue(wrap(edges));   Rf_PrintValue(wrap(clist));
+//   return clist;
+// }
 
 // [[Rcpp::export]]
 int_vec make_complement_(int_vec cc, int d, int shift=0){
@@ -63,7 +63,6 @@ List make_complement_list_(List gen_lst, int d, int shift=0){
   }
   return out;
 }
-
 
 //[[Rcpp::export]]
 List Scc_list_(const mat& S, const List& edges0){
@@ -104,12 +103,11 @@ void conips_inner_(arma::mat& S, arma::mat& K,
   List Scc_inv_list = Scc_inv_list_(S, edges0);
 
   // Rcout << "conips_inner started" << std::endl;
-  for (int i=0; i < edges0.length(); i++)
-    {    
-      uvec cc0 = (edges0[i]), aa0 = (clist0[i]);
-      mat Scc_inv = Scc_inv_list[i];
-      conips_ggm_update_cc_parm_(S, K, cc0, aa0, Scc_inv, print);
-    } 
+  for (int i=0; i < edges0.length(); i++) {    
+    uvec cc0 = (edges0[i]), aa0 = (clist0[i]);
+    mat Scc_inv = Scc_inv_list[i];
+    conips_ggm_update_cc_parm_(S, K, cc0, aa0, Scc_inv, print);
+  } 
   // Rcout << "conips_inner done" << std::endl;
 }
 
@@ -210,8 +208,7 @@ void covips_update_parm_(const uvec& cc0, const mat& Scc, mat& K, mat& Sigma,
 
 // Update all edges once
 List covips_inner_(const mat& S, mat& K, const List& elst0,
-		   mat& Sigma, List& Scc_lst, List& Scci_lst, int print=0)
-{
+		   mat& Sigma, List& Scc_lst, List& Scci_lst, int print=0){
   for (int i=0; i < elst0.length(); ++i){
     uvec cc0 = elst0[i];
     covips_update_parm_(cc0, Scc_lst[i], K, Sigma, Scci_lst[i],
@@ -223,8 +220,7 @@ List covips_inner_(const mat& S, mat& K, const List& elst0,
 
 void covips_update_parm0_(const uvec& cc0, const mat& Scc, mat& K, mat& Sigma,
 			  const mat& Scc_inv,
-			  int& n_upd, double eps=0.01, int print=0)
-{
+			  int& n_upd, double eps=0.01, int print=0){
   
   mat Sigmacc  = Sigma.submat(cc0, cc0);
   mat Kcc, Kupd, Haux, B, dd;
@@ -252,8 +248,7 @@ void covips_update_parm0_(const uvec& cc0, const mat& Scc, mat& K, mat& Sigma,
 // Update only some edges
 void covips_inner0_(mat& S, mat& K, List& elst0,
 		    mat& Sigma, List& Scc_lst, List& Scci_lst,
-		    int& n_upd, double eps=0.01, int print=0)
-{
+		    int& n_upd, double eps=0.01, int print=0){
   n_upd = 0;
   for (int i=0; i < elst0.length(); ++i){
     uvec cc0 = elst0[i];
@@ -299,7 +294,6 @@ List covips_ggm_(mat& S, List& elst, umat& emat, int& nobs,
 	       mat& K,       
 	       int& maxit, double& eps, int& convcrit, int& print, List& aux){
 
-  
   int version      = aux["version"];
   double logL, logLp, conv_check=9999, gap=-1.0, maxabs;
   int n_vars = S.n_cols, n_gen =elst.length();
@@ -310,8 +304,8 @@ List covips_ggm_(mat& S, List& elst, umat& emat, int& nobs,
   umat emat_c  = as_emat_complement_(emat-1, n_vars);
   mat Sigma, dif, Delta;  
   List res1, res2;
-
   List elst0 = clone(elst);  
+
   for (int i=0; i < elst.length(); i++) {
     elst0[i] = as<arma::uvec>(elst0[i]) - 1; // 0-based
   }
@@ -337,9 +331,7 @@ List covips_ggm_(mat& S, List& elst, umat& emat, int& nobs,
   maxabs = mnorm_maxabs_(Delta);
   conv_check = maxabs;
 
-  itcount = iter1;
-  itcount = itcount / n_gen;
-    
+  itcount = iter1 / n_gen;    
   logL    = ggm_logL_(S, K, nobs);  
   RETURN_VALUE;
 }

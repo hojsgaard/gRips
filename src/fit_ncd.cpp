@@ -1,8 +1,8 @@
 #include "RcppArmadillo.h"
 #include "grips_utils.h"
-#include "general_utils.h"
+// #include "general_utils.h"
 #include "arma_utils.h"
-#include "convergence.h"
+// #include "convergence.h"
 #include "precision.h"
 #include <iostream>
 #include <vector>

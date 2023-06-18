@@ -23,6 +23,9 @@
 \alias{logLik.gips_fit_class}
 \alias{AIC.gips_fit_class}
 \alias{BIC.gips_fit_class}
+\alias{sigma.gips_fit_class}
+\alias{concentration}
+\alias{concentration.gips_fit_class}
 \alias{print.gips_fit_class}
 \alias{summary.gips_fit_class}
 \alias{glance.gips_fit_class}
@@ -69,6 +72,12 @@ as_sparse(K)
 \method{AIC}{gips_fit_class}(object, ..., k = 2)
 
 \method{BIC}{gips_fit_class}(object, ...)
+
+\method{sigma}{gips_fit_class}(object, ...)
+
+concentration(object, ...)
+
+\method{concentration}{gips_fit_class}(object, ...)
 
 \method{print}{gips_fit_class}(x, ...)
 
