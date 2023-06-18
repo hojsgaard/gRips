@@ -457,6 +457,29 @@ BIC.gips_fit_class <- function(object, ...){
     -2 * as.numeric(ll) + log(attr(ll, "nobs")) * attr(ll, "nparm")    
 }
 
+#' @method sigma gips_fit_class
+#' @export
+#' @rdname utilities
+sigma.gips_fit_class <- function(object, ...) {
+    object$Sigma
+}
+
+#' @export
+#' @rdname utilities
+concentration <- function(object, ...) {
+    UseMethod("concentration")
+}
+
+#' @method concentration gips_fit_class
+#' @export
+#' @rdname utilities
+concentration.gips_fit_class <- function(object, ...) {
+    object$K
+}
+
+
+
+
 #' @export
 #' @rdname utilities
 print.gips_fit_class <- function(x, ...){

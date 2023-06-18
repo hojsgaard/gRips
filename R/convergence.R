@@ -77,38 +77,38 @@ max_abs_diff_on_EK <- function(Sigma, S, E, K){
 ##
 ## ##############################################
 
-.does_model_fit_to_data_ips <- function(EE, parm, data, eps){
-    d <- max_abs_diff_on_emat_(data, parm$Sigma, EE)
-    s <- max(abs(diag(data))) 
-    out <- d < s * eps
-    ##cat(sprintf(".does_model_fit_to_data_ips (R) d=%15e, s=%15e, out=%i\n", d, s, out))
-    out
-}
+## .does_model_fit_to_data_ips <- function(EE, parm, data, eps){
+##     d <- max_abs_diff_on_emat_(data, parm$Sigma, EE)
+##     s <- max(abs(diag(data))) 
+##     out <- d < s * eps
+##     ##cat(sprintf(".does_model_fit_to_data_ips (R) d=%15e, s=%15e, out=%i\n", d, s, out))
+##     out
+## }
 
-.does_model_fit_to_data_mtp2 <- function(EE, parm, data, eps){
-    ## cat(".does_model_fit_to_data_mtp2\n")
-    d1 <- max_diff_on_emat_(data, parm$Sigma, EE) 
-    d2 <- max_abs_diff_on_EK_(data, parm$Sigma, EE, parm$K)
-    out <- !((d1 > 0) || (d2 > eps)) 
-    ##cat(sprintf(".does_model_fit_to_data_mtp2 (R) d1=%15e, d2=%15e, out=%i\n", d1, d2, out))
-    out
-}
+## .does_model_fit_to_data_mtp2 <- function(EE, parm, data, eps){
+##     ## cat(".does_model_fit_to_data_mtp2\n")
+##     d1 <- max_diff_on_emat_(data, parm$Sigma, EE) 
+##     d2 <- max_abs_diff_on_EK_(data, parm$Sigma, EE, parm$K)
+##     out <- !((d1 > 0) || (d2 > eps)) 
+##     ##cat(sprintf(".does_model_fit_to_data_mtp2 (R) d1=%15e, d2=%15e, out=%i\n", d1, d2, out))
+##     out
+## }
 
-.does_model_fit_to_data_lasso <- function(EE, parm, data, eps){
-    cat("## NOT IMPLEMENTED\n")
-}
+## .does_model_fit_to_data_lasso <- function(EE, parm, data, eps){
+##     cat("## NOT IMPLEMENTED\n")
+## }
 
-.does_model_fit_to_data_hybrid <- function(EE, parm, data, eps){
-    cat("## NOT IMPLEMENTED\n")
-}
+## .does_model_fit_to_data_hybrid <- function(EE, parm, data, eps){
+##     cat("## NOT IMPLEMENTED\n")
+## }
 
-.does_model_fit_to_data <- function(EE, parm, data, eps, method){
-    switch(method,
-           "ips"    ={.does_model_fit_to_data_ips   (EE, parm, data, eps)},
-           "mtp2"   ={.does_model_fit_to_data_mtp2  (EE, parm, data, eps)},
-           "lasso"  ={.does_model_fit_to_data_lasso (EE, parm, data, eps)},
-           "hybrid" ={.does_model_fit_to_data_hybrid(EE, parm, data, eps)})
-}
+## .does_model_fit_to_data <- function(EE, parm, data, eps, method){
+##     switch(method,
+##            "ips"    ={.does_model_fit_to_data_ips   (EE, parm, data, eps)},
+##            "mtp2"   ={.does_model_fit_to_data_mtp2  (EE, parm, data, eps)},
+##            "lasso"  ={.does_model_fit_to_data_lasso (EE, parm, data, eps)},
+##            "hybrid" ={.does_model_fit_to_data_hybrid(EE, parm, data, eps)})
+## }
 
 ## ##############################################
 ##
@@ -117,38 +117,38 @@ max_abs_diff_on_EK <- function(Sigma, S, E, K){
 ## ##############################################
 
 
-.does_edge_fit_to_data_ips <- function(cc, parm, data, eps){
-    ##cat(".does_edge_fit_to_data_ips:  edge : ", toString(cc), "\n")
-    d <- max(abs(parm$Sigma[cc, cc] - data[cc, cc]))
-    d < eps
-}
+## .does_edge_fit_to_data_ips <- function(cc, parm, data, eps){
+##     ##cat(".does_edge_fit_to_data_ips:  edge : ", toString(cc), "\n")
+##     d <- max(abs(parm$Sigma[cc, cc] - data[cc, cc]))
+##     d < eps
+## }
 
-.does_edge_fit_to_data_mtp2 <- function(cc, parm, data, eps){
-    ##cat(".does_edge_fit_to_data_mtp2:  edge : ", toString(cc), "\n")
-    dif <- data[cc, cc] - parm$Sigma[cc, cc]
-    d1 <- max(dif)
-    d2 <- max(abs(dif) * parm$K[cc, cc])
-    out <- !(d1 > 0 || d2 > eps)
-    ## cat(sprintf(".does_edge_fit_to_data_mtp2 (R) d1=%15e, d2=%15e, out=%i\n",
-    ##             d1, d2, out))
-    out
-}
+## .does_edge_fit_to_data_mtp2 <- function(cc, parm, data, eps){
+##     ##cat(".does_edge_fit_to_data_mtp2:  edge : ", toString(cc), "\n")
+##     dif <- data[cc, cc] - parm$Sigma[cc, cc]
+##     d1 <- max(dif)
+##     d2 <- max(abs(dif) * parm$K[cc, cc])
+##     out <- !(d1 > 0 || d2 > eps)
+##     ## cat(sprintf(".does_edge_fit_to_data_mtp2 (R) d1=%15e, d2=%15e, out=%i\n",
+##     ##             d1, d2, out))
+##     out
+## }
 
-.does_edge_fit_to_data_lasso <- function(cc, parm, data, eps){
-    cat("## NOT IMPLEMENTED\n")
-}
+## .does_edge_fit_to_data_lasso <- function(cc, parm, data, eps){
+##     cat("## NOT IMPLEMENTED\n")
+## }
 
-.does_edge_fit_to_data_hybrid <- function(cc, parm, data, eps){
-    cat("## NOT IMPLEMENTED\n")
-}
+## .does_edge_fit_to_data_hybrid <- function(cc, parm, data, eps){
+##     cat("## NOT IMPLEMENTED\n")
+## }
 
-.does_edge_fit_to_data <- function(cc, parm, data, eps, method){
-    switch(method,
-           "ips"   ={.does_edge_fit_to_data_ips   (cc, parm, data, eps)},
-           "mtp2"  ={.does_edge_fit_to_data_mtp2  (cc, parm, data, eps)},
-           "lasso" ={.does_edge_fit_to_data_lasso (cc, parm, data, eps)},
-           "hybrid"={.does_edge_fit_to_data_hybrid(cc, parm, data, eps)})  
-}
+## .does_edge_fit_to_data <- function(cc, parm, data, eps, method){
+##     switch(method,
+##            "ips"   ={.does_edge_fit_to_data_ips   (cc, parm, data, eps)},
+##            "mtp2"  ={.does_edge_fit_to_data_mtp2  (cc, parm, data, eps)},
+##            "lasso" ={.does_edge_fit_to_data_lasso (cc, parm, data, eps)},
+##            "hybrid"={.does_edge_fit_to_data_hybrid(cc, parm, data, eps)})  
+## }
 
 
 

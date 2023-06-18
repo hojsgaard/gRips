@@ -69,62 +69,6 @@ extract_uv_ <- function(M, u, v, shift = 1L) {
     .Call('_gRips_extract_uv_', PACKAGE = 'gRips', M, u, v, shift)
 }
 
-max_abs_ <- function(S) {
-    .Call('_gRips_max_abs_', PACKAGE = 'gRips', S)
-}
-
-max_abs_diag_ <- function(S) {
-    .Call('_gRips_max_abs_diag_', PACKAGE = 'gRips', S)
-}
-
-max_abs_diff_rel_ <- function(S, Sigma) {
-    .Call('_gRips_max_abs_diff_rel_', PACKAGE = 'gRips', S, Sigma)
-}
-
-max_abs_diff_ <- function(S, Sigma) {
-    .Call('_gRips_max_abs_diff_', PACKAGE = 'gRips', S, Sigma)
-}
-
-max_abs_diag_diff_ <- function(S, Sigma) {
-    .Call('_gRips_max_abs_diag_diff_', PACKAGE = 'gRips', S, Sigma)
-}
-
-max_diag_diff_ <- function(S, Sigma) {
-    .Call('_gRips_max_diag_diff_', PACKAGE = 'gRips', S, Sigma)
-}
-
-diff_on_emat_ <- function(S, Sigma, E, shift = 1L) {
-    .Call('_gRips_diff_on_emat_', PACKAGE = 'gRips', S, Sigma, E, shift)
-}
-
-diff_on_elst_ <- function(S, Sigma, E, shift = 1L) {
-    .Call('_gRips_diff_on_elst_', PACKAGE = 'gRips', S, Sigma, E, shift)
-}
-
-max_abs_diff_on_emat_ <- function(Sigma, S, E, shift = 1L) {
-    .Call('_gRips_max_abs_diff_on_emat_', PACKAGE = 'gRips', Sigma, S, E, shift)
-}
-
-mean_abs_diff_on_emat_ <- function(Sigma, S, E, shift = 1L) {
-    .Call('_gRips_mean_abs_diff_on_emat_', PACKAGE = 'gRips', Sigma, S, E, shift)
-}
-
-max_abs_diff_on_elst_ <- function(Sigma, S, E, shift = 1L) {
-    .Call('_gRips_max_abs_diff_on_elst_', PACKAGE = 'gRips', Sigma, S, E, shift)
-}
-
-mean_abs_diff_on_elst_ <- function(Sigma, S, E, shift = 1L) {
-    .Call('_gRips_mean_abs_diff_on_elst_', PACKAGE = 'gRips', Sigma, S, E, shift)
-}
-
-max_diff_on_emat_ <- function(Sigma, S, E) {
-    .Call('_gRips_max_diff_on_emat_', PACKAGE = 'gRips', Sigma, S, E)
-}
-
-make_clist_ <- function(S, edges) {
-    .Call('_gRips_make_clist_', PACKAGE = 'gRips', S, edges)
-}
-
 make_complement_ <- function(cc, d, shift = 0L) {
     .Call('_gRips_make_complement_', PACKAGE = 'gRips', cc, d, shift)
 }
@@ -161,28 +105,12 @@ ncd_outer1_ <- function(Sigma, K, emat, emat_c, amat, nobs, eps, max_visits, n_v
     .Call('_gRips_ncd_ggm_', PACKAGE = 'gRips', S, elst, emat, nobs, K, maxit, eps, convcrit, print, aux)
 }
 
-unique_rows <- function(m) {
-    .Call('_gRips_unique_rows', PACKAGE = 'gRips', m)
-}
-
-unique_cols <- function(m) {
-    .Call('_gRips_unique_cols', PACKAGE = 'gRips', m)
-}
-
 .c_clone <- function(x) {
     .Call('_gRips_clone_', PACKAGE = 'gRips', x)
 }
 
 list_names_ <- function(lst) {
     .Call('_gRips_list_names_', PACKAGE = 'gRips', lst)
-}
-
-find_str_ <- function(st, x) {
-    .Call('_gRips_find_str_', PACKAGE = 'gRips', st, x)
-}
-
-list_to_emat <- function(lst, shift = 1L) {
-    .Call('_gRips_list_to_emat', PACKAGE = 'gRips', lst, shift)
 }
 
 as_emat2amat_ <- function(emat, d) {
@@ -211,14 +139,6 @@ mnorm_maxabs_ <- function(Delta) {
 
 ggm_logL_ <- function(S, K, nobs) {
     .Call('_gRips_ggm_logL_', PACKAGE = 'gRips', S, K, nobs)
-}
-
-list2row_ <- function(input_list, d = 2L) {
-    .Call('_gRips_list2row_', PACKAGE = 'gRips', input_list, d)
-}
-
-list2col_ <- function(input_list, d = 2L) {
-    .Call('_gRips_list2col_', PACKAGE = 'gRips', input_list, d)
 }
 
 # Register entry points for exported C++ functions

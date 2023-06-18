@@ -29,7 +29,7 @@
 
         switch(convcrit,
                "1" = {
-                   conv_check = mean_abs_diff_on_emat_(S, parm$Sigma, emat, 1)
+                   conv_check = mean_abs_diff_on_emat(S, parm$Sigma, emat)
                },
                "2" = {
                    logL = ggm_logL_(S, K=parm$K, nobs=nobs)
@@ -133,7 +133,7 @@ get_inner_function <- function(edges){
             
             switch(convcrit,
                    "1" = {
-                       conv_check = mean_abs_diff_on_emat_(S, solve_fun(K), emat, 1)
+                       conv_check = mean_abs_diff_on_emat(S, solve_fun(K), emat)
                    },
                    "2" = {
                        logL = ggm_logL_(S, K=K, nobs=nobs)

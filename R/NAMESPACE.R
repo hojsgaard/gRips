@@ -2,7 +2,7 @@
 #'
 #' @importFrom Rcpp evalCpp
 #'
-#' @importFrom stats cov cov2cor logLik cov.wt AIC BIC coef nobs rnorm
+#' @importFrom stats cov cov2cor logLik cov.wt AIC BIC coef nobs rnorm sigma
 #'
 #' @importMethodsFrom stats4 plot
 #' @exportMethod plot
