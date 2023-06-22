@@ -349,9 +349,10 @@ List ncd_ggm_(mat& S, List& elst, umat& emat, int& nobs,
     _["Sigma"] = Sigma,						
     _["logL"]  = logL,						
     _["iter"]  = itcount,					
-    _["gap"]   = gap,						
-    _["version"] = version,
-    _["converged"] = converged, 
+    _["gap"]   = gap,
+    _["mev"]   = mev,
+    _["version"]    = version,
+    _["converged"]  = converged, 
     _["conv_check"] = conv_check);				
   
 }

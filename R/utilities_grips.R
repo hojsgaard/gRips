@@ -505,10 +505,9 @@ print.gips_fit_class <- function(x, ...){
 
 #' @export
 #' @rdname utilities
-summary.gips_fit_class <- function(object, ...){
+summary.gips_fit_class <- function(object, ...) {
     xx <- as.data.frame(object$details)
     xx$engine <- NULL
-
     xx$ncore <- NULL
     ## xx$tpi <- with(xx, time / iter)
     ## xx$tpe <- with(xx, time / (dim-idim))
@@ -517,8 +516,8 @@ summary.gips_fit_class <- function(object, ...){
 
 #' @export
 #' @rdname utilities
-glance.gips_fit_class <- function(x, ...){
-    as.data.frame(x$details)
+glance.gips_fit_class <- function(x, ...) {
+    as.data.frame(x$details) 
 }
 
 

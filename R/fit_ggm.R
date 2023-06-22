@@ -198,6 +198,10 @@ formula2glist <- function(glist) {
     if (is.null(out$converged))
         out$converged = TRUE
 
+    if (is.null(out$mev))
+        out$mev = NA
+
+    
     if (out$converged) {
         trKS = sum(out$K * S)
         logL = out$logL
@@ -223,7 +227,8 @@ formula2glist <- function(glist) {
         trKS   = trKS,
         logL   = logL,
         conv   = conv,
-        dgap   = dgap       
+        dgap   = dgap,
+        mev    = out$mev
     )
     out$time <- out$iter <- out$eps <- NULL
     out$dim  <- out$diff <- NULL
@@ -235,10 +240,6 @@ formula2glist <- function(glist) {
 }
 
 
-#' @export
-summary.gips_fit_class <- function(object, ...) {
-    unlist(object[c("dim", "time", "iter", "edgevisit", "diff")])
-}
 
 
 get_init_parm <- function(S, K) {
