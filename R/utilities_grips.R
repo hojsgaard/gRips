@@ -1,3 +1,12 @@
+#' Fast computation of covariance / correlation matrix
+#'
+#' @param x a numeric matrix(like object).
+#' @param center,scale Should columns in x be centered and/or scaled
+#' @export
+fast_cov <- function(x, center=TRUE, scale=TRUE){
+    A <- scale(x, center=center, scale=scale) |> crossprod()
+    return(A / (nrow(x) - 1))
+}
 
 #' Genrate matrix of N(0, 1) variables
 #'

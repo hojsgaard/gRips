@@ -277,6 +277,7 @@ List ncd_ggm_(mat& S, List& elst, umat& emat, int& nobs,
     Rprintf(">> ncd_outer1 visits : %d\n", iter1);
 
   double mev = get_mev(Sigma);
+  Rprintf("mev: %f\n", mev);
   if (mev > eps2){
     converged = true;
     K = inv_qr_(Sigma);
@@ -333,8 +334,8 @@ List ncd_ggm_(mat& S, List& elst, umat& emat, int& nobs,
       break;
       
     default:
-      Rprintf("'version' must be 0, 1\n");
-    }    
+      Rprintf("'version' must be 0, 1\n");  
+    }
   } else {
     logL       = -1;
     conv_check = -1;
