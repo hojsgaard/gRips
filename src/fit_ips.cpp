@@ -94,7 +94,8 @@ inline void conips_ggm_update_cc_parm_(mat& S, mat& K, uvec& cc0, uvec& aa0, mat
   mat Kca=K.submat(cc0, aa0);    
   mat Kac=K.submat(aa0, cc0);    
   // mat L = Kca * inv(Kaa) * Kac;
-  K.submat(cc0, cc0) = Scc_inv + Kca * inv_qr_(Kaa) * Kac;
+  // K.submat(cc0, cc0) = Scc_inv + Kca * inv_qr_(Kaa) * Kac;
+  K.submat(cc0, cc0) = Scc_inv + Kca * solve(Kaa, Kac);
 }
 
 void conips_inner_(arma::mat& S, arma::mat& K,
