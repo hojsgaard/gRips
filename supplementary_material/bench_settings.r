@@ -3,10 +3,37 @@
 ##' # Gaussian graphical models""
 ##' 
 ##' # Copyright: Søren Højsgaard and Steffen Lauritzen
+##'
+##' Notice: Running these scripts on a 64 cores linux platform takes
+##' about 34 hours. 
 ##' --------------------------------------------------------------------------
 
-## Notice: Running these scripts on a 64 cores linux platform takes
-## about 34 hours.
+##' design: (either of 1,2,3; i.e. 1 = the design in the paper, 2 = a small
+##' (and fast) design and 3 = a larger (and slower) design)
+
+design <- 2 
+
+##' table: Which table(s) to genrate ## (a subset of c(1, 2, 3))
+##' 
+table  <- 2 
+
+##' Global settings
+EPS = 1e-3  
+
+
+## #####################################################
+## NEED NOT TOUCH ANYTHING BELOW HERE 
+## #####################################################
+
+##' ## SET VARIABLES TO BE USED IN SCRIPTS
+use <- c("design_paper",   ## Settings generating data in paper
+         "design_small",  ## Small settings for testing purposes
+         "design_medium"   ## Larger settings for testing purposes
+         )[design]
+
+##' ## SET TABLES TO CREATE
+scripts_used <- c("bench1a.r", "bench2a.r", "bench3a.r")[table]
+
 
 library(gRbase)
 library(doBy)
@@ -22,28 +49,12 @@ library(pander)
 library(RhpcBLASctl)
 library(gRips)
 
-##' ## SET VARIABLES TO BE USED IN SCRIPTS
-use <- c("settings_paper",   ## Settings generating data in paper
-         "settings_test_1",  ## Small settings for testing purposes
-         "settings_test_2"   ## Larger settings for testing purposes
-         )[1]
-
-##' ## SET TABLES TO CREATE
-scripts_used <- c("bench1a.r", "bench2a.r", "bench3a.r")[3]
-
-##' ## Global settings
-EPS = 1e-3  
-
-## #####################################################
-## NEED NOT TOUCH ANYTHING BELOW HERE 
-## #####################################################
-
 ENG = "cpp"
 
 
 ##' ## Dimensions etc for paper
-settings_paper <- list(
-    NAME = "settings_paper", EPS = EPS, ENG = ENG, 
+design_paper <- list(
+    NAME = "design_paper", EPS = EPS, ENG = ENG, 
     NVAR_FIX        = 100,          
     NVAR_VEC        = c(50, 100),
     PROB_VEC        = c(0.1, 0.30, 0.50, 0.70),
@@ -55,8 +66,8 @@ settings_paper <- list(
 )
 
 ##' ## Dimensions etc for testing script file (small)
-settings_test_1 <- list(
-    NAME = "settings_test_1", EPS = EPS, ENG = ENG, 
+design_small <- list(
+    NAME = "design_small", EPS = EPS, ENG = ENG, 
     NVAR_FIX         = 25,
     NVAR_VEC         = c(25, 50),
     PROB_VEC         = c(0.1, 0.30, 0.50, 0.70),
@@ -67,9 +78,9 @@ settings_test_1 <- list(
     TREE_USE         = c(50, 100, 200, 400, 600)
 )
 
-##' ## Dimensions etc for testing script file (larger)
-settings_test_2 <- list(
-    NAME = "settings_test_2", EPS = EPS, ENG = ENG,     
+##' ## Dimensions etc for testing script file (medium)
+design_medium <- list(
+    NAME = "design_medium", EPS = EPS, ENG = ENG,     
     NVAR_FIX         = 50,
     NVAR_VEC         = c(50, 100),
     PROB_VEC         = c(0.1, 0.30, 0.50, 0.70),
@@ -80,20 +91,20 @@ settings_test_2 <- list(
     TREE_USE         = 2 * c(50, 100, 200, 400, 600)
 )
 
-settings_used <-
-    list(settings_test_1=settings_test_1,
-         settings_test_2=settings_test_2,
-         settings_paper=settings_paper)[[use]]
+design_used <-
+    list(design_small=design_small,
+         design_medium=design_medium,
+         design_paper=design_paper)[[use]]
 
-NVAR_VEC     = settings_used$NVAR_VEC
-PROB_VEC     = settings_used$PROB_VEC
-NVAR_FIX     = settings_used$NVAR_FIX
-NMOD         = settings_used$NMOD
-GRID_SCALING = settings_used$GRID_SCALING
-TREE_NMOD    = settings_used$TREE_NMOD
-TREE_PROB    = settings_used$TREE_PROB
-TREE_UPPER   = settings_used$TREE_UPPER
-TREE_USE     = settings_used$TREE_USE
+NVAR_VEC     = design_used$NVAR_VEC
+PROB_VEC     = design_used$PROB_VEC
+NVAR_FIX     = design_used$NVAR_FIX
+NMOD         = design_used$NMOD
+GRID_SCALING = design_used$GRID_SCALING
+TREE_NMOD    = design_used$TREE_NMOD
+TREE_PROB    = design_used$TREE_PROB
+TREE_UPPER   = design_used$TREE_UPPER
+TREE_USE     = design_used$TREE_USE
 
 names(NVAR_VEC)  = paste0("nvar_", NVAR_VEC)
 names(PROB_VEC)  = paste0("prob_", PROB_VEC)
@@ -101,9 +112,8 @@ names(PROB_VEC)  = paste0("prob_", PROB_VEC)
 blas_set_num_threads(1)
 omp_set_num_threads(1)
 
-options("mc.cores"=parallel::detectCores() / 1,
+options("mc.cores"=parallel::detectCores(),
         "digits"=4, "width"=200)
-## options(scipen=999) ## Avoid exponential notation
 
 ##' ## output files
 RDFILE1 <- "result_table1" 
