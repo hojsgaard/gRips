@@ -23,7 +23,7 @@ local_scripts_used   <- file.path(.RES_DIR, scripts_used)
 cat(sprintf(".t.start: %s\n",.t.start))
 
 save(.t.start,      file=file.path(.RES_DIR, "t.start.RData"))
-save(settings_used, scripts_used,
+save(design_used, scripts_used,
      file=file.path(.RES_DIR, "settings_used.RData"))
 
 parallel::mclapply(local_scripts_used,

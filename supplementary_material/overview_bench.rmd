@@ -42,7 +42,7 @@ for (i in 1:length(rf)){
     cat(toString(scripts_used), "\n")
     pander::pander(scripts_used)
     cat("\n#### settings : \n\n")
-    ss <- settings_used  |> lapply(paste0, collapse=" ")
+    ss <- design_used  |> lapply(paste0, collapse=" ")
     ss <- as.data.frame(unlist(ss))
     names(ss) <- "value"
     cat(pander::pander(ss))    

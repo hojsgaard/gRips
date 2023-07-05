@@ -27,7 +27,7 @@ knitr::opts_chunk$set(echo=FALSE)
 ## Scripts:
 scripts_used
 ## Settings
-settings_used |> str()
+design_used |> str()
 ```
 
 ```{r}
