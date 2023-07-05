@@ -13,7 +13,7 @@
 
 design <- 2 
 
-##' table: Which table(s) to genrate ## (a subset of c(1, 2, 3))
+##' table: Which table(s) to generate ## (a subset of c(1, 2, 3))
 ##' 
 table  <- 2 
 
@@ -22,7 +22,7 @@ EPS = 1e-3
 
 
 ## #####################################################
-## NEED NOT TOUCH ANYTHING BELOW HERE 
+## PLEASE DO NOT CHANGE ANYTHING BELOW HERE 
 ## #####################################################
 
 ##' ## SET VARIABLES TO BE USED IN SCRIPTS
