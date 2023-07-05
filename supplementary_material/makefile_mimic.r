@@ -2,7 +2,7 @@ args = commandArgs(trailingOnly=TRUE)
 xtra <- paste0(args, collapse = "_")
 
 .RES_DIR     <- tempdir()
-file.remove(list.files(.RES_DIR, full=T))
+##file.remove(list.files(.RES_DIR, full=T))
 cat(".RES_DIR: ", .RES_DIR, "\n")
 
 ## WHICH SETTINGS TO USE
