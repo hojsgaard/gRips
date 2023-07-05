@@ -45,7 +45,6 @@ BiocManager::install(c("gRbase", "gRain", "gRim"), force=TRUE)
 ##' d): Install the necessary packages by running the following lines
 
 pkg.list <- c(
-    "gRbase",
     "doBy",
     "tidyverse",
     "knitr",
@@ -53,6 +52,7 @@ pkg.list <- c(
     "kableExtra",
     "dplyr",
     "tidyr",
+    "rmarkdown",
     "glue",
     "pander",
     "remotes",
