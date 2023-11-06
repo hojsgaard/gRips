@@ -19,7 +19,6 @@ Imports:
     Matrix,
     magrittr,    
     Rcpp (>= 0.12.0),
-    Rgraphviz,
     stats4
 Suggests:
     testthat (>= 2.1.0),
