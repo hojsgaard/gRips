@@ -23,7 +23,7 @@
 #' @importFrom magrittr "%>%"
 #' @export "%>%"
 #' 
-#' @importMethodsFrom Rgraphviz plot
+## #' @importMethodsFrom Rgraphviz plot
 #'
 #' @importFrom igraph erdos.renyi.game get.edgelist coreness
 #'
