@@ -251,7 +251,9 @@ List ncd_ggm_(mat& S, List& elst, umat& emat, int& nobs,
   int max_visits = n_vars * maxit, n_visits = 0;
   
   umat emat_c = as_emat_complement_(emat-1, n_vars);
-  mat amat    = as_emat2amat_(emat-1, n_vars);
+  // mat amat    = as_emat2amat_(emat-1, n_vars);
+  mat amat = aux["amat"];
+  // amat.print();
   mat Sigma   = S, K2, Delta;
   List res1, res2;
   double logL, gap=-1.0, conv_check, eps2, mno;
@@ -276,8 +278,9 @@ List ncd_ggm_(mat& S, List& elst, umat& emat, int& nobs,
   if (print>=2)
     Rprintf(">> ncd_outer1 visits : %d\n", iter1);
 
+  // FIXME mev
   double mev = get_mev(Sigma);
-  Rprintf("mev: %f\n", mev);
+  // Rprintf("mev: %f\n", mev);
   if (mev > eps2){
     converged = true;
     K = inv_qr_(Sigma);
