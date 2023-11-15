@@ -64,11 +64,14 @@ void update_Sigma_row_(int u, mat& Sigma, const mat& amat, int nobs, int print=0
     mat s_u   = Sigma.cols(u_);
     vec s_ubu = s_u.rows(ub_);
 
-    if (deg_u > nobs - 1){
-      beta_star = pinv(AA) * s_ubu;       // Rprintf("using pinv\n");
-    } else {
-      beta_star = solve(AA, s_ubu);       // Rprintf("using solve\n");      
-    }
+    // if (deg_u > nobs - 1){
+    //   beta_star = pinv(AA) * s_ubu;       // Rprintf("using pinv\n");
+    // } else {
+    //   beta_star = solve(AA, s_ubu);       // Rprintf("using solve\n");      
+    // }
+
+    beta_star = solve(AA, s_ubu);       // Rprintf("using solve\n");
+      
     w = Sigma.cols(ub_) * beta_star;
   }
 
