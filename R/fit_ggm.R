@@ -53,7 +53,7 @@ check_coreness <- function(emat, d, nobs){
     ig <- as_emat2igraph(emat, d)
     max_coreness <- max(coreness(ig))
     if (max_coreness >= (nobs - 1)) {  ## FIXME: evt nobs-2 (for det er antal frihedsgrader -1)
-        stop(glue("Max coreness ({max_coreness}) is larger or equal nobs ({nobs}) minus one; mle may not exist.\n"))
+        stop(glue("Max coreness ({max_coreness}) is larger than or equal nobs ({nobs}) minus one; mle may not exist.\n"))
     }
     max_coreness
 }
@@ -80,9 +80,9 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
 
     max_coreness <- check_coreness(emat, nrow(S), nobs)
     
-    S <- smart_start(S, amat)
+    S <- smart_start(S, amat) ### sl kommentar. Kun i ncd, ikke for de andre. 
     
-    max_coreness <- check_coreness(emat, nrow(S), nobs)
+    
 
     switch(method,
            "sncd" = {ver=0; method="ncd"},
