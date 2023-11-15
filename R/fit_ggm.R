@@ -49,6 +49,15 @@
 #'
 NULL
 
+check_coreness <- function(emat, d, nobs){   
+    ig <- as_emat2igraph(emat, d)
+    max_coreness <- max(coreness(ig))
+    if (max_coreness >= (nobs - 1)) {  ## FIXME: evt nobs-2 (for det er antal frihedsgrader -1)
+        stop(glue("Max coreness ({max_coreness}) is larger or equal nobs ({nobs}) minus one; mle may not exist.\n"))
+    }
+    max_coreness
+}
+
 #' @rdname fit_ggm
 #' @export
 fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convcrit=1, aux=list(),
@@ -60,15 +69,18 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
     method_str <- method
     
     formula <- parse_formula(formula, nrow(S))
-
     elst  <- formula2glist(formula)
     emat  <- as_elist2emat(elst)
-    
-    ig <- as_emat2igraph(emat, nrow(S))
-    max_coreness <- max(coreness(ig))
-    if (max_coreness >= (nobs - 1)) {  ## FIXME: evt nobs-2 (for det er antal frihedsgrader -1)
-        stop(glue("Max coreness ({max_coreness}) is larger or equal nobs ({nobs}) minus one; mle may not exist.\n"))
+    amat  <- as_emat2amat(emat, d=nrow(S))
+    ## str(list(formula=formula, elst=elst, emat=emat, amat=amat))
+
+    if (any(abs(diag(S)-1) > 1e-8)){
+        S <- cov2cor(S)
     }
+
+    S <- smart_start(S, amat)
+    
+    max_coreness <- check_coreness(emat, nrow(S), nobs)
 
     switch(method,
            "sncd" = {ver=0; method="ncd"},
@@ -76,8 +88,9 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
            "covips"={ver=0},
            "conips"={ver=0}
            )
-    
+
     aux0 <- list(method  = method,
+                 amat    = amat,
                  version = ver,                 
                  engine  = "cpp")
     
@@ -92,6 +105,7 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
         }
     }
     Ks <- .c_clone(K)
+
     t0 <- .get.time()
     comb <- paste0(engine, "_", method)
     switch(comb,
