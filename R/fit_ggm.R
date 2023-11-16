@@ -82,8 +82,8 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
     deg <- rowSums(amat)
     maxdeg <- max(deg)
     
-    if ((identical(method,"ncd"))&& (maxdeg>nobs-1)){
-       S <- smart_start(S, amat) 
+    if ((identical(method,"ncd"))&& (maxde g>= nobs-1)){
+       S <- sweep_start(S, amat,eps=eps) 
     }
 
     switch(method,
