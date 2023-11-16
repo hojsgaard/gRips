@@ -79,10 +79,12 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
     }
 
     max_coreness <- check_coreness(emat, nrow(S), nobs)
+    deg <- rowSums(amat)
+    maxdeg <- max(deg)
     
-    S <- smart_start(S, amat) ### sl kommentar. Kun i ncd, ikke for de andre. 
-    
-    
+    if ((identical(method,"ncd"))&& (maxdeg>nobs-1)){
+       S <- smart_start(S, amat) 
+    }
 
     switch(method,
            "sncd" = {ver=0; method="ncd"},
