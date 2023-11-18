@@ -206,7 +206,18 @@ sweep_start <- function(S, amat, f,eps=1e-8) {
 }
 
 
-
+auto_start <- function(S, good, amat) {
+  d <- nrow(amat)
+  Sigma <- S
+  
+  for (i in good)
+  {
+    b <- get_bd(1:d, i, amat)
+    
+    Sigma <- update_(Sigma, i, b)
+  }
+  return(Sigma)
+}
 
 
 

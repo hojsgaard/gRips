@@ -79,14 +79,28 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
     }
 
     max_coreness <- check_coreness(emat, nrow(S), nobs)
+    
     deg <- rowSums(amat)
     maxdeg <- max(deg)
     
-    if ((identical(method,"ncd"))&& (maxdeg>= nobs-1)){
-       ## S <- sweep_start(S, amat,eps=eps,f=nobs-1)
-      S <- smart_start(S, amat)
+    if ((identical(method, "ncd")) && (maxdeg >= nobs - 1)) {
+      df <- nobs - 1
+      d <- nrow(S)
+      good <- 1:d
+      good <- good[deg < df]
+      
+      if (length(good) >= d - df) {
+        print("autostart")
+        S = auto_start(S, good, amat)
+      }
+      else{
+        ## S <- sweep_start(S, amat,eps=eps,f=nobs-1)
+        S <- smart_start(S, amat)
+        print("smartstart")
+      }
+      
     }
-
+    
     switch(method,
            "sncd" = {ver=0; method="ncd"},
            "ncd"  = {ver=1},
