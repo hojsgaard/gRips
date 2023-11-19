@@ -53,36 +53,36 @@ small_last <- function(amat, f) {
               b=b))
 }
 
-
-
-smallest_last_ordering <- function(adj_matrix) {
-  # Calculate the degrees of each node (number of neighbors)
-  degrees <- rowSums(adj_matrix)
-  
-  ## Initialize an empty vector to store the smallest-last ordering
-  ordering <- numeric(length = ncol(adj_matrix))
-  passive <- numeric(length = ncol(adj_matrix))
-  
-  for (i in 1:length(ordering)) {
-    ## Find the node with the smallest degree
-    degrees
-    smallest_degree_node <- which(degrees == min(degrees))[1]
-    smallest_degree_node
-    
-    ## Update the ordering and remove the node and its edges
-    ordering[i] <- smallest_degree_node
-    adj_matrix[smallest_degree_node,] <- 0
-    adj_matrix[,smallest_degree_node] <- 0
-    degrees <- rowSums(adj_matrix)
-    degrees[smallest_degree_node] <- Inf  # Set the degree of the removed node to Inf
-    passive[smallest_degree_node] <- Inf
-    degrees <- degrees + passive
-    ## str(list(passive=passive, degrees=degrees, ordering=ordering))
-    
-  }
-  
-  return(rev(ordering))
-}
+# 
+# 
+# smallest_last_ordering <- function(adj_matrix) {
+#   # Calculate the degrees of each node (number of neighbors)
+#   degrees <- rowSums(adj_matrix)
+#   
+#   ## Initialize an empty vector to store the smallest-last ordering
+#   ordering <- numeric(length = ncol(adj_matrix))
+#   passive <- numeric(length = ncol(adj_matrix))
+#   
+#   for (i in 1:length(ordering)) {
+#     ## Find the node with the smallest degree
+#     degrees
+#     smallest_degree_node <- which(degrees == min(degrees))[1]
+#     smallest_degree_node
+#     
+#     ## Update the ordering and remove the node and its edges
+#     ordering[i] <- smallest_degree_node
+#     adj_matrix[smallest_degree_node,] <- 0
+#     adj_matrix[,smallest_degree_node] <- 0
+#     degrees <- rowSums(adj_matrix)
+#     degrees[smallest_degree_node] <- Inf  # Set the degree of the removed node to Inf
+#     passive[smallest_degree_node] <- Inf
+#     degrees <- degrees + passive
+#     ## str(list(passive=passive, degrees=degrees, ordering=ordering))
+#     
+#   }
+#   
+#   return(rev(ordering))
+# }
 
 smallest_first_ordering <- function(adj_matrix) {
   # Calculate the degrees of each node (number of neighbors)
@@ -126,7 +126,7 @@ small_first <- function(amat) {
 }
 
 
-smart_start <- function(S, amat) {
+full_start <- function(S, amat) {
   d <- nrow(amat)
   tmp <- small_first(amat)
   S2 <- S[tmp$sfo, tmp$sfo]
@@ -140,73 +140,73 @@ smart_start <- function(S, amat) {
 
 
 
+# 
+# symsweep <- function (V, b, eps = 1e-8)
+# {
+#   out <- matrix(0, nrow(V), nrow(V))
+#   dimnames(out) <- dimnames(V)
+#   Saa <- V[-b,-b, drop = FALSE]
+#   Sab <- V[-b, b, drop = FALSE]
+#   Sba <- V[b,-b, drop = FALSE]
+#   Sbb <- V[b, b, drop = TRUE]
+#   
+#   
+#   if (abs(Sbb) > eps) {
+#     Sbbi = -1 / Sbb
+#     
+#     B <- Sba * Sbbi
+#     out[-b,-b] <- Saa + Sab %*% B
+#     
+#     C <- Sba * abs(Sbbi)
+#     out[-b, b] <- t(C)
+#     out[b,-b] <- C
+#     out[b, b] <- Sbbi
+#     return(out)
+#   } else
+#     return(V)
+# }
+# 
+# 
+# 
+# push <- function(Sigma, b, f,eps=1e-8) {
+#   d <- nrow(Sigma)
+#   Sigma2 <- Sigma
+#   for (i in d:(f+2)){
+#     tmp <- symsweep(Sigma2[1:i, 1:i, drop=FALSE], i,eps=eps)
+#     Sigma2[1:i, 1:i] <- tmp
+#     tmp2 <- update_(Sigma2[1:(i-1), 1:(i-1)], (i-1), b[[i-1]]) ## A, u, b
+#     Sigma2[1:(i-1), 1:(i-1)] <- tmp2
+#   }
+#   return(Sigma2)
+# }
+# 
+# 
+# pull <- function(Sigma, f,eps=1e-8) {
+#   d <- nrow(Sigma)
+#   Sigma2 <- Sigma    
+#   for (i in (f+2):d) {
+#     tmp <- symsweep(Sigma2[1:i, 1:i, drop=FALSE], i,eps=eps)
+#     Sigma2[1:i, 1:i] <- tmp        
+#   }
+#   return(Sigma2)    
+# }
+# 
+# 
+# sweep_start <- function(S, amat, f,eps=1e-8) {
+#   d <- nrow(amat)
+#   tmp <- small_last(amat, f=f)
+#   S2 <- S[tmp$slo, tmp$slo]
+#   Sigma2 <- update_(S2, d, tmp$b[[d]])
+#   #Sigma  <- Sigma2[tmp$slo_inv, tmp$slo_inv]
+#   if (f < d - 1) {
+#     Sigma2 <- push(Sigma2, tmp$b, f,eps=eps)
+#     Sigma2 <- pull(Sigma2,  f, eps=eps)
+#   }
+#   return(Sigma2[tmp$slo_inv,tmp$slo_inv])
+# }
 
-symsweep <- function (V, b, eps = 1e-8)
-{
-  out <- matrix(0, nrow(V), nrow(V))
-  dimnames(out) <- dimnames(V)
-  Saa <- V[-b,-b, drop = FALSE]
-  Sab <- V[-b, b, drop = FALSE]
-  Sba <- V[b,-b, drop = FALSE]
-  Sbb <- V[b, b, drop = TRUE]
-  
-  
-  if (abs(Sbb) > eps) {
-    Sbbi = -1 / Sbb
-    
-    B <- Sba * Sbbi
-    out[-b,-b] <- Saa + Sab %*% B
-    
-    C <- Sba * abs(Sbbi)
-    out[-b, b] <- t(C)
-    out[b,-b] <- C
-    out[b, b] <- Sbbi
-    return(out)
-  } else
-    return(V)
-}
 
-
-
-push <- function(Sigma, b, f,eps=1e-8) {
-  d <- nrow(Sigma)
-  Sigma2 <- Sigma
-  for (i in d:(f+2)){
-    tmp <- symsweep(Sigma2[1:i, 1:i, drop=FALSE], i,eps=eps)
-    Sigma2[1:i, 1:i] <- tmp
-    tmp2 <- update_(Sigma2[1:(i-1), 1:(i-1)], (i-1), b[[i-1]]) ## A, u, b
-    Sigma2[1:(i-1), 1:(i-1)] <- tmp2
-  }
-  return(Sigma2)
-}
-
-
-pull <- function(Sigma, f,eps=1e-8) {
-  d <- nrow(Sigma)
-  Sigma2 <- Sigma    
-  for (i in (f+2):d) {
-    tmp <- symsweep(Sigma2[1:i, 1:i, drop=FALSE], i,eps=eps)
-    Sigma2[1:i, 1:i] <- tmp        
-  }
-  return(Sigma2)    
-}
-
-
-sweep_start <- function(S, amat, f,eps=1e-8) {
-  d <- nrow(amat)
-  tmp <- small_last(amat, f=f)
-  S2 <- S[tmp$slo, tmp$slo]
-  Sigma2 <- update_(S2, d, tmp$b[[d]])
-  #Sigma  <- Sigma2[tmp$slo_inv, tmp$slo_inv]
-  if (f < d - 1) {
-    Sigma2 <- push(Sigma2, tmp$b, f,eps=eps)
-    Sigma2 <- pull(Sigma2,  f, eps=eps)
-  }
-  return(Sigma2[tmp$slo_inv,tmp$slo_inv])
-}
-
-
-auto_start <- function(S, good, amat) {
+quick_start <- function(S, good, amat) {
   d <- nrow(amat)
   Sigma <- S
   

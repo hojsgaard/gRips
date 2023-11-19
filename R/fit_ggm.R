@@ -60,6 +60,7 @@ check_coreness <- function(emat, d, nobs){
 
 #' @rdname fit_ggm
 #' @export
+
 fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convcrit=1, aux=list(),
                     method="covips", print=0) {
     t0 <- .get.time()
@@ -74,11 +75,20 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
     amat  <- as_emat2amat(emat, d=nrow(S))
     ## str(list(formula=formula, elst=elst, emat=emat, amat=amat))
 
+    
+    #### SL COMMENT: THIS SHOULD ALWAYS BE DONE AND THEN RESULT SCALED BACK. OTHERWISE THE PROCEDURES ARE NOT SCALEINVARIANT
+    
     if (any(abs(diag(S)-1) > 1e-8)){
         S <- cov2cor(S)
     }
 
+    #### SL COMMENT: TIMING SHOULD BEGIN HERE AS STARTVALUE  AND CORENESS CHECK ALSO TAKES TIME. MAYBE OK TO EXCLUDE CORENESS CHECK
+    
     max_coreness <- check_coreness(emat, nrow(S), nobs)
+    
+    
+    t0 <- .get.time() ## SLL HAS MOVED THIS
+    
     
     deg <- rowSums(amat)
     maxdeg <- max(deg)
@@ -90,13 +100,13 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
       good <- good[deg < df]
       
       if (length(good) >= d - df) {
-        print("autostart")
-        S = auto_start(S, good, amat)
+        print("quickstart")
+        S = quick_start(S, good, amat)
       }
       else{
         ## S <- sweep_start(S, amat,eps=eps,f=nobs-1)
-        S <- smart_start(S, amat)
-        print("smartstart")
+        S <- full_start(S, amat)
+        print("fullstart")
       }
       
     }
@@ -125,7 +135,7 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
     }
     Ks <- .c_clone(K)
 
-    t0 <- .get.time()
+ ###   t0 <- .get.time()  SLL HAS MOVED TIMING
     comb <- paste0(engine, "_", method)
     switch(comb,
       "cpp_covips"     = {
