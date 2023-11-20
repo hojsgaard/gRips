@@ -63,7 +63,7 @@ check_coreness <- function(emat, d, nobs){
 
 fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convcrit=1, aux=list(),
                     method="covips", print=0) {
-    t0 <- .get.time()
+    t0 <- .get.time() 
     method <- match.arg(tolower(method),
                         c("covips", "conips", "ncd", "sncd"))
 
@@ -76,19 +76,21 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
     ## str(list(formula=formula, elst=elst, emat=emat, amat=amat))
 
     
-    #### SL COMMENT: THIS SHOULD ALWAYS BE DONE AND THEN RESULT SCALED BACK. OTHERWISE THE PROCEDURES ARE NOT SCALEINVARIANT
     
+    ### Gem skala og reskaler
+    scale_it = FALSE
+    scaling=rep(1,nrow(S))
     if (any(abs(diag(S)-1) > 1e-8)){
-        S <- cov2cor(S)
+       scaling = sqrt(diag(S)) 
+      S <- cov2cor(S)
+        scale_it=TRUE
     }
 
-    #### SL COMMENT: TIMING SHOULD BEGIN HERE AS STARTVALUE  AND CORENESS CHECK ALSO TAKES TIME. MAYBE OK TO EXCLUDE CORENESS CHECK
+    
     
     max_coreness <- check_coreness(emat, nrow(S), nobs)
     
-    
-    t0 <- .get.time() ## SLL HAS MOVED THIS
-    
+    ### OBTAINING STARTING VALUES IF NECESSARY
     
     deg <- rowSums(amat)
     maxdeg <- max(deg)
@@ -100,13 +102,13 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
       good <- good[deg < df]
       
       if (length(good) >= d - df) {
-        print("quickstart")
+       ## print("quickstart")
         S = quick_start(S, good, amat)
       }
       else{
-        ## S <- sweep_start(S, amat,eps=eps,f=nobs-1)
+       ## print("fullstart")
         S <- full_start(S, amat)
-        print("fullstart")
+       
       }
       
     }
@@ -135,7 +137,7 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
     }
     Ks <- .c_clone(K)
 
- ###   t0 <- .get.time()  SLL HAS MOVED TIMING
+ 
     comb <- paste0(engine, "_", method)
     switch(comb,
       "cpp_covips"     = {
@@ -162,7 +164,7 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
                   nobs=nobs, K=Ks, maxit=maxit, eps=eps, convcrit=convcrit, print=print, aux=aux0)
     
     out <- c(out, list(edges=emat, nobs=nobs, eps=eps, max_coreness=max_coreness))
-    out <- .finalize_fit(out, S=S, t0=t0, method=method_str, engine=engine)
+    out <- .finalize_fit(out, S=S, t0=t0, method=method_str, engine=engine, scale_it=scale_it, scaling=scaling)
     class(out) <- "gips_fit_class"
     out
 }
@@ -223,7 +225,7 @@ formula2glist <- function(glist) {
         stop("Need list or matrix")
 }
 
-.finalize_fit <- function(out, S=S, t0=NULL, method, engine, ...) {
+.finalize_fit <- function(out, S=S, t0=NULL, method, engine, scale_it, scaling, ...) {
     ## cat(".finalize_fit\n")
 
     
@@ -233,6 +235,13 @@ formula2glist <- function(glist) {
         dimnames(out$Sigma) <- dimnames(S)
 
     nparm <- ncol(out$edges) + nrow(out$K)
+    
+    ### Rescaling output
+    
+    Sigmascaling = scaling%*%t(scaling)
+    out$Sigma=out$Sigma*Sigmascaling
+    Kscaling=1/Sigmascaling
+    out$K=out$K*Kscaling
     
     if (!is.null(t0))
         out$time <- round(.get.diff.time(t0, units="secs"), 2)
@@ -247,7 +256,7 @@ formula2glist <- function(glist) {
     
     if (out$converged) {
         trKS = sum(out$K * S)
-        logL = out$logL
+        logL = out$logL-out$nobs*sum(log(scaling))
         conv = out$conv_check
         dgap = out$gap
     } else {
@@ -270,8 +279,8 @@ formula2glist <- function(glist) {
         trKS   = trKS,
         logL   = logL,
         conv   = conv,
-        dgap   = dgap,
-        mev    = out$mev
+        dgap   = dgap
+      ##  mev    = out$mev
     )
     out$time <- out$iter <- out$eps <- NULL
     out$dim  <- out$diff <- NULL

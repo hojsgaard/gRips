@@ -22,36 +22,36 @@ update_ <- function(A, u, b) {
 
 
 
-
-small_last <- function(amat, f) {    
-  slo <- smallest_last_ordering(amat)
-  nms <- rownames(amat)
-  slo_inv <- match(1:nrow(amat), slo)
-  amat2 <- amat[slo, slo]
-  
-  d <- nrow(amat)
-  A <- 1:d
-  b <- vector("list", d-1)
-  b_nms <- vector("list", d-1)
-  
-  for (i in d:1) {
-    bi <- intersect(get_bd(A, i, amat2), A)
-    deg <- length(bi)
- ##   if (f <= deg){
- ##     stop("MLE may not exist\n") SLL: redundant naar coreness er checket
- ##   }
-    b[[i]] <- bi
-    b_nms[[i]] <- nms[slo][bi]
-    A <- A[-i]
-  }
-  names(b) <- nms[slo]
-  names(b_nms) <- nms[slo]
-  return(list(slo=slo, slo_nms=nms[slo],
-              slo_inv=slo_inv,
-              slo_inv_nms=nms[slo_inv],
-              b_nms=b_nms,
-              b=b))
-}
+# 
+# small_last <- function(amat, f) {    
+#   slo <- smallest_last_ordering(amat)
+#   nms <- rownames(amat)
+#   slo_inv <- match(1:nrow(amat), slo)
+#   amat2 <- amat[slo, slo]
+#   
+#   d <- nrow(amat)
+#   A <- 1:d
+#   b <- vector("list", d-1)
+#   b_nms <- vector("list", d-1)
+#   
+#   for (i in d:1) {
+#     bi <- intersect(get_bd(A, i, amat2), A)
+#     deg <- length(bi)
+#  ##   if (f <= deg){
+#  ##     stop("MLE may not exist\n") SLL: redundant naar coreness er checket
+#  ##   }
+#     b[[i]] <- bi
+#     b_nms[[i]] <- nms[slo][bi]
+#     A <- A[-i]
+#   }
+#   names(b) <- nms[slo]
+#   names(b_nms) <- nms[slo]
+#   return(list(slo=slo, slo_nms=nms[slo],
+#               slo_inv=slo_inv,
+#               slo_inv_nms=nms[slo_inv],
+#               b_nms=b_nms,
+#               b=b))
+# }
 
 # 
 # 
