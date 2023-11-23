@@ -89,29 +89,42 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
     
     
     max_coreness <- check_coreness(emat, nrow(S), nobs)
+   
+    ## lav en small_first ordning til iterationen 
     
+    if (identical(method,"ncd")) {
+      tmp<-reorder(S,amat)
+      amat<-tmp$amat2
+      emat<-as_amat2emat(amat)
+      S<-tmp$S2
+    }
+      
     ### OBTAINING STARTING VALUES IF NECESSARY
     
-    deg <- rowSums(amat)
-    maxdeg <- max(deg)
+   ##  deg <- rowSums(amat)
+  ##   maxdeg <- max(deg)
     
-    if ((identical(method, "ncd")) && (maxdeg >= nobs - 1)) {
-      df <- nobs - 1
-      d <- nrow(S)
-      good <- 1:d
-      good <- good[deg < df]
-      
-      if (length(good) >= d - df) {
-       ## print("quickstart")
-        S = quick_start(S, good, amat)
-      }
-      else{
-       ## print("fullstart")
-        S <- full_start(S, amat)
-       
-      }
-      
-    }
+    
+    
+    # if ((identical(method, "ncd")) && (maxdeg >= nobs - 1)) 
+    #   
+    #   {
+    #   df <- nobs - 1
+    #   d <- nrow(S)
+    #   good <- 1:d
+    #   good <- good[deg < df]
+    #   
+    #   if (length(good) >= d - df) {
+    #    ## print("quickstart")
+    #     S = quick_start(S, good, amat)
+    #   }
+    #   else{
+    #    ## print("fullstart")
+    #     S <- full_start(S, amat)
+    #    
+    #   }
+    #   
+    # }
     
     switch(method,
            "sncd" = {ver=0; method="ncd"},

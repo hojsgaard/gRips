@@ -223,3 +223,12 @@ smallest_first_ordering <- function(adj_matrix) {
 #   
 #   return(rev(ordering))
 # }
+
+
+reorder <- function(S, amat) {
+  tmp <- small_first(amat)
+  S2 <- S[tmp$sfo, tmp$sfo]
+  amat2 <- amat[tmp$sfo, tmp$sfo]
+  return(list(S2=S2,amat2=amat2))
+}
+
