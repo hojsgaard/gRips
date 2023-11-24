@@ -229,6 +229,8 @@ reorder <- function(S, amat) {
   tmp <- small_first(amat)
   S2 <- S[tmp$sfo, tmp$sfo]
   amat2 <- amat[tmp$sfo, tmp$sfo]
-  return(list(S2=S2,amat2=amat2))
+  sfo_inv <- match(1:nrow(amat), tmp$sfo)
+  
+  return(list(S2=S2,amat2=amat2, sfo=tmp$sfo, sfo_inv=sfo_inv))
 }
 

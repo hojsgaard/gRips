@@ -77,6 +77,22 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
 
     
     
+    
+    max_coreness <- check_coreness(emat, nrow(S), nobs)
+   
+    ## lav en small_first ordning til iterationen 
+
+    reo <- NULL
+    if (identical(method,"ncd")) {
+        ## emat_orig <- emat
+        ## amat_orig <- amat
+        reo<-reorder(S, amat)
+        amat<-reo$amat2
+        emat<-as_amat2emat(amat)
+        S <- reo$S2
+    }
+
+
     ### Gem skala og reskaler
     scale_it = FALSE
     scaling=rep(1,nrow(S))
@@ -88,17 +104,7 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
 
     
     
-    max_coreness <- check_coreness(emat, nrow(S), nobs)
-   
-    ## lav en small_first ordning til iterationen 
     
-    if (identical(method,"ncd")) {
-      tmp<-reorder(S,amat)
-      amat<-tmp$amat2
-      emat<-as_amat2emat(amat)
-      S<-tmp$S2
-    }
-      
     ### OBTAINING STARTING VALUES IF NECESSARY
     
    ##  deg <- rowSums(amat)
@@ -160,7 +166,7 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
         fitfun <- .c_conips_ggm_
       },
       "cpp_ncd"        = {
-        fitfun <- .c_ncd_ggm_
+          fitfun <- .c_ncd_ggm_
       },
       "r_covips"       = {
         fitfun <- .r_covips_ggm_
@@ -177,7 +183,7 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
                   nobs=nobs, K=Ks, maxit=maxit, eps=eps, convcrit=convcrit, print=print, aux=aux0)
     
     out <- c(out, list(edges=emat, nobs=nobs, eps=eps, max_coreness=max_coreness))
-    out <- .finalize_fit(out, S=S, t0=t0, method=method_str, engine=engine, scale_it=scale_it, scaling=scaling)
+    out <- .finalize_fit(out, S=S, t0=t0, method=method_str, engine=engine, scale_it=scale_it, scaling=scaling, reo=reo)
     class(out) <- "gips_fit_class"
     out
 }
@@ -238,7 +244,7 @@ formula2glist <- function(glist) {
         stop("Need list or matrix")
 }
 
-.finalize_fit <- function(out, S=S, t0=NULL, method, engine, scale_it, scaling, ...) {
+.finalize_fit <- function(out, S=S, t0=NULL, method, engine, scale_it, scaling, reo, ...) {
     ## cat(".finalize_fit\n")
 
     
@@ -250,7 +256,6 @@ formula2glist <- function(glist) {
     nparm <- ncol(out$edges) + nrow(out$K)
     
     ### Rescaling output
-    
     Sigmascaling = scaling%*%t(scaling)
     out$Sigma=out$Sigma*Sigmascaling
     Kscaling=1/Sigmascaling
@@ -266,7 +271,6 @@ formula2glist <- function(glist) {
     if (is.null(out$mev))
         out$mev = NA
 
-    
     if (out$converged) {
         trKS = sum(out$K * S)
         logL = out$logL-out$nobs*sum(log(scaling))
@@ -276,8 +280,19 @@ formula2glist <- function(glist) {
         trKS <- logL <- conv <- dgap <- NA
     }
     
-    if (!identical(method, "ncd"))
-        dgap <- NA
+    if (!identical(method, "ncd")){
+        dgap <- NA       
+    } else {
+        S <- S[reo$sfo_inv, reo$sfo_inv]
+        dd <- dim(out$edges)
+        ee <- reo$sfo_inv[out$edges]
+        ## print(dd); print(out$edges); print(reo$sfo); print(reo$sfo_inv)        
+        ## dim(ee) <- dd
+        ## print(ee)
+        out$edges <- ee
+        out$K <- out$K[reo$sfo_inv, reo$sfo_inv]
+        out$Sigma <- out$Sigma[reo$sfo_inv, reo$sfo_inv]
+    }
     
     out$details <- list(
         method = method,
