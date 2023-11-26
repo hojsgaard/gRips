@@ -94,7 +94,16 @@ glance.gips_fit_class(x, ...)
 
 \item{nvar}{Number of variables}
 
-\item{d}{Number of columns in output.}
+\item{d}{Number of columns in output.
+
+glist <- list(c(1,2,3),c(2,3,4),c(5,6))
+em <- as_glist2emat(glist)
+am <- as_emat2amat(em, d=6)
+ig <- as_emat2igraph(em)
+el <- as_emat2elist(em)
+igraph::max_cliques(ig)
+as_emat2cq(em, 6)
+as_emat_complement(em, 6)}
 
 \item{elist}{Edge list (list of pairs)}
 

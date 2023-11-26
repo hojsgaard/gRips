@@ -147,6 +147,9 @@ impose_zero <- function(emat, K){
 }
 
 
+
+
+
 #' @title Utilities
 #'
 #' @description Utilities
@@ -162,23 +165,14 @@ impose_zero <- function(emat, K){
 #' @param x An object (to print)
 #' @param d Number of columns in output.
 #'
-
-
-## system.time(
-## glist2 <- as_glist2cq(glist)
-## )
-
-## em <- as_glist2emat(glist)
-## ig <- as_emat2igraph(em)
-## igraph::max_cliques(ig)
-
-## system.time({
-## em <- as_glist2emat(glist)
-## ig <- as_emat2igraph(em)
-## gn <- as_graphnel(ig)
-## gRbase::getCliques(gn)
-## })
-
+#' glist <- list(c(1,2,3),c(2,3,4),c(5,6))
+#' em <- as_glist2emat(glist)
+#' am <- as_emat2amat(em, d=6)
+#' ig <- as_emat2igraph(em)
+#' el <- as_emat2elist(em)
+#' igraph::max_cliques(ig)
+#' as_emat2cq(em, 6)
+#' as_emat_complement(em, 6)
 
 
 # Convert edges to cliques
@@ -194,7 +188,7 @@ as_emat2cq <- function(emat, nvar=NULL){
     am[t(emat)] <- 1  
     am <- am + t.default(am)
 
-    cq <- as(am, "graphNEL")  %>% as("dgCMatrix")  %>% gRbase::maxCliqueMAT() 
+    cq <- as(am, "igraph")  %>% as("dgCMatrix")  %>% gRbase::maxCliqueMAT() 
     cq <- lapply(cq$maxCliques, "as.numeric")
     cq
 }
@@ -297,7 +291,7 @@ as_glist2igraph <- function(glist, d){
 #' @export
 #' @rdname utilities
 as_emat2graph  <- function(emat, d){
-    as(as_emat2amat(emat, d=d), "graphNEL")
+    as(as_emat2amat(emat, d=d), "igraph")
 }
 
 #' @export
@@ -346,7 +340,7 @@ as_K2amat <- function(K, eps=1e-4){
 #' @export
 #' @rdname utilities
 as_K2graph <- function(K){
-    as(as_K2amat(zapsmall(K)), "graphNEL")
+    as(as_K2amat(zapsmall(K)), "igraph")
 }
 
 #' @export
