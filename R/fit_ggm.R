@@ -25,7 +25,8 @@
 #' model (number of edges + number of nodes) between successive
 #' iterations.
 #' 
-#' * 3: duality gap may turn negative due uncertain sign of rounding error, so its absolute value is returned. 
+#' * 3: computed duality gap may turn negative due to rounding error, so its absolute value is returned. 
+#' This still provides upper bound on error of likelihood function.
 #' 
 #' R-based / c++-based in combination with con / cov.
 #'
@@ -51,7 +52,7 @@
 #'
 NULL
 
-## Colouring number determine using coreness function from igraph
+## Colouring number determined using coreness function from igraph
 
 get_col_number <- function(emat, d, nobs){   
     ig <- as_emat2igraph(emat, d)
@@ -92,7 +93,8 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
     }
 
 
-    ### Rescale to use correlation matrix and remember rescaling
+    ## Rescale to use correlation matrix and remember rescaling
+    
     scale_it = FALSE
     scaling=rep(1,nrow(S))
     if (any(abs(diag(S)-1) > 1e-8)){
