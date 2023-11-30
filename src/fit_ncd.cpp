@@ -24,13 +24,16 @@ typedef Rcpp::CharacterVector chr_vec;
 // ### ###################################################
 
 double duality_gap_(mat& S, mat& K, int nobs){
-  mat KS = K * S;
+  mat KS = K * S; 
+ 
+  double val, sign;  
+ log_det(val, sign, KS); 
 
-  double val, sign;
-  log_det(val, sign, KS);
-
-  // double out = nobs * (accu(K % S) - log(det(KS)) - S.n_rows) / 2; // FIXME Fragile
-  double out = nobs * (accu(K % S) - val - S.n_rows) / 2; // FIXME Fragile
+  // double out = nobs * (accu(K % S) - log(det(KS)) - S.n_rows) / 2; // FIXME Fragile  
+     double out = nobs * ( - val + accu(K % S) - S.n_rows) / 2; //  Fragile 
+	
+     out = fabs(out); // to avoid negative numbers by rounding error
+ 
   return out;
 }
 

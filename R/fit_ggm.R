@@ -25,6 +25,8 @@
 #' model (number of edges + number of nodes) between successive
 #' iterations.
 #' 
+#' * 3: duality gap may turn negative due uncertain sign of rounding error, so its absolute value is returned. 
+#' 
 #' R-based / c++-based in combination with con / cov.
 #'
 #' @examples
@@ -49,13 +51,15 @@
 #'
 NULL
 
-check_coreness <- function(emat, d, nobs){   
+## Colouring number determine using coreness function from igraph
+
+get_col_number <- function(emat, d, nobs){   
     ig <- as_emat2igraph(emat, d)
-    max_coreness <- max(coreness(ig))
-    if (max_coreness >= (nobs - 1)) {  ## FIXME: evt nobs-2 (for det er antal frihedsgrader -1)
-        stop(glue("Max coreness ({max_coreness}) is larger than or equal nobs ({nobs}) minus one; mle may not exist.\n"))
+    col_number <- max(coreness(ig))+1
+    if (col_number > (nobs - 1)) {  
+        stop(glue("Colouring number ({col_number}) exceeds degrees of freedom ({nobs-1}); MLE may not exist.\n"))
     }
-    max_coreness
+    col_number
 }
 
 #' @rdname fit_ggm
@@ -74,18 +78,13 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
     emat  <- as_elist2emat(elst)
     amat  <- as_emat2amat(emat, d=nrow(S))
     ## str(list(formula=formula, elst=elst, emat=emat, amat=amat))
-
     
-    
-    
-    max_coreness <- check_coreness(emat, nrow(S), nobs)
+    col_number <- get_col_number(emat, nrow(S), nobs)
    
-    ## lav en small_first ordning til iterationen 
+    ## If NCD is used, we determine a small_first ordering to be used in the iteration 
 
     reo <- NULL
     if (identical(method,"ncd")) {
-        ## emat_orig <- emat
-        ## amat_orig <- amat
         reo<-reorder(S, amat)
         amat<-reo$amat2
         emat<-as_amat2emat(amat)
@@ -93,7 +92,7 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
     }
 
 
-    ### Gem skala og reskaler
+    ### Rescale to use correlation matrix and remember rescaling
     scale_it = FALSE
     scaling=rep(1,nrow(S))
     if (any(abs(diag(S)-1) > 1e-8)){
@@ -105,32 +104,7 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
     
     
     
-    ### OBTAINING STARTING VALUES IF NECESSARY
-    
-   ##  deg <- rowSums(amat)
-  ##   maxdeg <- max(deg)
-    
-    
-    
-    # if ((identical(method, "ncd")) && (maxdeg >= nobs - 1)) 
-    #   
-    #   {
-    #   df <- nobs - 1
-    #   d <- nrow(S)
-    #   good <- 1:d
-    #   good <- good[deg < df]
-    #   
-    #   if (length(good) >= d - df) {
-    #    ## print("quickstart")
-    #     S = quick_start(S, good, amat)
-    #   }
-    #   else{
-    #    ## print("fullstart")
-    #     S <- full_start(S, amat)
-    #    
-    #   }
-    #   
-    # }
+ 
     
     switch(method,
            "sncd" = {ver=0; method="ncd"},
@@ -182,7 +156,7 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
     out <- fitfun(S=S, elst=elst, emat=emat,
                   nobs=nobs, K=Ks, maxit=maxit, eps=eps, convcrit=convcrit, print=print, aux=aux0)
     
-    out <- c(out, list(edges=emat, nobs=nobs, eps=eps, max_coreness=max_coreness))
+    out <- c(out, list(edges=emat, nobs=nobs, eps=eps, col_number=col_number))
     out <- .finalize_fit(out, S=S, t0=t0, method=method_str, engine=engine, scale_it=scale_it, scaling=scaling, reo=reo)
     class(out) <- "gips_fit_class"
     out
@@ -260,6 +234,9 @@ formula2glist <- function(glist) {
     out$Sigma=out$Sigma*Sigmascaling
     Kscaling=1/Sigmascaling
     out$K=out$K*Kscaling
+    S =S*Sigmascaling
+    
+    
     
     if (!is.null(t0))
         out$time <- round(.get.diff.time(t0, units="secs"), 2)
@@ -282,7 +259,7 @@ formula2glist <- function(glist) {
     
     if (!identical(method, "ncd")){
         dgap <- NA       
-    } else {
+    } else { ### reorganizing output to original ordering of variables
         S <- S[reo$sfo_inv, reo$sfo_inv]
         dd <- dim(out$edges)
         ee <- reo$sfo_inv[out$edges]
