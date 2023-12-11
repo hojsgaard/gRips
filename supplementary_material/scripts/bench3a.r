@@ -38,6 +38,8 @@ design<-
         stringsAsFactors = FALSE
     )
 
+## design <- design[design$nvar==2000 & design$prob==0.01 & design$rep==5, ]
+
 design <-
     design |>
     transform(Enparm = nvar + nvar * (nvar - 1) * prob / 2)

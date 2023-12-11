@@ -1,8 +1,10 @@
 args = commandArgs(trailingOnly=TRUE)
 xtra <- paste0(args, collapse = "_")
 
+if (identical(xtra, "")) xtra <- "default"
+
 .RES_DIR     <- tempdir()
-##file.remove(list.files(.RES_DIR, full=T))
+file.remove(list.files(.RES_DIR, full=T))
 cat(".RES_DIR: ", .RES_DIR, "\n")
 
 ## WHICH SETTINGS TO USE
@@ -23,7 +25,7 @@ local_scripts_used   <- file.path(.RES_DIR, scripts_used)
 cat(sprintf(".t.start: %s\n",.t.start))
 
 save(.t.start,      file=file.path(.RES_DIR, "t.start.RData"))
-save(design_used, scripts_used,
+save(settings_used, scripts_used,
      file=file.path(.RES_DIR, "settings_used.RData"))
 
 parallel::mclapply(local_scripts_used,

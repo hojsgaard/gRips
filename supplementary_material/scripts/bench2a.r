@@ -52,7 +52,7 @@ grid_size <- round(grid_size / GRID_SCALING)
 grid_size <- cbind(grid_size, apply(grid_size, 1, FUN=prod))
 colnames(grid_size) <- c("nr", "nc", "nvar")
 
-md_grid <- expand.grid(method = c("cov", "ncd"),
+md_grid <- expand.grid(method = c("cov", "ncd")[1:2],
                        ver    = 1,
                        rep    = 1,
                        marg   = "edge",

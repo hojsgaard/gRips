@@ -33,7 +33,7 @@ EPS
 
 design <-
     expand.grid(
-        method = c("cov", "con", "ncd"),
+        method = c("cov", "con", "ncd")[1:3],
         ## ver    = c(1),
         marg   = c("cliq", "edge"),
         rep    = 1:NMOD,

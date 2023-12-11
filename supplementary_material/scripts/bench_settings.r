@@ -1,4 +1,4 @@
-##' --------------------------------------------------------------------------
+##' -----------------------------------------------------------------
 ##' # Benchmarking for paper "On some algorithms for estimation in
 ##' # Gaussian graphical models""
 ##' 
@@ -6,31 +6,30 @@
 ##'
 ##' Notice: Running these scripts on a 64 cores linux platform takes
 ##' about 34 hours. 
-##' --------------------------------------------------------------------------
+##' -----------------------------------------------------------------
 
 ##' design: (either of 1,2,3; i.e. 1 = the design in the paper, 2 = a small
 ##' (and fast) design and 3 = a larger (and slower) design)
+design <- 1
 
-design <- 2 
-
-##' table: Which table(s) to generate ## (a subset of c(1, 2, 3))
-##' 
-table  <- 2 
+##' table: Which table(s) to genrate ## (a subset of c(1, 2, 3))
+table  <- 2
 
 ##' Global settings
 EPS = 1e-3  
 
 
 ## #####################################################
-## PLEASE DO NOT CHANGE ANYTHING BELOW HERE 
+## NEED NOT TOUCH ANYTHING BELOW HERE 
 ## #####################################################
 
 ##' ## SET VARIABLES TO BE USED IN SCRIPTS
 use <- c("design_paper",   ## Settings generating data in paper
-         "design_small",  ## Small settings for testing purposes
+         "design_small",   ## Small settings for testing purposes
          "design_medium"   ## Larger settings for testing purposes
          )[design]
 
+settings_used <- use
 ##' ## SET TABLES TO CREATE
 scripts_used <- c("bench1a.r", "bench2a.r", "bench3a.r")[table]
 
