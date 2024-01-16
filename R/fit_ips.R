@@ -5,10 +5,21 @@
 ##
 ## --- ---------------------------------------------------
 
+mean_abs_diff_on_emat <- function(Sigma, S, E){
+    diff_on_emat <- function(Sigma, S, E){
+        dif <- Sigma - S
+        out <- c(diag(dif), dif[t(E)])
+        out
+    }
+
+    mean(abs(diff_on_emat (Sigma, S, E)))
+}
+
+
 ## #' @rdname fit-ggm
 ## #' @export
 ## edges can be either list or 2 x p matrix
-.r_covips_ggm_ <- function (S, Elist, emat, nobs, K, iter=1000L, eps=1e-6, convcrit=1, aux=list(), print=FALSE){
+r_covips_ggm_ <- function (S, Elist, emat, nobs, K, iter=1000L, eps=1e-6, convcrit=1, aux=list(), print=FALSE){
 
     t0 <- .get.time()
     inner <- get_inner_function(Elist)
@@ -80,7 +91,7 @@ get_inner_function <- function(edges){
 
 
 ## edges is a list
-.r_conips_ggm_ <- function (S, Elist, emat, nobs, K, iter=1000, eps=1e-6, convcrit=1, aux=list(), print=FALSE) 
+r_conips_ggm_ <- function (S, Elist, emat, nobs, K, iter=1000, eps=1e-6, convcrit=1, aux=list(), print=FALSE) 
 {
     my.complement <- function(cc, p){
         return(setdiff(1:p, cc))
@@ -157,4 +168,36 @@ get_inner_function <- function(edges){
     out$logL  = logL
     out
 }
+
+.covips_ggm_update_cc_parm <- function(S, cc, parm, Scc_inv_list, j)
+{
+
+    ## sprintf("parm-start:\n") %>% cat(); print(parm)
+    
+    Scc       <- S[cc, cc] ## FIXED
+    Ktilde    <- Scc_inv_list[[j]]
+    
+    Kcc       <- parm$K[cc, cc]
+    Sigmacc   <- parm$Sigma[cc, cc]
+    
+    Kstar  = .sol(Sigmacc);
+    Laux   = Kcc - Kstar;
+    
+    Kupd   = Ktilde + Laux;
+    Haux   = Kstar - Kstar %*% Scc %*% Kstar;
+    
+    parm$K[cc, cc] = Kupd;
+    ## str(list(Kstar=Kstar, Haux=Haux, Scc=Scc))
+    
+    parm$Sigma     = parm$Sigma - parm$Sigma[, cc] %*% Haux %*% parm$Sigma[cc, ] 
+
+    ## sprintf("parm-end:\n") %>% cat(); print(parm)
+    parm
+}
+
+
+
+
+
+
 

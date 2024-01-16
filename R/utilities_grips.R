@@ -21,7 +21,6 @@ generate_n01 <- function(n.obs, nvar, seed=2022){
     d
 }
 
-
 solve_fun <- function(A, b=NULL){
     solve_qr <- function(A, b=NULL){
         if (is.null(b))
@@ -67,47 +66,6 @@ ggm_logL <- function(S, K, nobs){
 }
 
 
-get_zero_edges <- function(emat, dim){
-  if (is.null(emat)) emat <- matrix(NA, 2, 0)
-  emat <- cbind(emat, emat[2:1,])
-  amat <- matrix(0L, nrow=dim, ncol=dim)
-  amat[t.default(emat)] <- 1L
-  amat <- upper.tri(amat, diag=TRUE) + amat
-  out <- which(amat==0L, arr.ind = TRUE)
-
-  t.default(out)
-}
-
-
-#' @title Utes
-#' @description Utes
-#' @name utes
-#' @param emat Edge matrix (2 x p)
-#' @param Sigma,S Symmetrix positive definite matrices
-#' @param eps Threshold
-#' 
-
-## # do backquote
-## dobq <- function(fnlist){  ## To doBy
-##    lapply(fnlist, function(g) bquote(.(g)()))
-## }
-
-
-#' @export
-#' @rdname utes
-does_fit <- function(Sigma, S, emat, eps=1e-4){
-  v <- max_abs_diff_on_emat(Sigma, S, emat)
-  cat("max deviation : ", v, "\n")
-  v < eps
-}
-
-
-#' matchKSigma
-#'
-#' @param object A gips_fit_class object
-#' @export
-#' @rdname utes
-
 matchKSigma <- function(object){
     if (!inherits(object, "gips_fit_class"))
         stop("'object' is not a gips_git_class object")
@@ -145,9 +103,6 @@ impose_zero <- function(emat, K){
     K[rbind(emc, emc[2:1,])]  <- 0
     return(K)
 }
-
-
-
 
 
 #' @title Utilities
@@ -412,11 +367,6 @@ as_sparse <- function(K){
 }
 
 
-## .getDiag <- function(S){
-    ## r <- nrow(S)
-    ## S[1 + (r+1) * (0:(r-1))]
-## }
-
 #' @export
 #' @rdname utilities
 #' @param object Model object.
@@ -481,8 +431,6 @@ concentration.gips_fit_class <- function(object, ...) {
 }
 
 
-
-
 #' @export
 #' @rdname utilities
 print.gips_fit_class <- function(x, ...){
@@ -516,8 +464,6 @@ glance.gips_fit_class <- function(x, ...) {
 
 
 
-
-
 ## as_elist2emat <- function(elist){
 
 ##     idx <- sapply(elist, length) > 1
@@ -536,3 +482,55 @@ glance.gips_fit_class <- function(x, ...) {
 ##     emat
 ## }
 
+
+## # do backquote
+## dobq <- function(fnlist){  ## To doBy
+##    lapply(fnlist, function(g) bquote(.(g)()))
+## }
+
+
+## #' @export
+## #' @rdname utes
+## does_fit <- function(Sigma, S, emat, eps=1e-4){
+##   v <- max_abs_diff_on_emat(Sigma, S, emat)
+##   cat("max deviation : ", v, "\n")
+##   v < eps
+## }
+
+
+
+## get_zero_edges <- function(emat, dim){
+##   if (is.null(emat)) emat <- matrix(NA, 2, 0)
+##   emat <- cbind(emat, emat[2:1,])
+##   amat <- matrix(0L, nrow=dim, ncol=dim)
+##   amat[t.default(emat)] <- 1L
+##   amat <- upper.tri(amat, diag=TRUE) + amat
+##   out <- which(amat==0L, arr.ind = TRUE)
+
+##   t.default(out)
+## }
+
+
+
+
+## ' @title Utes
+## ' @description Utes
+## ' @name utes
+## #' @param emat Edge matrix (2 x p)
+## #' @param Sigma,S Symmetrix positive definite matrices
+## #' @param eps Threshold
+## ' 
+
+
+## ' matchKSigma
+## '
+## ' @param object A gips_fit_class object
+## ' @export
+## ' @rdname utes
+
+
+
+## .getDiag <- function(S){
+    ## r <- nrow(S)
+    ## S[1 + (r+1) * (0:(r-1))]
+## }

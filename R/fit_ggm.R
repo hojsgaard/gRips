@@ -145,13 +145,13 @@ fit_ggm <- function(S, formula=NULL, nobs, K=NULL, maxit=10000L, eps=1e-2, convc
           fitfun <- .c_ncd_ggm_
       },
       "r_covips"       = {
-        fitfun <- .r_covips_ggm_
+        fitfun <- r_covips_ggm_
       },
       "r_conips"       = {
-        fitfun <- .r_conips_ggm_
+        fitfun <- r_conips_ggm_
       },
       "r_ncd"          = {
-        fitfun <- .r_ncd_ggm_
+        fitfun <- r_ncd_ggm_
       }
     )    
 

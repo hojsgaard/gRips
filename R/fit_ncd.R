@@ -1,6 +1,99 @@
+################################################################################
+################################################################################
 
-################################################################################
-################################################################################
+r_ncd_ggm_ <- function(S, Elist, emat, nobs=NULL, K, iter, eps=1e-6, convcrit=1, print=FALSE, aux=NULL){
+    t0 <- .get.time()
+
+    ## cat(sprintf("iter: %d\n", iter))
+    amat <- as_emat2amat(emat, nrow(S))
+    parm <- new.env()
+
+    parm$Sigma <- S
+    parm$K <- NULL
+    
+    emat_c <- as_emat_complement(emat, nrow(S))    
+    res1 <- outerloop1(parm, emat, emat_c, amat, eps, iter);
+    ## cat("Sigma after outerloop1:\n"); print(parm$Sigma)
+    
+    res2 <- outerloop2(parm, emat, emat_c, amat, eps, iter)
+    ## cat("Sigma and K after outerloop2 :\n"); print(parm$Sigma); print(parm$K)
+    
+    logL = ggm_logL_(parm$Sigma, K=parm$K, nobs=nobs)
+    cert = certificate_ncd(parm$Sigma, parm$K, emat, emat_c)
+    ## cat(sprintf("cert: %f\n", cert))
+
+    out <- list(K=parm$K, Sigma=parm$Sigma,
+                conv_check=unname(res2$conv_crit),
+                logL = logL,
+                cert = cert,
+                iter = unname(res2$iter + res1$iter),
+                time  = .get.diff.time(t0, units="millisecs"))
+    return(out)
+}
+
+
+outerloop1 <- function(parm, emat, emat_c, amat, eps, maxit=1000){
+    ## cat("outerloop1 - start\n")
+    not_converged <- TRUE
+    it1 <- 0
+
+    if (!is.null(parm$K)){
+        logLp <- ggm_logL_(parm$Sigma, parm$K, nobs=nobs)
+    } else {
+        logLp <- -99999
+    }
+    logL <- logLp
+
+    Sigma_prev <- diag(diag(parm$Sigma))
+    while (not_converged){
+        innerloop1_update_Sigma2(parm, amat)
+        it1  <- it1 + 1
+        mad  <- mean_abs_diff_non_edge(parm$Sigma, Sigma_prev, emat_c)        
+        Sigma_prev <- parm$Sigma
+        conv_crit  <- mad
+
+        ## cat(sprintf("it1: %d mad: %f\n", it1, mad))
+        if ((it1 == maxit) || (conv_crit < eps)) { break() }
+    }
+    ## cat("outerloop1 done\n")
+    list(iter=it1, mad=mad) ## FIXME mad should be conv_crit		
+    ## parm (with updated Sigma) is the result 
+}
+
+outerloop2 <- function(parm, emat, emat_c, amat, eps, maxit=1000){
+
+    smart_K <- TRUE
+    
+    is_invertible <- function(S){det(S) > 0}
+    
+    if (is_invertible(parm$Sigma)){
+        parm$K <- solve_fun(parm$Sigma)        
+    } else {
+        stop("NCD algorithm failed")
+    }
+
+    ## cat("Sigma, K and KSigma (before updating)\n");
+    ## print(parm$Sigma); print(parm$K); print(parm$K %*% parm$Sigma)
+    
+    it2       <- 0
+    converged <- FALSE
+    while (!converged){
+        innerloop2_update_Sigma_K2(parm, amat, smart_K=smart_K)
+        dif2 <- diff_fun(parm$Sigma, parm$K, emat_c)
+        it2  <- it2 + 1
+        conv_crit <- dif2
+        ## cat(sprintf("it2: %d dif2: %f\n", it2, dif2))
+        if ((it2 == maxit) || (conv_crit < eps)) { break() }
+    }
+
+    ## cat("outerloop2 done\n")
+    out <- list(iter=it2, conv_crit=conv_crit)
+    ## print(out)
+    out
+}
+
+
+
 
 
 diff_fun <- function(S, K, emc){
@@ -11,9 +104,6 @@ diff_fun <- function(S, K, emc){
     d <- nrow(S) * (nrow(S) + 1) / 2
     sum( abs(Kuv) * sqrt(Suu * Svv) ) / d    
 }
-
-
-
 
 mean_abs_diff_non_edge <- function(Sigma1, Sigma2, emc){
     sum(abs(Sigma1 - Sigma2)) / (2 * ncol(emc))
@@ -113,115 +203,27 @@ innerloop1_update_Sigma2 <- function(parm, amat){
 }
 
 
-outerloop1 <- function(parm, emat, emat_c, amat, eps, maxit=1000){
-    ## cat("outerloop1 - start\n")
-    not_converged <- TRUE
-    it1 <- 0
 
-    if (!is.null(parm$K)){
-        logLp <- ggm_logL_(parm$Sigma, parm$K, nobs=nobs)
-    } else {
-        logLp <- -99999
-    }
-    logL <- logLp
+## outerloop2_s <- function(parm, emat, emat_c, amat, eps, maxit=1000){
 
-    Sigma_prev <- diag(diag(parm$Sigma))
-    while (not_converged){
-        innerloop1_update_Sigma2(parm, amat)
-        it1  <- it1 + 1
-        mad  <- mean_abs_diff_non_edge(parm$Sigma, Sigma_prev, emat_c)        
-        Sigma_prev <- parm$Sigma
-        conv_crit  <- mad
-
-        ## cat(sprintf("it1: %d mad: %f\n", it1, mad))
-        if ((it1 == maxit) || (conv_crit < eps)) { break() }
-    }
-    ## cat("outerloop1 done\n")
-    list(iter=it1, mad=mad) ## FIXME mad should be conv_crit		
-    ## parm (with updated Sigma) is the result 
-}
-
-outerloop2 <- function(parm, emat, emat_c, amat, eps, maxit=1000){
-
-    smart_K <- TRUE
+##     is_invertible <- function(S){det(S) > 0}
     
-    is_invertible <- function(S){det(S) > 0}
+##     if (is_invertible(parm$Sigma)){
+##         parm$K <- solve_fun(parm$Sigma)        
+##     } else {
+##         stop("NCD algorithm failed")
+##     }
     
-    if (is_invertible(parm$Sigma)){
-        parm$K <- solve_fun(parm$Sigma)        
-    } else {
-        stop("NCD algorithm failed")
-    }
-
-    ## cat("Sigma, K and KSigma (before updating)\n");
-    ## print(parm$Sigma); print(parm$K); print(parm$K %*% parm$Sigma)
+##     it2       <- 0
+##     dif2 <- diff_fun(parm$Sigma, parm$K, emat_c)
+##     conv_crit <- dif2
     
-    it2       <- 0
-    converged <- FALSE
-    while (!converged){
-        innerloop2_update_Sigma_K2(parm, amat, smart_K=smart_K)
-        dif2 <- diff_fun(parm$Sigma, parm$K, emat_c)
-        it2  <- it2 + 1
-        conv_crit <- dif2
-        ## cat(sprintf("it2: %d dif2: %f\n", it2, dif2))
-        if ((it2 == maxit) || (conv_crit < eps)) { break() }
-    }
+##     ## cat("outerloop2 done\n")
+##     out <- list(iter=it2, conv_crit=conv_crit)
+##     ## print(out)
+##     out
+## }
 
-    ## cat("outerloop2 done\n")
-    out <- list(iter=it2, conv_crit=conv_crit)
-    ## print(out)
-    out
-}
-
-outerloop2_s <- function(parm, emat, emat_c, amat, eps, maxit=1000){
-
-    is_invertible <- function(S){det(S) > 0}
-    
-    if (is_invertible(parm$Sigma)){
-        parm$K <- solve_fun(parm$Sigma)        
-    } else {
-        stop("NCD algorithm failed")
-    }
-    
-    it2       <- 0
-    dif2 <- diff_fun(parm$Sigma, parm$K, emat_c)
-    conv_crit <- dif2
-    
-    ## cat("outerloop2 done\n")
-    out <- list(iter=it2, conv_crit=conv_crit)
-    ## print(out)
-    out
-}
-
-.r_ncd_ggm_ <- function(S, Elist, emat, nobs=NULL, K, iter, eps=1e-6, convcrit=1, print=FALSE, aux=NULL){
-    t0 <- .get.time()
-
-    ## cat(sprintf("iter: %d\n", iter))
-    amat <- as_emat2amat(emat, nrow(S))
-    parm <- new.env()
-
-    parm$Sigma <- S
-    parm$K <- NULL
-    
-    emat_c <- as_emat_complement(emat, nrow(S))    
-    res1 <- outerloop1(parm, emat, emat_c, amat, eps, iter);
-    ## cat("Sigma after outerloop1:\n"); print(parm$Sigma)
-    
-    res2 <- outerloop2(parm, emat, emat_c, amat, eps, iter)
-    ## cat("Sigma and K after outerloop2 :\n"); print(parm$Sigma); print(parm$K)
-    
-    logL = ggm_logL_(parm$Sigma, K=parm$K, nobs=nobs)
-    cert = certificate_ncd(parm$Sigma, parm$K, emat, emat_c)
-    ## cat(sprintf("cert: %f\n", cert))
-
-    out <- list(K=parm$K, Sigma=parm$Sigma,
-                conv_check=unname(res2$conv_crit),
-                logL = logL,
-                cert = cert,
-                iter = unname(res2$iter + res1$iter),
-                time  = .get.diff.time(t0, units="millisecs"))
-    return(out)
-}
 
 
 

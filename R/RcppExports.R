@@ -5,100 +5,12 @@ inv_qr_ <- function(X) {
     .Call('_gRips_inv_qr_', PACKAGE = 'gRips', X)
 }
 
-setdiff_ <- function(x, y) {
-    .Call('_gRips_setdiff_', PACKAGE = 'gRips', x, y)
-}
-
-rep_nout <- function(x, nout) {
-    .Call('_gRips_rep_nout', PACKAGE = 'gRips', x, nout)
-}
-
-vec2mat <- function(x, nrow, ncol) {
-    .Call('_gRips_vec2mat', PACKAGE = 'gRips', x, nrow, ncol)
-}
-
-remove_elem <- function(X, ent_, shift = 1L) {
-    .Call('_gRips_remove_elem', PACKAGE = 'gRips', X, ent_, shift)
-}
-
-extract_elem <- function(X, ent_, shift = 1L) {
-    .Call('_gRips_extract_elem', PACKAGE = 'gRips', X, ent_, shift)
-}
-
-replace_elem <- function(X, ent_, value_, shift = 1L) {
-    .Call('_gRips_replace_elem', PACKAGE = 'gRips', X, ent_, value_, shift)
-}
-
-remove_rows <- function(X, row_ent_, shift = 1L) {
-    .Call('_gRips_remove_rows', PACKAGE = 'gRips', X, row_ent_, shift)
-}
-
-extract_rows <- function(X, row_ent_, shift = 1L) {
-    .Call('_gRips_extract_rows', PACKAGE = 'gRips', X, row_ent_, shift)
-}
-
-replace_rows <- function(X, row_ent_, value, shift = 1L) {
-    .Call('_gRips_replace_rows', PACKAGE = 'gRips', X, row_ent_, value, shift)
-}
-
-replace_u_vc <- function(M, u, v, value, shift = 1L) {
-    .Call('_gRips_replace_u_vc', PACKAGE = 'gRips', M, u, v, value, shift)
-}
-
-replace_uc_v <- function(M, u, v, value, shift = 1L) {
-    .Call('_gRips_replace_uc_v', PACKAGE = 'gRips', M, u, v, value, shift)
-}
-
-replace_uc_vc <- function(M, u, v, value, shift = 1L) {
-    .Call('_gRips_replace_uc_vc', PACKAGE = 'gRips', M, u, v, value, shift)
-}
-
-replace_u_v <- function(M, u, v, value, shift = 1L) {
-    .Call('_gRips_replace_u_v', PACKAGE = 'gRips', M, u, v, value, shift)
-}
-
-replace_uv_ <- function(M, u, v, value, shift = 1L) {
-    .Call('_gRips_replace_uv_', PACKAGE = 'gRips', M, u, v, value, shift)
-}
-
-as_colvec <- function(M) {
-    invisible(.Call('_gRips_as_colvec', PACKAGE = 'gRips', M))
-}
-
-extract_uv_ <- function(M, u, v, shift = 1L) {
-    .Call('_gRips_extract_uv_', PACKAGE = 'gRips', M, u, v, shift)
-}
-
-make_complement_ <- function(cc, d, shift = 0L) {
-    .Call('_gRips_make_complement_', PACKAGE = 'gRips', cc, d, shift)
-}
-
-make_complement_list_ <- function(gen_lst, d, shift = 0L) {
-    .Call('_gRips_make_complement_list_', PACKAGE = 'gRips', gen_lst, d, shift)
-}
-
-Scc_list_ <- function(S, edges0) {
-    .Call('_gRips_Scc_list_', PACKAGE = 'gRips', S, edges0)
-}
-
-Scc_inv_list_ <- function(S, edges0) {
-    .Call('_gRips_Scc_inv_list_', PACKAGE = 'gRips', S, edges0)
-}
-
 .c_conips_ggm_ <- function(S, elst, emat, nobs, K, maxit, eps, convcrit, print, aux) {
     .Call('_gRips_conips_ggm_', PACKAGE = 'gRips', S, elst, emat, nobs, K, maxit, eps, convcrit, print, aux)
 }
 
-covips_outer0_ <- function(S, K, elst0, Sigma, Scc_lst, Scci_lst, nobs, emat_c, n_upd, max_visits, n_visits, eps = 0.01, print = 0L) {
-    .Call('_gRips_covips_outer0_', PACKAGE = 'gRips', S, K, elst0, Sigma, Scc_lst, Scci_lst, nobs, emat_c, n_upd, max_visits, n_visits, eps, print)
-}
-
 .c_covips_ggm_ <- function(S, elst, emat, nobs, K, maxit, eps, convcrit, print, aux) {
     .Call('_gRips_covips_ggm_', PACKAGE = 'gRips', S, elst, emat, nobs, K, maxit, eps, convcrit, print, aux)
-}
-
-ncd_outer1_ <- function(Sigma, K, emat, emat_c, amat, nobs, eps, max_visits, n_visits, print = 0L) {
-    .Call('_gRips_ncd_outer1_', PACKAGE = 'gRips', Sigma, K, emat, emat_c, amat, nobs, eps, max_visits, n_visits, print)
 }
 
 .c_ncd_ggm_ <- function(S, elst, emat, nobs, K, maxit, eps, convcrit, print, aux) {
@@ -107,34 +19,6 @@ ncd_outer1_ <- function(Sigma, K, emat, emat_c, amat, nobs, eps, max_visits, n_v
 
 .c_clone <- function(x) {
     .Call('_gRips_clone_', PACKAGE = 'gRips', x)
-}
-
-list_names_ <- function(lst) {
-    .Call('_gRips_list_names_', PACKAGE = 'gRips', lst)
-}
-
-as_emat2amat_ <- function(emat, d) {
-    .Call('_gRips_as_emat2amat_', PACKAGE = 'gRips', emat, d)
-}
-
-as_emat_complement_ <- function(emat, d) {
-    .Call('_gRips_as_emat_complement_', PACKAGE = 'gRips', emat, d)
-}
-
-has_full_rank_ <- function(Delta, eps) {
-    .Call('_gRips_has_full_rank_', PACKAGE = 'gRips', Delta, eps)
-}
-
-project_onto_G_ <- function(Delta, emc) {
-    .Call('_gRips_project_onto_G_', PACKAGE = 'gRips', Delta, emc)
-}
-
-mnorm_one_ <- function(Delta) {
-    .Call('_gRips_mnorm_one_', PACKAGE = 'gRips', Delta)
-}
-
-mnorm_maxabs_ <- function(Delta) {
-    .Call('_gRips_mnorm_maxabs_', PACKAGE = 'gRips', Delta)
 }
 
 ggm_logL_ <- function(S, K, nobs) {
