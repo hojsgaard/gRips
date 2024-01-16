@@ -155,8 +155,6 @@ void ncd_inner1_update_Sigma_(mat& Sigma, mat& amat, int nobs, int print=0){
   }
 }
 
-
-//[[Rcpp::export]]
 List ncd_outer1_(mat& Sigma, mat& K, umat& emat, umat& emat_c, mat& amat,
 		 int& nobs, double& eps, int max_visits, int& n_visits, int print=0){
 

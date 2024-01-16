@@ -51,6 +51,9 @@ Convergence criterion:
 model (number of edges + number of nodes) between successive
 iterations.
 
+* 3: computed duality gap may turn negative due to rounding error, so its absolute value is returned. 
+This still provides upper bound on error of likelihood function.
+
 R-based / c++-based in combination with con / cov.
 }
 \examples{

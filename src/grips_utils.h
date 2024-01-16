@@ -14,7 +14,7 @@ const int erp=0; // ERROR PRINTING
 // ------------------------------------------------------------------
 
 SEXP clone_(SEXP& x);
-chr_vec list_names_(List lst);
+// chr_vec list_names_(List lst);
 mat as_emat2amat_(umat emat, int d);
 umat as_emat_complement_(umat emat, int d);
 
@@ -23,9 +23,7 @@ umat as_emat_complement_(umat emat, int d);
 // *** gRips utilities ***
 // ---------------------------------------------------------------------
 
-
-
-bool has_full_rank_(mat& Delta, double eps); // FIXME
+// bool has_full_rank_(mat& Delta, double eps); // FIXME
 double get_mev(mat& Delta);
   
 mat project_onto_G_(const mat& Delta, const umat& emc);

@@ -20,15 +20,14 @@ SEXP clone_(SEXP& x)
   return(x2);
 }
 
-//[[Rcpp::export]]
-chr_vec list_names_(List lst){
-  chr_vec out(0);
-  if (lst.length() > 0)
-    out = as<chr_vec>(lst.names());
-  return out;
-}
+// //[[Rcpp::export]]
+// chr_vec list_names_(List lst){
+//   chr_vec out(0);
+//   if (lst.length() > 0)
+//     out = as<chr_vec>(lst.names());
+//   return out;
+// }
 
-//[[Rcpp::export]]
 mat as_emat2amat_(umat emat, int d){
   mat amat = zeros(d, d);
   uvec eids = sub2ind(size(amat), emat);
@@ -38,9 +37,8 @@ mat as_emat2amat_(umat emat, int d){
   return amat;
 }
 
-//[[Rcpp::export]]
-umat as_emat_complement_(umat emat, int d){
 
+umat as_emat_complement_(umat emat, int d){
   mat amat = as_emat2amat_(emat, d);
   amat = amat - 1;
   amat = trimatl(amat);
@@ -55,20 +53,20 @@ umat as_emat_complement_(umat emat, int d){
 // *** gRips utilities ***
 // ---------------------------------------------------------------------
 
-// [[Rcpp::export]]
-bool has_full_rank_(mat& Delta, double eps){ // FIXME
-    vec eigval;
-    mat eigvec;
+// // [[Rcpp::export]]
+// bool has_full_rank_(mat& Delta, double eps){ // FIXME
+//     vec eigval;
+//     mat eigvec;
     
-    eig_sym(eigval, eigvec, Delta);
-    double mev = min(eigval);
-    return (mev > eps);
-    // Rprintf("val %f sign %f mev %f\n", val, sign, mev);
+//     eig_sym(eigval, eigvec, Delta);
+//     double mev = min(eigval);
+//     return (mev > eps);
+//     // Rprintf("val %f sign %f mev %f\n", val, sign, mev);
 
 
-// uword rank_Delta = arma::rank(Delta); //, sqrt(datum::eps) * Delta.n_cols);
-  // return (rank_Delta >= Delta.n_cols); 	    
-}
+// // uword rank_Delta = arma::rank(Delta); //, sqrt(datum::eps) * Delta.n_cols);
+//   // return (rank_Delta >= Delta.n_cols); 	    
+// }
 
 
 double get_mev(mat& Delta){
@@ -81,7 +79,6 @@ double get_mev(mat& Delta){
 }
 
 
-// [[Rcpp::export]]
 mat project_onto_G_(const mat& Delta, const umat& emc){
 
   mat Delta2 = Delta;
@@ -97,14 +94,12 @@ mat project_onto_G_(const mat& Delta, const umat& emc){
   return(Delta2);
 }
 
-// [[Rcpp::export]]
 double mnorm_one_(mat& Delta){
   rowvec s = sum(abs(Delta));
   // s.print();
   return(max(s));
 }
 
-// [[Rcpp::export]]
 double mnorm_maxabs_(mat& Delta){
   rowvec s = max(abs(Delta));
   // s.print();

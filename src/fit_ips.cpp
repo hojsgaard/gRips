@@ -44,7 +44,7 @@ typedef Rcpp::CharacterVector chr_vec;
 //   return clist;
 // }
 
-// [[Rcpp::export]]
+// // [[Rcpp::export]]
 int_vec make_complement_(int_vec cc, int d, int shift=0){
   uvec uc_   = arma::linspace<arma::uvec>(1, d, d);
   uvec cc_   = as<uvec>(cc);
@@ -53,7 +53,6 @@ int_vec make_complement_(int_vec cc, int d, int shift=0){
   return out;
 }
 
-// [[Rcpp::export]]
 List make_complement_list_(List gen_lst, int d, int shift=0){
   List out = List(gen_lst.length());
   for (int i=0; i<gen_lst.length(); i++){
@@ -64,7 +63,6 @@ List make_complement_list_(List gen_lst, int d, int shift=0){
   return out;
 }
 
-//[[Rcpp::export]]
 List Scc_list_(const mat& S, const List& edges0){
   List out(edges0.length());
   for (int i=0; i<edges0.length(); i++){
@@ -75,7 +73,6 @@ List Scc_list_(const mat& S, const List& edges0){
   return out;
 }
 
-//[[Rcpp::export]]
 List Scc_inv_list_(const mat& S, const List& edges0){
   List out(edges0.length());
   for (int i=0; i<edges0.length(); i++){
@@ -258,7 +255,6 @@ void covips_inner0_(mat& S, mat& K, List& elst0,
   }
 }
 
-//[[Rcpp::export]]  
 List covips_outer0_(mat& S, mat& K, List& elst0, mat& Sigma,
 		    List& Scc_lst, List& Scci_lst,
 		    int& nobs, umat& emat_c,
