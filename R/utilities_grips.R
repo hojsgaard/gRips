@@ -76,16 +76,16 @@ matchKSigma <- function(object){
 }
 
 
-#' Parameter equality
-#'
-#' @param p2a,p2b Parameter lists.
-#' @param eps A small number.
-#' 
-#' @export
-#' @rdname utilities
-parmEq <- function(p2a, p2b, eps=1e-4){
-  max(abs(p2a$K - p2b$K)) / max(abs(p2a$K)) < eps && max(abs(p2a$Sigma - p2b$Sigma)) / max(abs(p2a$Sigma)) < eps
-}
+## #' Parameter equality
+## #'
+## #' @param p2a,p2b Parameter lists.
+## #' @param eps A small number.
+## #' 
+## #' @export
+## #' @rdname utilities
+## parmEq <- function(p2a, p2b, eps=1e-4){
+##   max(abs(p2a$K - p2b$K)) / max(abs(p2a$K)) < eps && max(abs(p2a$Sigma - p2b$Sigma)) / max(abs(p2a$Sigma)) < eps
+## }
 
 
 #' Impose zeros in matrix entries which do not correspond to an edge.
@@ -105,215 +105,12 @@ impose_zero <- function(emat, K){
 }
 
 
-#' @title Utilities
-#'
-#' @description Utilities
-#'
-#' @name utilities
-#'
-#' @param emat Edge matrix (2 x p)
-#' @param amat Adjacency matrix
-#' @param glist Generator list
-#' @param elist Edge list (list of pairs)
-#' @param nvar Number of variables
-#' @param K Concentration matrix
-#' @param x An object (to print)
-#' @param d Number of columns in output.
-#'
-#' glist <- list(c(1,2,3),c(2,3,4),c(5,6))
-#' em <- as_glist2emat(glist)
-#' am <- as_emat2amat(em, d=6)
-#' ig <- as_emat2igraph(em)
-#' el <- as_emat2elist(em)
-#' igraph::max_cliques(ig)
-#' as_emat2cq(em, 6)
-#' as_emat_complement(em, 6)
-
-
-# Convert edges to cliques
-#' @export
-#' @rdname utilities
-as_emat2cq <- function(emat, nvar=NULL){
-
-    if (ncol(emat) == 0) return(list())
-    if (is.null(nvar)){
-        nvar <- max(emat)
-    }
-    am <- matrix(0, nrow=nvar, ncol=nvar)    
-    am[t(emat)] <- 1  
-    am <- am + t.default(am)
-
-    cq <- as(am, "igraph")  %>% as("dgCMatrix")  %>% gRbase::maxCliqueMAT() 
-    cq <- lapply(cq$maxCliques, "as.numeric")
-    cq
-}
-
-
-#' @export
-#' @rdname utilities
-as_emat_complement <- function(emat, nvar){ # Those edges NOT in emat
-  am <- matrix(0, nrow=nvar, ncol=nvar)
-  am[t(emat)] <- 1
-  am[t(emat[2:1, ,drop=FALSE])] <- 1
-  am <- (am == 0) * lower.tri(am)
-  t.default(which(am==1, arr.ind=TRUE))
-}
-
-
-#' @export
-#' @rdname utilities
-as_emat2amat <-function(emat, d){
-    vn <- sort(unique(c(emat)))
-    M <- matrix(0, nrow=d, ncol=d)
-    for (j in 1:ncol(emat)){
-        e <- emat[,j]
-        M[e[1], e[2]] <- M[e[2], e[1]] <- 1
-    }
-    M
-}
-
-#' @export
-#' @rdname utilities
-as_emat2elist <- function(emat){
-    if (ncol(emat) > 0)
-        split(t.default(emat), 1:(ncol(emat)))
-    else
-        list()
-}
-
-#' @export
-#' @rdname utilities
-as_elist2emat <- function(elist){
-    find_unique_rows <- function(ed){
-        d <- max(ed)
-        ii <- ed[,1] * 10^(nchar(d)+1) + ed[,2]
-        ed[!duplicated(ii),]
-    }
-    
-    idx <- sapply(elist, length) > 1
-    elist <- elist[idx]
-    
-    if (length(elist) > 0){
-        ed <- lapply(elist, combn_prim, 2)
-        ed <- ed |> do.call(cbind, args=_)
-        ed <- t.default(ed)
-        b <- ed[, 1] > ed[, 2]
-        ed[b,] <- ed[b, 2:1]
-        ed <- find_unique_rows(ed)
-        emat <- t.default(ed)
-    } else
-        emat <- matrix(NA, ncol=0, nrow=2)
-    emat
-}
-
-
-#' @export
-#' @rdname utilities
-as_glist2emat <- function(glist){
-  if (!inherits(glist, "list")) stop("'glist' must be a list\n")
-  if (length(glist) == 0)
-    return(matrix(NA, nrow=2, ncol=0))
-  glist <- glist[sapply(glist, function(x) length(x)>1)]
-  if (length(glist) == 0)
-    return(matrix(NA, nrow=2, ncol=0))
-
-  g2 <- lapply(glist, function(x) names2pairs(x))
-  g2 <- unlist(g2, recursive=FALSE)
-  g2 <- do.call(rbind, g2)
-  t.default(g2[!duplicated(g2),])
-}
-
-#' @export
-#' @rdname utilities
-as_glist2cq <- function(glist){
-    as_glist2emat(glist) |> as_emat2cq()
-}
-
-
-#' @export
-#' @rdname utilities
-as_glist2graph <- function(glist, d){
-    as_emat2graph(as_glist2emat(glist), d=d)
-}
-
-#' @export
-#' @rdname utilities
-as_glist2igraph <- function(glist, d){
-    g <- as_glist2graph(glist, d=d)
-    as(g, "igraph")
-}
-
-#' @export
-#' @rdname utilities
-as_emat2graph  <- function(emat, d){
-    as(as_emat2amat(emat, d=d), "igraph")
-}
-
-#' @export
-#' @rdname utilities
-as_emat2igraph <- function(emat, d){
-    ## cat("as_emat2igraph\n")
-    ## print(emat)
-    igraph::make_undirected_graph(emat, d)
-}
 
 
 
-#' @export
-#' @rdname utilities
-as_amat2emat <- function(amat, eps=1e-4){
-    amat[lower.tri(amat, diag=TRUE)] <- 0
-    e <- which(abs(amat) > eps, arr.ind = T)
-    rownames(e) <- NULL
-    colnames(e) <- NULL
-    t.default(e)
-}
 
-#' @export
-#' @rdname utilities
-as_emat2glist <- function(emat){
-    gRbase::colmat2list(emat)
-}
 
-#' @export
-#' @rdname utilities
-as_glist2out_edges <- function(glist){
-    u <- gRbase::ug(glist)
-    n <- gRbase::nonEdgeList(u)
-    do.call(rbind, lapply(n, as.numeric))
-}
 
-#' @export
-#' @rdname utilities
-as_K2amat <- function(K, eps=1e-4){
-    MM <- zapsmall(K)
-    MM <- 1 * (abs(MM) > eps)
-    diag(MM) <- 0
-    MM
-}
-
-#' @export
-#' @rdname utilities
-as_K2graph <- function(K){
-    as(as_K2amat(zapsmall(K)), "igraph")
-}
-
-#' @export
-#' @rdname utilities
-as_sparse <- function(K){
-    as(zapsmall(K), "dgCMatrix")}
-
-.form2emat <- function(form){
-    if (is.matrix(form) && nrow(form) == 2) return(form)  ## FIXME
-    else
-        if (length(form) > 0){
-            em <- do.call(rbind, lapply(form, function(g)
-                if (length(g) > 1) t.default(combn_prim(g, 2))))
-            em <- t.default(unique(em))
-        } else
-            em  <- matrix(nrow=2, ncol=0)
-    em
-}
 
 
 
@@ -367,11 +164,16 @@ as_sparse <- function(K){
 }
 
 
+#' @title Utilities for gRips
+#'
+#' @name utilities_grips
+
 #' @export
-#' @rdname utilities
+#' @rdname utilities_grips
 #' @param object Model object.
 #' @param ... Additional arguments; currently not used.
 #' @param k Penalty parameter for calculating AIC; only k=2 gives genuine AIC.
+#' @param x Object to be printed.
 logLik.gips_fit_class <- function(object, ...){
 
   nobs <- nobs(object)# unname(object$details["nobs"])
@@ -396,7 +198,7 @@ logLik.gips_fit_class <- function(object, ...){
 
 #' @method AIC gips_fit_class
 #' @export
-#' @rdname utilities
+#' @rdname utilities_grips
 AIC.gips_fit_class <- function(object, ..., k=2){
     ll <- logLik(object) 
     -2 * as.numeric(ll) + k * attr(ll, "nparm")
@@ -404,7 +206,7 @@ AIC.gips_fit_class <- function(object, ..., k=2){
 
 #' @method BIC gips_fit_class
 #' @export
-#' @rdname utilities
+#' @rdname utilities_grips
 BIC.gips_fit_class <- function(object, ...){
     ll <- logLik(object) 
     -2 * as.numeric(ll) + log(attr(ll, "nobs")) * attr(ll, "nparm")    
@@ -412,27 +214,27 @@ BIC.gips_fit_class <- function(object, ...){
 
 #' @method sigma gips_fit_class
 #' @export
-#' @rdname utilities
+#' @rdname utilities_grips
 sigma.gips_fit_class <- function(object, ...) {
     object$Sigma
 }
 
 #' @export
-#' @rdname utilities
+#' @rdname utilities_grips
 concentration <- function(object, ...) {
     UseMethod("concentration")
 }
 
 #' @method concentration gips_fit_class
 #' @export
-#' @rdname utilities
+#' @rdname utilities_grips
 concentration.gips_fit_class <- function(object, ...) {
     object$K
 }
 
 
 #' @export
-#' @rdname utilities
+#' @rdname utilities_grips
 print.gips_fit_class <- function(x, ...){
     ## cat("Method: ", x$method, "\n")
     ## xx <- c(method=x$method, eng=x$engine, x$details)
@@ -446,7 +248,7 @@ print.gips_fit_class <- function(x, ...){
 }
 
 #' @export
-#' @rdname utilities
+#' @rdname utilities_grips
 summary.gips_fit_class <- function(object, ...) {
     xx <- as.data.frame(object$details)
     xx$engine <- NULL
@@ -457,80 +259,9 @@ summary.gips_fit_class <- function(object, ...) {
 }
 
 #' @export
-#' @rdname utilities
+#' @rdname utilities_grips 
 glance.gips_fit_class <- function(x, ...) {
     as.data.frame(x$details) 
 }
 
 
-
-## as_elist2emat <- function(elist){
-
-##     idx <- sapply(elist, length) > 1
-##     elist <- elist[idx]
-
-##     if (length(elist) > 0){
-##         . <- NULL 
-##         ed <- lapply(elist, combn_prim, 2)  %>% do.call(cbind, .)  %>% t
-##         ## ed <- lapply(elist, combn_prim, 2)  %>% {function(zz) {do.call(cbind, zz)}}  %>% t
-##         b <- ed[, 1] > ed[, 2]
-##         ed[b,] <- ed[b, 2:1]
-##         ed <- ed[!duplicated.matrix(ed),,drop=FALSE]
-##         emat <- t.default(ed)
-##     } else
-##         emat <- matrix(NA, ncol=0, nrow=2)
-##     emat
-## }
-
-
-## # do backquote
-## dobq <- function(fnlist){  ## To doBy
-##    lapply(fnlist, function(g) bquote(.(g)()))
-## }
-
-
-## #' @export
-## #' @rdname utes
-## does_fit <- function(Sigma, S, emat, eps=1e-4){
-##   v <- max_abs_diff_on_emat(Sigma, S, emat)
-##   cat("max deviation : ", v, "\n")
-##   v < eps
-## }
-
-
-
-## get_zero_edges <- function(emat, dim){
-##   if (is.null(emat)) emat <- matrix(NA, 2, 0)
-##   emat <- cbind(emat, emat[2:1,])
-##   amat <- matrix(0L, nrow=dim, ncol=dim)
-##   amat[t.default(emat)] <- 1L
-##   amat <- upper.tri(amat, diag=TRUE) + amat
-##   out <- which(amat==0L, arr.ind = TRUE)
-
-##   t.default(out)
-## }
-
-
-
-
-## ' @title Utes
-## ' @description Utes
-## ' @name utes
-## #' @param emat Edge matrix (2 x p)
-## #' @param Sigma,S Symmetrix positive definite matrices
-## #' @param eps Threshold
-## ' 
-
-
-## ' matchKSigma
-## '
-## ' @param object A gips_fit_class object
-## ' @export
-## ' @rdname utes
-
-
-
-## .getDiag <- function(S){
-    ## r <- nrow(S)
-    ## S[1 + (r+1) * (0:(r-1))]
-## }
